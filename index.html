@@ -2,141 +2,128 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>شات بلس المطور - Dark Mode</title>
+    <title>شات بلس الخرافي - النسخة النهائية الملكية</title>
     <style>
         :root {
-            --bg-main: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0;
-            --bg-input: #2d2d2d; --accent: #0f9d58;
+            --bg-main: #121212; --bg-card: #181818; --bg-chat: #0f0f0f;
+            --text-main: #e0e0e0; --bg-input: #252525; --accent-green: #0f9d58; --accent-blue: #3498db;
         }
-        body { font-family: Arial, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
-        #auth-container, #main-wrapper { max-width: 1000px; margin: 30px auto; background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow: hidden; }
-        #auth-container { max-width: 400px; padding: 30px; text-align: center; }
-        #main-wrapper { display: flex; height: 600px; display: none; }
-        #sidebar { width: 250px; background: #181818; border-left: 1px solid #2d2d2d; padding: 20px; display: flex; flex-direction: column; }
-        #chat-area { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg-card); }
-        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style: none; margin: 0; }
-        .msg { padding: 12px; margin-bottom: 12px; border-radius: 8px; max-width: 75%; width: fit-content; }
-        .role-owner { background: #5c1d24; border-right: 4px solid #ff4757; }
-        .role-admin { background: #5c431d; border-right: 4px solid #ffa502; }
-        .role-moderator { background: #1d3b5c; border-right: 4px solid #1e90ff; }
-        .role-member { background: #2d2d2d; border-right: 4px solid #888; }
-        .role-guest { background: #222; border-right: 4px solid #555; }
-        .chat-img { max-width: 250px; border-radius: 8px; display: block; margin-top: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .file-link { color: #3498db; text-decoration: none; display: inline-block; margin-top: 5px; font-weight: bold; }
-        #form-container { display: flex; padding: 15px; background: #181818; gap: 10px; align-items: center; }
-        #input { flex-grow: 1; padding: 12px; background: var(--bg-input); border: 1px solid #333; color: white; border-radius: 6px; outline: none; }
-        button { padding: 12px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .file-btn { background: #3a3a3a; font-size: 20px; padding: 8px 15px; }
-        .room-item { padding: 12px; background: #252525; margin-bottom: 8px; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; }
-        .room-item:hover, .active-room { background: var(--accent); }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 0; overflow: hidden; }
+        
+        /* شاشة الدخول المتقدمة والبريد الوهمي */
+        #gate-container { position: fixed; top:0; left:0; width:100vw; height:100vh; background: var(--bg-main); display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .gate-card { width: 380px; background: var(--bg-card); padding: 30px; border-radius: 14px; text-align: center; border: 1px solid #2d2d2d; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .gate-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .gate-tab-btn { flex: 1; padding: 12px; background: #222; color: #aaa; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .gate-tab-btn.active { background: var(--accent-blue); color: white; }
+        .gate-card input, .gate-card select { width: 92%; padding: 12px; margin-bottom: 12px; background: var(--bg-input); color: white; border: 1px solid #333; border-radius: 6px; font-size: 14px; text-align: center; }
+        .gate-card button.main-btn { width: 92%; padding: 12px; background: var(--accent-green); color: white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 15px; }
+
+        /* الهيكل الأساسي للتطبيق الشامل */
+        #app-wrapper { display: flex; flex-direction: column; height: 100vh; display: none; }
+        
+        /* 1. الشريط العلوي - أعلى الشاشة */
+        #top-bar { height: 60px; background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #222; }
+        .top-left-group, .top-right-group { display: flex; align-items: center; gap: 15px; }
+        .top-icon-btn { font-size: 20px; cursor: pointer; background: none; border: none; color: white; padding: 5px; position: relative; }
+        .top-icon-btn span.badge-count { position: absolute; top:-5px; right:-5px; background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; }
+        .my-avatar-top { width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: 2px solid var(--accent-blue); }
+
+        /* منطقة العمل الجانبية والوسطى */
+        #middle-container { display: flex; flex-grow: 1; height: calc(100vh - 115px); position: relative; }
+        
+        /* القائمة الجانبية اليسرى المخفية/الظاهرة */
+        #sidebar-left { width: 240px; background: #141414; border-left: 1px solid #222; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .room-btn { padding: 12px; background: #222; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; }
+        .room-btn.active { background: var(--accent-green); }
+
+        /* 2. منطقة الشات الكبرى - الوسط */
+        #chat-window { flex-grow: 1; background: var(--bg-chat); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        #messages-view { flex-grow: 1; padding: 20px; overflow-y: auto; list-style: none; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* تنسيق الرسائل حسب الرتب الفخمة */
+        .msg-box { padding: 12px 16px; border-radius: 10px; max-width: 70%; width: fit-content; line-height: 1.5; font-size: 14px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .role-owner { background: #5c181e; border-right: 5px solid #ff4757; color: #ffebec; }
+        .role-admin { background: #5c3c18; border-right: 5px solid #ffa502; color: #fff8eb; }
+        .role-management { background: #185c2c; border-right: 5px solid #2ed573; color: #ebffef; }
+        .role-moderator { background: #183e5c; border-right: 5px solid #1e90ff; color: #ebefff; }
+        .role-member { background: #252525; border-right: 5px solid #888888; }
+        .role-guest { background: #1e1e1e; border-right: 5px solid #555555; }
+        
+        .msg-meta { font-size: 11px; opacity: 0.6; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 20px; }
+        .msg-badge { font-size: 10px; font-weight: bold; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: yellow; }
+        .reply-quote { background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; margin-bottom: 6px; font-size: 12px; border-left: 3px solid var(--accent-blue); }
+        
+        /* وسائط الرسائل */
+        .chat-img-media { max-width: 260px; border-radius: 8px; margin-top: 5px; display: block; cursor: pointer; }
+        .drawing-canvas-img { background: white; max-width: 200px; border-radius: 6px; display: block; margin-top: 5px; }
+
+        /* شريط المتواجدين حالياً الأيمن */
+        #sidebar-right-users { width: 240px; background: #141414; border-right: 1px solid #222; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .user-online-card { display: flex; align-items: center; gap: 10px; padding: 8px; background: #1e1e1e; border-radius: 6px; cursor: pointer; border-bottom: 1px solid #2d2d2d; }
+        .user-online-card:hover { background: #2a2a2a; }
+
+        /* بار اقتباس وتجهيز الرد */
+        #reply-preview-bar { height: 40px; background: #222; display: none; align-items: center; justify-content: space-between; padding: 0 15px; border-top: 1px solid var(--accent-blue); font-size: 13px; }
+
+        /* 3. شريط الكتابة الذكي والملفات - أسفل الشاشة */
+        #input-dock-bar { height: 65px; background: #181818; border-top: 1px solid #222; display: flex; align-items: center; padding: 0 15px; gap: 10px; }
+        .dock-btn { font-size: 22px; background: none; border: none; color: #b0b0b0; cursor: pointer; padding: 5px; transition: 0.2s; }
+        .dock-btn:hover { color: white; transform: scale(1.1); }
+        #chat-text-input { flex-grow: 1; padding: 12px; background: var(--bg-input); border: 1px solid #333; color: white; border-radius: 8px; outline: none; font-size: 14px; }
+        #send-fly-btn { background: var(--accent-green); color: white; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+        /* 4. الشريط السفلي النهائي خارج الشات */
+        #bottom-footer-bar { height: 55px; background: #000; border-top: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 13px; }
+        .footer-left, .footer-right { display: flex; align-items: center; gap: 15px; }
+
+        /* النوافذ العائمة المنبثقة (الرسم، المتجر، الملف الشخصي، الإيموجي) */
+        .floating-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border: 1px solid #333; border-radius: 12px; padding: 20px; width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10000; display: none; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #2d2d2d; padding-bottom: 8px; }
+        .modal-close-btn { cursor: pointer; font-size: 18px; font-weight: bold; color: red; }
+        
+        /* لوحة الرسم التفاعلية */
+        #paint-canvas { background: white; border-radius: 6px; cursor: crosshair; display: block; margin: 0 auto 15px; }
+        
+        /* أزرار الإيموجي وصندوق التعبيرات */
+        .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; font-size: 24px; max-height: 200px; overflow-y: auto; }
+        .emoji-item { cursor: pointer; text-align: center; padding: 5px; border-radius: 4px; }
+        .emoji-item:hover { background: #333; }
+        
+        /* شريط ميديا الإدارة وصلاحيات المالك */
+        .admin-action-row { display: flex; gap: 5px; margin-top: 10px; background: #ff47571a; padding: 5px; border-radius: 4px; }
+        .admin-action-row button { padding: 4px 8px; font-size: 11px; background: #ff4757; border:none; color:white; border-radius:3px; cursor:pointer; }
     </style>
 </head>
 <body>
 
-<div id="auth-container">
-    <h2>🌙 دخول الشات الاحترافي</h2>
-    <input type="text" id="username-in" placeholder="اكتب اسم المستخدم أو الزائر..." style="width:90%; padding:12px; margin-bottom:15px; background:var(--bg-input); color:white; border:1px solid #333; border-radius:6px;"><br>
-    <button onclick="loginFast()" style="width: 95%;">دخول سريع كزائر</button>
-</div>
+<!-- نغمة التنبيه الصوتية عند استقبال الرسائل والميديا الفورية -->
+<audio id="notif-sound" src="https://mixkit.co" preload="auto"></audio>
 
-<div id="main-wrapper">
-    <div id="sidebar">
-        <h3>🏠 غرف الدردشة</h3>
-        <div id="rooms-list">
-            <div id="room-general" class="room-item active-room" onclick="switchRoom('العامة')">🏠 الغرفة العامة</div>
-            <div id="room-tech" class="room-item" onclick="switchRoom('الدعم التقني')">🛠️ الدعم التقني</div>
+<!-- شاشة بوابات الدخول والتسجيل وقبول البريد الوهمي -->
+<div id="gate-container">
+    <div class="gate-card">
+        <h2 style="margin-top:0;">🌙 شات بلس الملكي</h2>
+        <div class="gate-tabs">
+            <button id="tab-v-btn" class="gate-tab-btn active" onclick="toggleGateTab('visitor')">زائر سريع</button>
+            <button id="tab-m-btn" class="gate-tab-btn" onclick="toggleGateTab('member')">الأعضاء</button>
         </div>
-        <a href="/dashboard" id="dash-link" style="color:#ffa502; text-decoration:none; margin-top:auto; font-weight:bold; display:block;">⚙️ لوحة التحكم الإدارية</a>
-    </div>
-    
-    <div id="chat-area">
-        <ul id="messages"></ul>
-        <div id="form-container">
-            <input type="file" id="file-input" style="display: none;" onchange="uploadFile(this)">
-            <button class="file-btn" onclick="document.getElementById('file-input').click()">📎</button>
-            <input id="input" autocomplete="off" placeholder="اكتب رسالتك هنا..." />
-            <button id="send-btn" onclick="sendMsg()">إرسال</button>
+        
+        <div id="gate-alert" style="font-size:12px; margin-bottom:10px; font-weight:bold;"></div>
+
+        <!-- فورم الزائر المطور بالاختيار والجنس والاسم المختار (مثل الجلاد) -->
+        <div id="gate-visitor-panel">
+            <input type="text" id="v-name" placeholder="اكتب اسمك المستعار (مثلاً: الجلاد)...">
+            <select id="v-gender">
+                <option value="" disabled selected>اختر نوع الجنس...</option>
+                <option value="ذكر">👦 ذكر</option>
+                <option value="أنثى">👧 أنثى</option>
+                <option value="نوع آخر">✨ نوع آخر</option>
+            </select>
+            <button class="main-btn" onclick="loginVisitor()">دخول فوري للشات</button>
         </div>
-    </div>
-</div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-    const socket = io();
-    let currentUser = { name: '', role: 'owner' }; // تم ضبطها تلقائياً كـ owner للتجربة الكاملة
-    let currentRoom = 'العامة';
-
-    function loginFast() {
-        const name = document.getElementById('username-in').value;
-        if(name.trim()) {
-            currentUser.name = name;
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('main-wrapper').style.display = 'flex';
-            socket.emit('join room', { roomName: currentRoom, user: currentUser.name });
-        }
-    }
-
-    function switchRoom(roomName) {
-        currentRoom = roomName;
-        document.getElementById('room-general').classList.toggle('active-room', roomName === 'العامة');
-        document.getElementById('room-tech').classList.toggle('active-room', roomName === 'الدعم التقني');
-        socket.emit('join room', { roomName: currentRoom, user: currentUser.name });
-    }
-
-    function sendMsg() {
-        const input = document.getElementById('input');
-        if(input.value.trim()) {
-            socket.emit('chat message', { text: input.value, user: currentUser.name, role: currentUser.role, type: 'text' });
-            input.value = '';
-        }
-    }
-
-    function uploadFile(element) {
-        const file = element.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const fileData = e.target.result;
-            const isImage = file.type.startsWith('image/');
-            socket.emit('chat message', {
-                user: currentUser.name,
-                role: currentUser.role,
-                type: isImage ? 'image' : 'file',
-                fileName: file.name,
-                fileBuffer: fileData
-            });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    socket.on('chat message', (data) => {
-        appendMessage(data);
-    });
-
-    socket.on('load old messages', (messagesList) => {
-        const messagesContainer = document.getElementById('messages');
-        messagesContainer.innerHTML = '';
-        messagesList.forEach(data => appendMessage(data));
-    });
-
-    function appendMessage(data) {
-        const messagesContainer = document.getElementById('messages');
-        const item = document.createElement('li');
-        item.className = `msg role-${data.role}`;
-
-        let content = data.text;
-        if(data.type === 'image') {
-            content = `<img src="${data.fileBuffer}" class="chat-img" />`;
-        } else if(data.type === 'file') {
-            content = `📄 <a href="${data.fileBuffer}" download="${data.fileName}" class="file-link">${data.fileName}</a>`;
-        }
-
-        item.innerHTML = `<strong>${data.user}:</strong> <div>${content}</div>`;
-        messagesContainer.appendChild(item);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-</script>
-</body>
-</html>
+        <!-- فورم الحسابات والتسجيل الحقيقي بالبريد الوهمي وحفظ البيانات -->
+        <div id="gate-member-panel" style="display:none;">
+            <div id="member-login-fields">
 
