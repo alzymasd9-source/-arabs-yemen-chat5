@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>شات بلس المطور - Dark Mode</title>
+    <style>
+        :root {
+            --bg-main: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0;
+            --bg-input: #2d2d2d; --accent: #0f9d58;
+        }
+        body { font-family: Arial, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
+        #auth-container, #main-wrapper { max-width: 1000px; margin: 30px auto; background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow: hidden; }
+        #auth-container { max-width: 400px; padding: 30px; text-align: center; }
+        #main-wrapper { display: flex; height: 600px; display: none; }
+        #sidebar { width: 250px; background: #181818; border-left: 1px solid #2d2d2d; padding: 20px; display: flex; flex-direction: column; }
+        #chat-area { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg-card); }
+        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; list-style: none; margin: 0; }
+        .msg { padding: 12px; margin-bottom: 12px; border-radius: 8px; max-width: 75%; width: fit-content; }
+        .role-owner { background: #5c1d24; border-right: 4px solid #ff4757; }
+        .role-admin { background: #5c431d; border-right: 4px solid #ffa502; }
+        .role-moderator { background: #1d3b5c; border-right: 4px solid #1e90ff; }
+        .role-member { background: #2d2d2d; border-right: 4px solid #888; }
+        .role-guest { background: #222; border-right: 4px solid #555; }
+        .chat-img { max-width: 250px; border-radius: 8px; display: block; margin-top: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .file-link { color: #3498db; text-decoration: none; display: inline-block; margin-top: 5px; font-weight: bold; }
+        #form-container { display: flex; padding: 15px; background: #181818; gap: 10px; align-items: center; }
+        #input { flex-grow: 1; padding: 12px; background: var(--bg-input); border: 1px solid #333; color: white; border-radius: 6px; outline: none; }
+        button { padding: 12px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .file-btn { background: #3a3a3a; font-size: 20px; padding: 8px 15px; }
+        .room-item { padding: 12px; background: #252525; margin-bottom: 8px; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; }
+        .room-item:hover, .active-room { background: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div id="auth-container">
+    <h2>🌙 دخول الشات الاحترافي</h2>
+    <input type="text" id="username-in" placeholder="اكتب اسم المستخدم أو الزائر..." style="width:90%; padding:12px; margin-bottom:15px; background:var(--bg-input); color:white; border:1px solid #333; border-radius:6px;"><br>
+    <button onclick="loginFast()" style="width: 95%;">دخول سريع كزائر</button>
+</div>
+
+<div id="main-wrapper">
+    <div id="sidebar">
+        <h3>🏠 غرف الدردشة</h3>
+        <div id="rooms-list">
+            <div id="room-general" class="room-item active-room" onclick="switchRoom('العامة')">🏠 الغرفة العامة</div>
+            <div id="room-tech" class="room-item" onclick="switchRoom('الدعم التقني')">🛠️ الدعم التقني</div>
+        </div>
+        <a href="/dashboard" id="dash-link" style="color:#ffa502; text-decoration:none; margin-top:auto; font-weight:bold; display:block;">⚙️ لوحة التحكم الإدارية</a>
+    </div>
+    
+    <div id="chat-area">
+        <ul id="messages"></ul>
+        <div id="form-container">
+            <input type="file" id="file-input" style="display: none;" onchange="uploadFile(this)">
+            <button class="file-btn" onclick="document.getElementById('file-input').click()">📎</button>
+            <input id="input" autocomplete="off" placeholder="اكتب رسالتك هنا..." />
+            <button id="send-btn" onclick="sendMsg()">إرسال</button>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    let currentUser = { name: '', role: 'owner' }; // تم ضبطها تلقائياً كـ owner للتجربة الكاملة
+    let currentRoom = 'العامة';
+
+    function loginFast() {
+        const name = document.getElementById('username-in').value;
+        if(name.trim()) {
+            currentUser.name = name;
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('main-wrapper').style.display = 'flex';
+            socket.emit('join room', { roomName: currentRoom, user: currentUser.name });
+        }
+    }
+
+    function switchRoom(roomName) {
+        currentRoom = roomName;
+        document.getElementById('room-general').classList.toggle('active-room', roomName === 'العامة');
+        document.getElementById('room-tech').classList.toggle('active-room', roomName === 'الدعم التقني');
+        socket.emit('join room', { roomName: currentRoom, user: currentUser.name });
+    }
+
+    function sendMsg() {
+        const input = document.getElementById('input');
+        if(input.value.trim()) {
+            socket.emit('chat message', { text: input.value, user: currentUser.name, role: currentUser.role, type: 'text' });
+            input.value = '';
+        }
+    }
+
+    function uploadFile(element) {
+        const file = element.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const fileData = e.target.result;
+            const isImage = file.type.startsWith('image/');
+            socket.emit('chat message', {
+                user: currentUser.name,
+                role: currentUser.role,
+                type: isImage ? 'image' : 'file',
+                fileName: file.name,
+                fileBuffer: fileData
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    socket.on('chat message', (data) => {
+        appendMessage(data);
+    });
+
+    socket.on('load old messages', (messagesList) => {
+        const messagesContainer = document.getElementById('messages');
+        messagesContainer.innerHTML = '';
+        messagesList.forEach(data => appendMessage(data));
+    });
+
+    function appendMessage(data) {
+        const messagesContainer = document.getElementById('messages');
+        const item = document.createElement('li');
+        item.className = `msg role-${data.role}`;
+
+        let content = data.text;
+        if(data.type === 'image') {
+            content = `<img src="${data.fileBuffer}" class="chat-img" />`;
+        } else if(data.type === 'file') {
+            content = `📄 <a href="${data.fileBuffer}" download="${data.fileName}" class="file-link">${data.fileName}</a>`;
+        }
+
+        item.innerHTML = `<strong>${data.user}:</strong> <div>${content}</div>`;
+        messagesContainer.appendChild(item);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+</script>
+</body>
+</html>
+
