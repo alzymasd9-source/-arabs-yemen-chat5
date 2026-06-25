@@ -2,46 +2,109 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شات بلس الملكي</title>
+<script src="/socket.io/socket.io.js"></script>
 <style>
-body{background:#121212;color:white;text-align:center;font-family:Arial}
-button{padding:10px 20px;margin:5px;border:none;border-radius:5px;cursor:pointer}
-.active{background:#3498db;color:white}
-.inactive{background:#333;color:#aaa}
-.panel{display:none;margin-top:20px}
-.panel.show{display:block}
+body{background:#121212;color:#e0e0e0;margin:0;font-family:'Segoe UI',Arial;overflow:hidden}
+#gate-container{display:flex;align-items:center;justify-content:center;height:100vh}
+.gate-card{width:360px;background:#181818;padding:30px;border-radius:14px;text-align:center;border:1px solid #2d2d2d}
+.gate-tabs{display:flex;gap:8px;margin-bottom:20px}
+.gate-tab-btn{flex:1;padding:12px;background:#222;color:#aaa;border:none;border-radius:6px;cursor:pointer;font-weight:bold}
+.gate-tab-btn.active{background:#3498db;color:white}
+input,select{width:90%;padding:12px;margin:8px 0;background:#252525;color:white;border:1px solid #333;border-radius:6px;text-align:center}
+.main-btn{width:90%;padding:12px;background:#0f9d58;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;margin-top:10px}
+#chat-container{display:none;flex-direction:column;height:100vh}
+#messages{flex:1;overflow-y:auto;padding:15px;background:#1a1a1a}
+.msg{background:#2a2a2a;padding:10px;margin-bottom:8px;border-radius:8px;text-align:right}
+#input-area{display:flex;padding:10px;background:#181818;border-top:1px solid #333}
+#input-area input{flex:1;margin:0 5px}
+#input-area button{padding:12px 20px;background:#3498db;color:white;border:none;border-radius:6px;cursor:pointer}
 </style>
 </head>
 <body>
-<h2>🌙 شات بلس الملكي</h2>
 
-<button id="v" class="active" onclick="show('v')">زائر سريع</button>
-<button id="m" class="inactive" onclick="show('m')">الأعضاء</button>
-<button id="r" class="inactive" onclick="show('r')">تسجيل</button>
-
-<div id="v-panel" class="panel show">
-<p>لوحة الزائر شغالة</p>
+<div id="gate-container">
+<div class="gate-card">
+<h2 style="margin-top:0;">🌙 شات بلس الملكي</h2>
+<div class="gate-tabs">
+<button id="tab-v-btn" class="gate-tab-btn active" onclick="toggleGateTab('visitor')">زائر سريع</button>
+<button id="tab-m-btn" class="gate-tab-btn" onclick="toggleGateTab('member')">الأعضاء</button>
+<button id="tab-r-btn" class="gate-tab-btn" onclick="toggleGateTab('register')">تسجيل</button>
 </div>
 
-<div id="m-panel" class="panel">
-<p>لوحة الأعضاء - اكتب اسمك وكلمة السر</p>
-<input placeholder="الاسم المستخدم"><br>
-<input type="password" placeholder="الباسورد">
+<div id="gate-visitor-panel">
+<input type="text" id="v-name" placeholder="اكتب اسمك">
+<select id="v-gender"><option value="" disabled selected>اختر الجنس</option><option value="ذكر">👦 ذكر</option><option value="أنثى">👧 أنثى</option></select>
+<button class="main-btn" onclick="joinChat()">دخول فوري للشات</button>
 </div>
 
-<div id="r-panel" class="panel">
-<p>لوحة التسجيل - انشئ حساب جديد</p>
-<input placeholder="الاسم"><br>
-<input type="password" placeholder="كلمة السر">
+<div id="gate-member-panel" style="display:none;">
+<input type="text" id="m-name" placeholder="الاسم المستخدم">
+<input type="password" id="m-pass" placeholder="الباسورد">
+<button class="main-btn" onclick="joinChat(true)">دخول</button>
+</div>
+
+<div id="gate-register-panel" style="display:none;">
+<input type="text" id="r-name" placeholder="الاسم">
+<input type="password" id="r-pass" placeholder="الباسورد">
+<input type="email" id="r-email" placeholder="الايميل">
+<button class="main-btn" onclick="register()">تسجيل</button>
+</div>
+</div>
+</div>
+
+<div id="chat-container">
+<div id="messages"></div>
+<div id="input-area">
+<input type="text" id="msg-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
+<button onclick="sendMsg()">إرسال</button>
+</div>
 </div>
 
 <script>
-function show(id){
-document.querySelectorAll('button').forEach(b=>{b.className='inactive'});
-document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
-document.getElementById(id).className='active';
-document.getElementById(id+'-panel').classList.add('show');
+const socket = io();
+let myName = '';
+
+function toggleGateTab(type){
+document.querySelectorAll('.gate-tab-btn').forEach(b=>b.classList.remove('active'));
+document.getElementById('gate-visitor-panel').style.display='none';
+document.getElementById('gate-member-panel').style.display='none';
+document.getElementById('gate-register-panel').style.display='none';
+if(type=='visitor'){document.getElementById('tab-v-btn').classList.add('active'); document.getElementById('gate-visitor-panel').style.display='block'}
+else if(type=='member'){document.getElementById('tab-m-btn').classList.add('active'); document.getElementById('gate-member-panel').style.display='block'}
+else{document.getElementById('tab-r-btn').classList.add('active'); document.getElementById('gate-register-panel').style.display='block'}
 }
+
+function joinChat(isMember=false){
+myName = isMember ? document.getElementById('m-name').value : document.getElementById('v-name').value;
+const gender = document.getElementById('v-gender').value;
+if(!myName || (!isMember && !gender)){ alert('اكتب اسمك واختر الجنس'); return; }
+document.getElementById('gate-container').style.display='none';
+document.getElementById('chat-container').style.display='flex';
+socket.emit('join', {name: myName, gender: gender});
+}
+
+function register(){
+alert('تم التسجيل بنجاح! سجل دخول الحين');
+toggleGateTab('member');
+}
+
+function sendMsg(){
+const input = document.getElementById('msg-input');
+if(input.value.trim()){
+socket.emit('chat message', {name: myName, text: input.value});
+input.value='';
+}
+}
+
+socket.on('chat message', (data)=>{
+const div = document.createElement('div');
+div.className = 'msg';
+div.innerHTML = `<b>${data.name}:</b> ${data.text}`;
+document.getElementById('messages').appendChild(div);
+document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+});
 </script>
 </body>
 </html>
