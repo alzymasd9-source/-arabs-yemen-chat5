@@ -11,14 +11,15 @@ body{margin:0;font-family:tahoma;background:#0a0a0a;color:#eee}
 #messages{flex:1;overflow-y:auto;padding:10px}
 #media-box{padding:8px 10px;background:#1a1a1a;border-top:1px solid #333;display:flex;gap:10px}
 #media-box button{padding:8px 12px;background:#2a2a2a;border:1px solid #444;border-radius:6px;color:#eee;cursor:pointer;font-size:18px}
-#media-box button:disabled{cursor:not-allowed}
-#input-box{display:flex;padding:10px;background:#1a1a1a;border-top:1px solid #333}
+#media-box button:disabled{cursor:not-allowed;opacity:0.3}
+#input-box{display:flex;padding:10px;background:#1a1a1a;border-top:1px solid #333;gap:8px}
 #msg{flex:1;padding:10px;border:none;border-radius:8px;background:#2a2a2a;color:#eee;outline:none}
-button.send{margin-right:8px;padding:10px 20px;background:#00aa55;border:none;border-radius:8px;color:#fff;cursor:pointer}
+select{padding:8px;background:#2a2a2a;color:#eee;border:1px solid #444;border-radius:6px}
+button.send{padding:10px 20px;background:#00aa55;border:none;border-radius:8px;color:#fff;cursor:pointer}
 
 .msg-row{display:flex;align-items:flex-start;margin:12px 0;gap:8px}
 .msg-row.me{flex-direction:row-reverse}
-.avatar{width:45px;height:45px;border-radius:50%;border:2px solid;flex-shrink:0;object-fit:cover}
+.avatar{width:45px;height:45px;border-radius:50%;border:2px solid;flex-shrink:0;object-fit:cover;background:#1a1a1a;padding:5px}
 .msg-content{flex:1;max-width:75%}
 .msg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px;color:#888}
 .msg-name{font-weight:bold;font-size:14px}
@@ -42,6 +43,11 @@ button.send{margin-right:8px;padding:10px 20px;background:#00aa55;border:none;bo
   </div>
 
   <div id="input-box">
+    <select id="gender">
+      <option value="ذكر">ذكر 💙</option>
+      <option value="انثى">أنثى 💗</option>
+      <option value="جنس3">جنس ثالث 🤍</option>
+    </select>
     <input id="msg" placeholder="اكتب رسالتك..." onkeypress="if(event.key=='Enter')send()">
     <button class="send" onclick="send()">إرسال</button>
   </div>
@@ -52,27 +58,42 @@ button.send{margin-right:8px;padding:10px 20px;background:#00aa55;border:none;bo
 var socket = io();
 var myName = prompt("اسمك؟") || "زائر";
 var myRank = prompt("رتبتك؟ زائر / عضو / مميز", "زائر");
+var myGender = document.getElementById('gender').value;
 
-socket.emit('join', {name: myName, rank: myRank});
+socket.emit('join', {name: myName, rank: myRank, gender: myGender});
 
 socket.on('myData', (data) => {
   myRank = data.rank;
+  myGender = data.gender;
   updateMediaButtons();
 });
 
 function updateMediaButtons() {
-  let canMedia = canSendMedia(myRank);
+  let canMedia = ['مميز','مشرف','ادارة','ادمن','مالك'].includes(myRank);
   document.getElementById('btnImage').disabled =!canMedia;
   document.getElementById('btnYoutube').disabled =!canMedia;
-  document.getElementById('btnImage').style.opacity = canMedia? '1' : '0.3';
-  document.getElementById('btnYoutube').style.opacity = canMedia? '1' : '0.3';
 }
 
-function canSendMedia(rank) {
-  return ['مميز','مشرف','ادارة','ادمن','مالك'].includes(rank);
+function getBorderColor(rank, gender) {
+  if(rank === 'زائر') {
+    if(gender === 'انثى') return '#ff66cc';
+    if(gender === 'جنس3') return '#ffffff';
+    return '#00aaff';
+  }
+  if(rank === 'عضو') {
+    if(gender === 'انثى') return '#ff4499';
+    if(gender === 'جنس3') return '#cccccc';
+    return '#0088ff';
+  }
+  return '#ffd700';
 }
 
-// استقبال الرسائل
+function getRankNum(rank) {
+  if(rank === 'زائر') return '1';
+  if(rank === 'عضو') return '2';
+  return '👑';
+}
+
 socket.on('chat message', (data) => {
   if(data.name === 'النظام'){
     let div = document.createElement('div');
@@ -87,7 +108,6 @@ socket.on('chat message', (data) => {
   document.getElementById('messages').scrollTop = 99999;
 });
 
-// استقبال الميديا
 socket.on('newMedia', (data) => {
   addMessage(data, true);
   document.getElementById('messages').scrollTop = 99999;
@@ -97,17 +117,17 @@ function addMessage(data, isMedia=false) {
   let row = document.createElement('div');
   row.className = 'msg-row' + (data.name == myName? ' me' : '');
 
-  let rankNum = data.rank === 'زائر'? '1' : data.rank === 'عضو'? '2' : '👑';
-  let rankColor = data.rank === 'زائر'? '#ff66cc' : data.rank === 'عضو'? '#00aaff' : '#ffd700';
+  let rankNum = getRankNum(data.rank);
+  let borderColor = getBorderColor(data.rank, data.gender);
   let nameColor = data.rank === 'مميز'? '#ffd700' : '#00ff88';
 
   let content = isMedia?
     (data.type === 'image'? `<img src="${data.url}" style="max-width:200px;border-radius:8px">` :
-     `<iframe width="200" height="113" src="https://www.youtube.com/embed/${data.url.split('v=')[1]||data.url.split('youtu.be/')[1]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe>`)
+     `<iframe width="200" height="113" src="https://www.youtube.com/embed/${(data.url.split('v=')[1]||data.url.split('youtu.be/')[1]).split('&')[0]}" frameborder="0" allowfullscreen style="border-radius:8px"></iframe>`)
     : data.text;
 
   row.innerHTML = `
-    <img src="${data.avatar}" class="avatar" style="border-color:${rankColor}">
+    <img src="${data.avatar}" class="avatar" style="border-color:${borderColor}" onerror="this.src='https://i.pravatar.cc/45?u=${data.name}'">
     <div class="msg-content">
       <div class="msg-header">
         <span class="msg-name" style="color:${nameColor}">${rankNum} ${data.name}</span>
@@ -150,7 +170,7 @@ function send(){
 }
 
 function sendImage() {
-  if(!canSendMedia(myRank)) {
+  if(!['مميز','مشرف','ادارة','ادمن','مالك'].includes(myRank)) {
     alert('هذي الميزة للمميز فقط 💎');
     return;
   }
@@ -159,7 +179,7 @@ function sendImage() {
 }
 
 function sendYoutube() {
-  if(!canSendMedia(myRank)) {
+  if(!['مميز','مشرف','ادارة','ادمن','مالك'].includes(myRank)) {
     alert('هذي الميزة للمميز فقط 💎');
     return;
   }
