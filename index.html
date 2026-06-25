@@ -3,35 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شات بلس الخرافي</title>
+<title>شات بلس الملكي</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
-:root {--bg-main:#121212; --bg-card:#181818; --bg-chat:#0f0f0f; --text-main:#e0e0e0; --bg-input:#252525; --accent-green:#0f9d58; --accent-blue:#3498db; --accent-red:#ff4757;}
-body {font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:var(--bg-main); color:var(--text-main); margin:0; padding:0; overflow:hidden;}
-#gate-container {position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg-main); display:flex; align-items:center; justify-content:center; z-index:9999;}
-.gate-card {width:380px; background:var(--bg-card); padding:30px; border-radius:14px; text-align:center; border:1px solid #2d2d2d;}
+body {font-family:'Segoe UI',Arial; background:#121212; color:#e0e0e0; margin:0; padding:0; overflow:hidden;}
+#gate-container {position:fixed; top:0; left:0; width:100vw; height:100vh; background:#121212; display:flex; align-items:center; justify-content:center;}
+.gate-card {width:380px; background:#181818; padding:30px; border-radius:14px; text-align:center; border:1px solid #2d2d2d;}
 .gate-tabs {display:flex; gap:10px; margin-bottom:20px;}
 .gate-tab-btn {flex:1; padding:12px; background:#222; color:#aaa; border:none; border-radius:6px; cursor:pointer; font-weight:bold;}
-.gate-tab-btn.active {background:var(--accent-blue); color:white;}
-.gate-card input,.gate-card select {width:92%; padding:12px; margin-bottom:12px; background:var(--bg-input); color:white; border:1px solid #333; border-radius:6px; text-align:center; outline:none;}
-.gate-card button.main-btn {width:92%; padding:12px; background:var(--accent-green); color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;}
-#gate-alert {font-size:12px; margin-bottom:10px; color:var(--accent-red); min-height:20px;}
-#app-wrapper {display:none; flex-direction:column; height:100vh;}
-#top-bar {height:60px; background:#000; display:flex; align-items:center; justify-content:space-between; padding:0 20px; border-bottom:1px solid #222;}
-#top-bar button {background:var(--accent-red); color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;}
-#chat-window {flex-grow:1; background:var(--bg-chat); display:flex; flex-direction:column;}
-#messages-view {flex-grow:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;}
-.msg {padding:12px 16px; background:#252525; border-radius:10px; max-width:70%; border-right:4px solid var(--accent-blue);}
-.msg b {color:var(--accent-blue);}
-.sys-msg {color:#888; text-align:center; font-size:13px;}
-#input-dock-bar {height:65px; background:#181818; border-top:1px solid #222; display:flex; align-items:center; padding:0 15px; gap:10px;}
-#chat-text-input {flex-grow:1; padding:12px; background:var(--bg-input); border:1px solid #333; color:white; border-radius:8px; outline:none;}
-#send-fly-btn {background:var(--accent-green); color:white; border-radius:50%; width:42px; height:42px; border:none; cursor:pointer; font-size:18px;}
+.gate-tab-btn.active {background:#3498db; color:white;}
+.gate-card input,.gate-card select {width:92%; padding:12px; margin-bottom:12px; background:#252525; color:white; border:1px solid #333; border-radius:6px; text-align:center;}
+.gate-card button.main-btn {width:92%; padding:12px; background:#0f9d58; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;}
 </style>
 </head>
 <body>
-
-<audio id="notif-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-notification-bell-933.mp3" preload="auto"></audio>
 
 <div id="gate-container">
 <div class="gate-card">
@@ -42,59 +27,38 @@ body {font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:var(--bg-main);
 <button id="tab-r-btn" class="gate-tab-btn" onclick="toggleGateTab('register')">تسجيل</button>
 </div>
 
-<div id="gate-alert"></div>
-
 <div id="gate-visitor-panel">
-<input type="text" id="v-name" placeholder="اكتب اسمك المستعار...">
+<input type="text" id="v-name" placeholder="اكتب اسمك">
 <select id="v-gender">
-<option value="" disabled selected>اختر نوع الجنس...</option>
+<option value="" disabled selected>اختر الجنس</option>
 <option value="ذكر">👦 ذكر</option>
 <option value="أنثى">👧 أنثى</option>
-<option value="نوع آخر">✨ نوع آخر</option>
 </select>
-<button class="main-btn" onclick="loginVisitor()">دخول فوري للشات</button>
+<button class="main-btn" onclick="alert('الزر شغال! اسمك: '+document.getElementById('v-name').value)">دخول فوري للشات</button>
 </div>
 
 <div id="gate-member-panel" style="display:none;">
-<input type="text" id="m-user" placeholder="الاسم المستخدم">
-<input type="password" id="m-pass" placeholder="الباسورد">
-<button class="main-btn" onclick="loginMember()">دخول</button>
+<input type="text" placeholder="الاسم المستخدم">
+<input type="password" placeholder="الباسورد">
+<button class="main-btn">دخول</button>
 </div>
 
 <div id="gate-register-panel" style="display:none;">
-<input type="text" id="r-name" placeholder="الاسم">
-<input type="password" id="r-pass" placeholder="الباسورد">
-<input type="text" id="r-email" placeholder="البريد الالكتروني - وهمي عادي">
-<button class="main-btn" onclick="registerUser()">تسجيل عضوية</button>
-</div>
-</div>
-</div>
-
-<div id="app-wrapper">
-<div id="top-bar">
-<div>مرحباً <span id="user-display"></span></div>
-<button onclick="logout()">خروج</button>
-</div>
-<div id="chat-window">
-<div id="messages-view"></div>
-<div id="input-dock-bar">
-<input type="text" id="chat-text-input" placeholder="اكتب رسالة...">
-<button id="send-fly-btn" onclick="sendMsg()">➤</button>
+<input type="text" placeholder="الاسم">
+<input type="password" placeholder="الباسورد">
+<input type="text" placeholder="الايميل">
+<button class="main-btn">تسجيل</button>
 </div>
 </div>
 </div>
 
 <script>
-const socket = io();
-let currentUser = '';
-let currentRole = 'guest';
-let currentRoom = 'الغرفة العامة';
-
 function toggleGateTab(type){
 document.querySelectorAll('.gate-tab-btn').forEach(b=>b.classList.remove('active'))
 document.getElementById('gate-visitor-panel').style.display='none'
 document.getElementById('gate-member-panel').style.display='none'
 document.getElementById('gate-register-panel').style.display='none'
+
 if(type=='visitor'){
 document.getElementById('tab-v-btn').classList.add('active')
 document.getElementById('gate-visitor-panel').style.display='block'
@@ -105,108 +69,6 @@ document.getElementById('gate-member-panel').style.display='block'
 document.getElementById('tab-r-btn').classList.add('active')
 document.getElementById('gate-register-panel').style.display='block'
 }
-document.getElementById('gate-alert').innerText=''
-}
-
-function loginVisitor(){
-let name = document.getElementById('v-name').value.trim()
-let gender = document.getElementById('v-gender').value
-if(!name ||!gender){
-document.getElementById('gate-alert').innerText = 'اكتب الاسم واختار الجنس'
-return
-}
-currentUser = name + ' [' + gender + ']'
-currentRole = 'guest'
-socket.emit('join room', { roomName: currentRoom, user: currentUser, role: currentRole })
-enterChat()
-}
-
-async function loginMember(){
-let user = document.getElementById('m-user').value.trim()
-let pass = document.getElementById('m-pass').value.trim()
-if(!user ||!pass){
-document.getElementById('gate-alert').innerText = 'اكتب الاسم والباسورد'
-return
-}
-let res = await fetch('/api/login', {
-method: 'POST',
-headers: {'Content-Type':'application/json'},
-body: JSON.stringify({username:user, password:pass})
-let data = await res.json()
-if(data.success){
-currentUser = data.user.name
-currentRole = data.user.role
-socket.emit('join room', { roomName: currentRoom, user: currentUser, role: currentRole })
-enterChat()
-}else{
-document.getElementById('gate-alert').innerText = data.error
-}
-}
-
-async function registerUser(){
-let name = document.getElementById('r-name').value.trim()
-let pass = document.getElementById('r-pass').value.trim()
-let email = document.getElementById('r-email').value.trim()
-if(!name ||!pass ||!email){
-document.getElementById('gate-alert').innerText = 'اكمل كل الحقول'
-return
-}
-let res = await fetch('/api/register', {
-method: 'POST',
-headers: {'Content-Type':'application/json'},
-body: JSON.stringify({username:name, password:pass, email:email})
-let data = await res.json()
-alert(data.success || data.error)
-if(data.success) toggleGateTab('member')
-}
-
-function enterChat(){
-document.getElementById('gate-container').style.display='none'
-document.getElementById('app-wrapper').style.display='flex'
-document.getElementById('user-display').innerText = currentUser + ' - ' + currentRole
-}
-
-function logout(){
-localStorage.clear()
-location.reload()
-}
-
-function sendMsg(){
-let input = document.getElementById('chat-text-input')
-let text = input.value.trim()
-if(!text) return
-socket.emit('chat message', {user: currentUser, role: currentRole, text: text, room: currentRoom})
-input.value = ''
-}
-
-socket.on('chat message', (msg)=>{
-let div = document.createElement('div')
-div.className = 'msg'
-div.innerHTML = `<b>${msg.user}:</b> ${msg.text}`
-document.getElementById('messages-view').appendChild(div)
-document.getElementById('messages-view').scrollTop = 99999
-document.getElementById('notif-sound').play().catch(()=>{})
-})
-
-socket.on('sys message', (msg)=>{
-let div = document.createElement('div')
-div.className = 'sys-msg'
-div.innerText = msg.text
-document.getElementById('messages-view').appendChild(div)
-})
-
-socket.on('load old messages', (msgs)=>{
-msgs.forEach(msg=>{
-let div = document.createElement('div')
-div.className = 'msg'
-div.innerHTML = `<b>${msg.user}:</b> ${msg.text}`
-document.getElementById('messages-view').appendChild(div)
-})
-})
-
-document.getElementById('chat-text-input').addEventListener('keypress', e=>{
-if(e.key=='Enter') sendMsg()
-})
 </script>
 
 </body>
