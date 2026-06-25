@@ -1,16 +1,13 @@
 {
   "name": "chat-plus-dark",
   "version": "1.0.0",
-  "description": "تطبيق شات متكامل ومطور مع مشاركة ملفات ونظام رتب وغرف",
+  "description": "شات منتدى متطور مع غرفات ونظام رتب",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "express": "^4.19.2",
-    "express-session": "^1.18.0",
-    "mongoose": "^8.3.1",
     "socket.io": "^4.7.5"
   }
 }
