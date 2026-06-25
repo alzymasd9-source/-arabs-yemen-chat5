@@ -22,6 +22,9 @@ body{margin:0;font-family:tahoma;background:#0a0a0a;color:#eee}
   color:#eee;font-size:16px;box-sizing:border-box
 }
 .login-form select{cursor:pointer}
+.login-form select option[disabled]{
+  color:#777;
+}
 .login-form button{
   width:100%;padding:12px;margin-top:15px;
   background:#00aa55;border:none;border-radius:8px;
@@ -56,13 +59,13 @@ button.send{padding:10px 20px;background:#00aa55;border:none;border-radius:8px;c
     <h2>تسجيل الدخول</h2>
 
     <div style="display:flex;gap:8px;flex-direction:row-reverse">
-      <select id="inputGender" style="width:45%;flex-shrink:0">
-        <option value="" disabled selected>نوع الجنس</option>
+      <select id="inputGender2" autocomplete="off" style="width:45%;flex-shrink:0">
+        <option value="" disabled selected hidden>نوع الجنس</option>
         <option value="ذكر">ذكر 💙</option>
         <option value="انثى">أنثى 💗</option>
         <option value="جنس3">نوع آخر 🤍</option>
       </select>
-      <input type="text" id="inputName" placeholder="اكتب اسمك..." maxlength="20" style="flex:1">
+      <input type="text" id="inputName" placeholder="اكتب اسمك..." maxlength="20" style="flex:1" autocomplete="off">
     </div>
 
     <button onclick="enterChat()">دخول</button>
@@ -92,7 +95,7 @@ var myName, myRank, myGender;
 function enterChat(){
   myName = document.getElementById('inputName').value.trim();
   myRank = 'زائر';
-  let genderSelect = document.getElementById('inputGender');
+  let genderSelect = document.getElementById('inputGender2');
   myGender = genderSelect.value;
 
   if(!myName){
@@ -113,9 +116,8 @@ socket.on('myData', (data) => {
   myRank = data.rank;
   myGender = data.gender;
 
-  // العضو والمميز ما يشوفون اختيار الجنس
   if(myRank!== 'زائر') {
-    document.getElementById('inputGender').style.display = 'none';
+    document.getElementById('inputGender2').style.display = 'none';
   }
 
   updateMediaButtons();
