@@ -7,7 +7,6 @@
 <style>
 body{margin:0;font-family:tahoma;background:#0a0a0a;color:#eee}
 
-/* مربع الدخول */
 #loginBox{
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:9999
@@ -30,7 +29,6 @@ body{margin:0;font-family:tahoma;background:#0a0a0a;color:#eee}
 }
 .login-form button:hover{background:#00cc66}
 
-/* الشات */
 #chat{display:none;flex-direction:column;height:100vh}
 #header{background:#00aa55;padding:15px;text-align:center;font-weight:bold;font-size:18px}
 #messages{flex:1;overflow-y:auto;padding:10px;background:#0f0f0f}
@@ -53,26 +51,24 @@ button.send{padding:10px 20px;background:#00aa55;border:none;border-radius:8px;c
 </head>
 <body>
 
-<!-- مربع الدخول -->
 <div id="loginBox">
   <div class="login-form">
     <h2>تسجيل الدخول</h2>
-    <input type="text" id="inputName" placeholder="اكتب اسمك..." maxlength="20">
-    <select id="inputRank">
-      <option value="زائر">زائر 1</option>
-      <option value="عضو">عضو 2</option>
-      <option value="مميز">مميز 👑</option>
-    </select>
-    <select id="inputGender">
-      <option value="ذكر">ذكر 💙</option>
-      <option value="انثى">أنثى 💗</option>
-      <option value="جنس3">نوع آخر 🤍</option>
-    </select>
+
+    <div style="display:flex;gap:8px;flex-direction:row-reverse">
+      <select id="inputGender" style="width:45%;flex-shrink:0">
+        <option value="" disabled selected>نوع الجنس</option>
+        <option value="ذكر">ذكر 💙</option>
+        <option value="انثى">أنثى 💗</option>
+        <option value="جنس3">نوع آخر 🤍</option>
+      </select>
+      <input type="text" id="inputName" placeholder="اكتب اسمك..." maxlength="20" style="flex:1">
+    </div>
+
     <button onclick="enterChat()">دخول</button>
   </div>
 </div>
 
-<!-- الشات -->
 <div id="chat">
   <div id="header">💬 شات الرتب</div>
   <div id="messages"></div>
@@ -95,23 +91,33 @@ var myName, myRank, myGender;
 
 function enterChat(){
   myName = document.getElementById('inputName').value.trim();
-  myRank = document.getElementById('inputRank').value;
-  myGender = document.getElementById('inputGender').value;
+  myRank = 'زائر';
+  let genderSelect = document.getElementById('inputGender');
+  myGender = genderSelect.value;
 
   if(!myName){
     alert('اكتب اسمك أول');
     return;
   }
+  if(!myGender){
+    alert('اختار نوع الجنس');
+    return;
+  }
 
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('chat').style.display = 'flex';
-
   socket.emit('join', {name: myName, rank: myRank, gender: myGender});
 }
 
 socket.on('myData', (data) => {
   myRank = data.rank;
   myGender = data.gender;
+
+  // العضو والمميز ما يشوفون اختيار الجنس
+  if(myRank!== 'زائر') {
+    document.getElementById('inputGender').style.display = 'none';
+  }
+
   updateMediaButtons();
 });
 
