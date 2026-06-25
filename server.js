@@ -8,17 +8,21 @@ const io = require('socket.io')(http, { cors: { origin: "*" } });
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// صور الرتب الثابتة
+// صور ثابتة حسب الرتبة + الجنس
 const AVATARS = {
-  زائر: 'https://i.imgur.com/8Km9tLL.png', // رقم 1 وردي
-  عضو: 'https://i.imgur.com/lr8uK9B.png' // رقم 2 أزرق
+  'زائر-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male&backgroundColor=00aaff',
+  'زائر-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female&backgroundColor=ff66cc',
+  'زائر-جنس3': 'https://api.dicebear.com/7.x/personas/svg?seed=neutral&backgroundColor=ffffff',
+
+  'عضو-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male2&backgroundColor=0088ff',
+  'عضو-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female2&backgroundColor=ff4499',
+  'عضو-جنس3': 'https://api.dicebear.com/7.x/personas/svg?seed=neutral2&backgroundColor=eeeeee'
 };
 
 const DB_FILE = path.join(__dirname, 'users.json');
-let usersDB = {}; // {اسم: {rank, avatar, balance}}
-let onlineUsers = {}; // {socketId: {name, rank, avatar}}
+let usersDB = {};
+let onlineUsers = {};
 
-// تحميل الداتا بيز
 if(fs.existsSync(DB_FILE)){
   usersDB = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 }
@@ -27,7 +31,6 @@ function saveDB(){
   fs.writeFileSync(DB_FILE, JSON.stringify(usersDB, null, 2));
 }
 
-// هل الرتبة تقدر ترسل ميديا؟
 function canSendMedia(rank) {
   return ['مميز','مشرف','ادارة','ادمن','مالك'].includes(rank);
 }
@@ -37,36 +40,40 @@ io.on('connection', (socket) => {
   socket.on('join', (data) => {
     let name = data.name || 'زائر';
     let rank = usersDB[name]?.rank || data.rank || 'زائر';
+    let gender = usersDB[name]?.gender || data.gender || 'ذكر'; // ذكر / انثى / جنس3
 
     if(!usersDB[name]) {
-      usersDB[name] = {rank, avatar: AVATARS, balance: 0};
+      usersDB[name] = {rank, gender, avatar: null, balance: 0};
       saveDB();
     }
 
-    let avatar = (rank === 'مميز')? usersDB[name].avatar : AVATARS;
-    onlineUsers[socket.id] = {name, rank, avatar};
+    let avatarKey = `${rank}-${gender}`;
+    let avatar = (rank === 'مميز')? usersDB[name].avatar : AVATARS[avatarKey];
+    if(!avatar) avatar = AVATARS['زائر-ذكر']; // احتياط
+
+    onlineUsers[socket.id] = {name, rank, gender, avatar};
 
     socket.broadcast.emit('chat message', {name: 'النظام', text: `${name} انضم [${rank}]`});
     socket.emit('myData', onlineUsers[socket.id]);
   });
 
-  // رسائل نصية عادية
   socket.on('chat message', (data) => {
     let user = onlineUsers[socket.id];
     if(!user) return;
 
-    let avatarToShow = (user.rank === 'مميز')? user.avatar : AVATARS[user.rank];
+    let avatarKey = `${user.rank}-${user.gender}`;
+    let avatarToShow = (user.rank === 'مميز')? user.avatar : AVATARS[avatarKey];
 
     io.emit('chat message', {
       name: user.name,
       rank: user.rank,
+      gender: user.gender,
       avatar: avatarToShow,
       text: data.text,
       time: data.time
     });
   });
 
-  // ========== منع الصور واليوتيوب للزائر والعضو ==========
   socket.on('sendMedia', (data) => {
     let user = onlineUsers[socket.id];
     if(!user) return;
@@ -82,6 +89,7 @@ io.on('connection', (socket) => {
         url: data.url,
         name: user.name,
         rank: user.rank,
+        gender: user.gender,
         avatar: user.avatar,
         time: data.time
       });
@@ -93,13 +101,13 @@ io.on('connection', (socket) => {
         url: data.url,
         name: user.name,
         rank: user.rank,
+        gender: user.gender,
         avatar: user.avatar,
         time: data.time
       });
     }
   });
 
-  // تغيير الصورة - بس للمميز
   socket.on('changeAvatar', (newAvatar) => {
     let user = onlineUsers[socket.id];
     if(!user) return;
