@@ -3,34 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شات الرتب</title>
+<title>شات اليمن</title>
 <style>
-body{margin:0;font-family:tahoma;background:#0a0a0a;color:#eee}
+body{margin:0;font-family:tahoma;background:url('https://i.imgur.com/3ZQZQZQ.jpg') no-repeat center fixed;background-size:cover;color:#eee}
 
 #loginBox{
   position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:9999
+  background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999
 }
 .login-form{
-  background:#1a1a1a;padding:30px;border-radius:15px;border:2px solid #00aa55;
-  width:320px;box-shadow:0 0 30px #00aa55
+  background:rgba(255,255,255,0.95);padding:25px;border-radius:15px;
+  width:340px;box-shadow:0 0 30px rgba(0,0,0,0.5);color:#333
 }
-.login-form h2{text-align:center;margin:0 0 20px;color:#00aa55}
-.login-form input,.login-form select{
-  width:100%;padding:12px;margin:10px 0;
-  background:#2a2a2a;border:1px solid #444;border-radius:8px;
-  color:#eee;font-size:16px;box-sizing:border-box
-}
-.login-form select{cursor:pointer}
-.login-form select option[disabled]{
-  color:#777;
+.login-form h2{text-align:center;margin:0 0 5px;color:#006699;font-size:28px}
+.login-form p{text-align:center;color:#0099cc;margin:0 0 20px;font-size:14px}
+.login-form input{
+  width:100%;padding:12px;margin:8px 0;
+  background:#fff;border:1px solid #ccc;border-radius:8px;
+  color:#333;font-size:16px;box-sizing:border-box;text-align:center
 }
 .login-form button{
-  width:100%;padding:12px;margin-top:15px;
-  background:#00aa55;border:none;border-radius:8px;
-  color:#fff;font-size:16px;font-weight:bold;cursor:pointer
+  width:100%;padding:12px;margin-top:10px;
+  border:none;border-radius:8px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer
 }
-.login-form button:hover{background:#00cc66}
+.btn-guest{background:#00aa00}
+.btn-member{background:#003344}
 
 #chat{display:none;flex-direction:column;height:100vh}
 #header{background:#00aa55;padding:15px;text-align:center;font-weight:bold;font-size:18px}
@@ -49,31 +46,49 @@ button.send{padding:10px 20px;background:#00aa55;border:none;border-radius:8px;c
 .msg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px;color:#888}
 .msg-name{font-weight:bold;font-size:14px}
 .msg-text{padding:10px 14px;background:#2a2a2a;border-radius:12px;border:1px solid #333;word-wrap:break-word}
-.msg-row.me.msg-text{background:#004422;border-color:#00ff88}
+.msg-row.me .msg-text{background:#004422;border-color:#00ff88}
 </style>
 </head>
 <body>
 
 <div id="loginBox">
   <div class="login-form">
-    <h2>تسجيل الدخول</h2>
-
-    <div style="display:flex;gap:8px;flex-direction:row-reverse">
-      <select id="inputGender2" autocomplete="off" style="width:45%;flex-shrink:0">
-        <option value="" disabled selected hidden>نوع الجنس</option>
-        <option value="ذكر">ذكر 💙</option>
-        <option value="انثى">أنثى 💗</option>
-        <option value="جنس3">نوع آخر 🤍</option>
-      </select>
-      <input type="text" id="inputName" placeholder="اكتب اسمك..." maxlength="20" style="flex:1" autocomplete="off">
+    <h2>شات اليمن</h2>
+    <p>غرفة دردشة شباب وبنات اليمن</p>
+    
+    <!-- الزرين -->
+    <div style="display:flex;gap:10px;margin-bottom:15px">
+      <button class="btn-guest" onclick="showGuestForm()">دخول الزوار</button>
+      <button class="btn-member" onclick="showMemberForm()">دخول الأعضاء</button>
     </div>
 
-    <button onclick="enterChat()">دخول</button>
+    <!-- فورم الزوار -->
+    <div id="guestForm" style="display:none">
+      <input type="text" id="inputNameGuest" placeholder="الإسم المستعار" maxlength="20" autocomplete="off">
+      
+      <div style="display:flex;justify-content:center;gap:40px;margin:15px 0">
+        <label style="cursor:pointer;font-size:18px;color:#00aaff;font-weight:bold">
+          <input type="radio" name="gender" value="ذكر" checked> ذكر
+        </label>
+        <label style="cursor:pointer;font-size:18px;color:#ff4499;font-weight:bold">
+          <input type="radio" name="gender" value="انثى"> أنثى
+        </label>
+      </div>
+      
+      <button class="btn-guest" onclick="enterChatGuest()">دخول</button>
+    </div>
+
+    <!-- فورم الأعضاء -->
+    <div id="memberForm" style="display:none">
+      <input type="text" id="inputNameMember" placeholder="الإسم المستعار" maxlength="20" autocomplete="off">
+      <input type="password" id="inputPassMember" placeholder="كلمة المرور" autocomplete="off">
+      <button class="btn-member" onclick="enterChatMember()">دخول</button>
+    </div>
   </div>
 </div>
 
 <div id="chat">
-  <div id="header">💬 شات الرتب</div>
+  <div id="header">💬 شات اليمن</div>
   <div id="messages"></div>
 
   <div id="media-box">
@@ -92,34 +107,43 @@ button.send{padding:10px 20px;background:#00aa55;border:none;border-radius:8px;c
 var socket = io();
 var myName, myRank, myGender;
 
-function enterChat(){
-  myName = document.getElementById('inputName').value.trim();
-  myRank = 'زائر';
-  let genderSelect = document.getElementById('inputGender2');
-  myGender = genderSelect.value;
+function showGuestForm(){
+  document.getElementById('guestForm').style.display = 'block';
+  document.getElementById('memberForm').style.display = 'none';
+}
 
-  if(!myName){
-    alert('اكتب اسمك أول');
-    return;
-  }
-  if(!myGender){
-    alert('اختار نوع الجنس');
-    return;
-  }
+function showMemberForm(){
+  document.getElementById('memberForm').style.display = 'block';
+  document.getElementById('guestForm').style.display = 'none';
+}
+
+function enterChatGuest(){
+  myName = document.getElementById('inputNameGuest').value.trim();
+  myRank = 'زائر';
+  myGender = document.querySelector('input[name="gender"]:checked').value;
+
+  if(!myName){ alert('اكتب اسمك أول'); return; }
 
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('chat').style.display = 'flex';
   socket.emit('join', {name: myName, rank: myRank, gender: myGender});
 }
 
+function enterChatMember(){
+  myName = document.getElementById('inputNameMember').value.trim();
+  let pass = document.getElementById('inputPassMember').value;
+
+  if(!myName){ alert('اكتب اسمك أول'); return; }
+  if(!pass){ alert('اكتب كلمة المرور'); return; }
+
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('chat').style.display = 'flex';
+  socket.emit('join', {name: myName, password: pass, from: 'member'});
+}
+
 socket.on('myData', (data) => {
   myRank = data.rank;
   myGender = data.gender;
-
-  if(myRank!== 'زائر') {
-    document.getElementById('inputGender2').style.display = 'none';
-  }
-
   updateMediaButtons();
 });
 
@@ -148,11 +172,6 @@ function getBorderColor(rank, gender) {
     if(rank === 'زائر') return '#ff66cc';
     if(rank === 'عضو') return '#ff4499';
     return '#ffdd00';
-  }
-  if(gender === 'جنس3') {
-    if(rank === 'زائر') return '#ffffff';
-    if(rank === 'عضو') return '#cccccc';
-    return '#eeeeee';
   }
   if(rank === 'زائر') return '#00aaff';
   if(rank === 'عضو') return '#0088ff';
