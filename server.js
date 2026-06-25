@@ -13,7 +13,6 @@ const AVATARS = {
   'زائر-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male&backgroundColor=00aaff',
   'زائر-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female&backgroundColor=ff66cc',
   'زائر-جنس3': 'https://api.dicebear.com/7.x/personas/svg?seed=neutral&backgroundColor=ffffff',
-
   'عضو-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male2&backgroundColor=0088ff',
   'عضو-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female2&backgroundColor=ff4499',
   'عضو-جنس3': 'https://api.dicebear.com/7.x/personas/svg?seed=neutral2&backgroundColor=eeeeee'
@@ -40,7 +39,7 @@ io.on('connection', (socket) => {
   socket.on('join', (data) => {
     let name = data.name || 'زائر';
     let rank = usersDB[name]?.rank || data.rank || 'زائر';
-    let gender = usersDB[name]?.gender || data.gender || 'ذكر'; // ذكر / انثى / جنس3
+    let gender = usersDB[name]?.gender || data.gender || 'ذكر';
 
     if(!usersDB[name]) {
       usersDB[name] = {rank, gender, avatar: null, balance: 0};
@@ -49,11 +48,12 @@ io.on('connection', (socket) => {
 
     let avatarKey = `${rank}-${gender}`;
     let avatar = (rank === 'مميز')? usersDB[name].avatar : AVATARS[avatarKey];
-    if(!avatar) avatar = AVATARS['زائر-ذكر']; // احتياط
+    if(!avatar) avatar = AVATARS['زائر-ذكر'];
 
     onlineUsers[socket.id] = {name, rank, gender, avatar};
 
-    socket.broadcast.emit('chat message', {name: 'النظام', text: `${name} انضم [${rank}]`});
+    // رسالة انضمام للكل
+    io.emit('system', {text: `${name} انضم [${rank}]`});
     socket.emit('myData', onlineUsers[socket.id]);
   });
 
@@ -108,29 +108,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('changeAvatar', (newAvatar) => {
-    let user = onlineUsers[socket.id];
-    if(!user) return;
-
-    if(user.rank!== 'مميز') {
-      socket.emit('error', 'لازم تكون مميز عشان تغير الصورة');
-      return;
-    }
-    if(!newAvatar.startsWith('http')) {
-      socket.emit('error', 'رابط الصورة غير صالح');
-      return;
-    }
-
-    user.avatar = newAvatar;
-    usersDB[user.name].avatar = newAvatar;
-    saveDB();
-    socket.emit('avatarUpdated', newAvatar);
-  });
-
   socket.on('disconnect', () => {
     let user = onlineUsers[socket.id];
     if(user){
-      socket.broadcast.emit('chat message', {name: 'النظام', text: `${user.name} غادر`});
+      io.emit('system', {text: `${user.name} غادر`});
       delete onlineUsers[socket.id];
     }
   });
