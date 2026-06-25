@@ -1,65 +1,131 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+const fs = require('fs');
 const path = require('path');
-
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] }
-});
+const http = require('http').createServer(app);
+const io = require('socket.io')(http, { cors: { origin: "*" } });
 
-// هذا السطر يخلي السيرفر يقرأ index.html صح في Render
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(__dirname));
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+// صور الرتب الثابتة
+const AVATARS = {
+  زائر: 'https://i.imgur.com/8Km9tLL.png', // رقم 1 وردي
+  عضو: 'https://i.imgur.com/lr8uK9B.png' // رقم 2 أزرق
+};
 
-function getDateNow(){
-  const d = new Date();
-  const day = d.getDate();
-  const month = d.getMonth() + 1;
-  let hours = d.getHours();
-  const minutes = d.getMinutes().toString().padStart(2,'0');
-  const ampm = hours >= 12 ? 'م' : 'ص';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  return `${day}/${month} ${hours}:${minutes} ${ampm}`;
+const DB_FILE = path.join(__dirname, 'users.json');
+let usersDB = {}; // {اسم: {rank, avatar, balance}}
+let onlineUsers = {}; // {socketId: {name, rank, avatar}}
+
+// تحميل الداتا بيز
+if(fs.existsSync(DB_FILE)){
+  usersDB = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 }
 
-// نخزن آخر رسالة لكل مستخدم
-const lastMessages = {};
+function saveDB(){
+  fs.writeFileSync(DB_FILE, JSON.stringify(usersDB, null, 2));
+}
+
+// هل الرتبة تقدر ترسل ميديا؟
+function canSendMedia(rank) {
+  return ['مميز','مشرف','ادارة','ادمن','مالك'].includes(rank);
+}
 
 io.on('connection', (socket) => {
-  console.log('مستخدم اتصل: ' + socket.id);
-  
+
   socket.on('join', (data) => {
-    socket.username = data.name;
-    console.log(data.name + ' دخل');
-    io.emit('chat message', {name: 'النظام', text: `👋 ${data.name} انضم للغرفة`});
+    let name = data.name || 'زائر';
+    let rank = usersDB[name]?.rank || data.rank || 'زائر';
+
+    if(!usersDB[name]) {
+      usersDB[name] = {rank, avatar: AVATARS, balance: 0};
+      saveDB();
+    }
+
+    let avatar = (rank === 'مميز')? usersDB[name].avatar : AVATARS;
+    onlineUsers[socket.id] = {name, rank, avatar};
+
+    socket.broadcast.emit('chat message', {name: 'النظام', text: `${name} انضم [${rank}]`});
+    socket.emit('myData', onlineUsers[socket.id]);
   });
 
+  // رسائل نصية عادية
   socket.on('chat message', (data) => {
-    console.log(data.name + ': ' + data.text);
-    const time = getDateNow();
-    
-    // خزن آخر رسالة للعضو
-    lastMessages[data.name] = {text: data.text, time: time};
-    
-    io.emit('chat message', {name: data.name, text: data.text, time: time});
+    let user = onlineUsers[socket.id];
+    if(!user) return;
+
+    let avatarToShow = (user.rank === 'مميز')? user.avatar : AVATARS[user.rank];
+
+    io.emit('chat message', {
+      name: user.name,
+      rank: user.rank,
+      avatar: avatarToShow,
+      text: data.text,
+      time: data.time
+    });
+  });
+
+  // ========== منع الصور واليوتيوب للزائر والعضو ==========
+  socket.on('sendMedia', (data) => {
+    let user = onlineUsers[socket.id];
+    if(!user) return;
+
+    if(!canSendMedia(user.rank)) {
+      socket.emit('error', 'ممنوع: رفع الصور واليوتيوب للمميز فقط 💎');
+      return;
+    }
+
+    if(data.type === 'image' && data.url.startsWith('http')) {
+      io.emit('newMedia', {
+        type: 'image',
+        url: data.url,
+        name: user.name,
+        rank: user.rank,
+        avatar: user.avatar,
+        time: data.time
+      });
+    }
+
+    if(data.type === 'youtube' && (data.url.includes('youtube.com') || data.url.includes('youtu.be'))) {
+      io.emit('newMedia', {
+        type: 'youtube',
+        url: data.url,
+        name: user.name,
+        rank: user.rank,
+        avatar: user.avatar,
+        time: data.time
+      });
+    }
+  });
+
+  // تغيير الصورة - بس للمميز
+  socket.on('changeAvatar', (newAvatar) => {
+    let user = onlineUsers[socket.id];
+    if(!user) return;
+
+    if(user.rank!== 'مميز') {
+      socket.emit('error', 'لازم تكون مميز عشان تغير الصورة');
+      return;
+    }
+    if(!newAvatar.startsWith('http')) {
+      socket.emit('error', 'رابط الصورة غير صالح');
+      return;
+    }
+
+    user.avatar = newAvatar;
+    usersDB[user.name].avatar = newAvatar;
+    saveDB();
+    socket.emit('avatarUpdated', newAvatar);
   });
 
   socket.on('disconnect', () => {
-    if(socket.username){
-      // انتظر 200ms عشان لو فيه رسالة أخيرة وصلت قبل الفصل
-      setTimeout(() => {
-        io.emit('chat message', {name: 'النظام', text: `👋 ${socket.username} غادر الغرفة`});
-        delete lastMessages[socket.username];
-      }, 200);
+    let user = onlineUsers[socket.id];
+    if(user){
+      socket.broadcast.emit('chat message', {name: 'النظام', text: `${user.name} غادر`});
+      delete onlineUsers[socket.id];
     }
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`السيرفر شغال على المنفذ ${PORT}`));
+http.listen(3000, () => console.log('السيرفر شغال على http://localhost:3000'));
