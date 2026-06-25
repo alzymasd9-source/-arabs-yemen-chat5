@@ -8,7 +8,6 @@ const io = require('socket.io')(http, { cors: { origin: "*" } });
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// صور ثابتة حسب الرتبة + الجنس
 const AVATARS = {
   'زائر-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male&backgroundColor=00aaff',
   'زائر-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female&backgroundColor=ff66cc',
@@ -38,12 +37,16 @@ io.on('connection', (socket) => {
 
   socket.on('join', (data) => {
     let name = data.name || 'زائر';
-    let rank = usersDB[name]?.rank || data.rank || 'زائر';
+    let rank = usersDB[name]?.rank || 'زائر';
     let gender = usersDB[name]?.gender || data.gender || 'ذكر';
 
+    // زائر جديد = نحفظ الجنس اللي اختاره
     if(!usersDB[name]) {
       usersDB[name] = {rank, gender, avatar: null, balance: 0};
       saveDB();
+    } else {
+      // عضو/مميز قديم = تجاهل الجنس المرسل وخلي اللي بالملف
+      if(rank!== 'زائر') gender = usersDB[name].gender;
     }
 
     let avatarKey = `${rank}-${gender}`;
@@ -52,7 +55,6 @@ io.on('connection', (socket) => {
 
     onlineUsers[socket.id] = {name, rank, gender, avatar};
 
-    // رسالة انضمام للكل
     io.emit('system', {text: `${name} انضم [${rank}]`});
     socket.emit('myData', onlineUsers[socket.id]);
   });
@@ -61,8 +63,13 @@ io.on('connection', (socket) => {
     let user = onlineUsers[socket.id];
     if(!user) return;
 
-    let avatarKey = `${user.rank}-${user.gender}`;
-    let avatarToShow = (user.rank === 'مميز')? user.avatar : AVATARS[avatarKey];
+    let avatarToShow;
+    if(user.rank === 'مميز') {
+      avatarToShow = user.avatar || 'https://api.dicebear.com/7.x/personas/svg?seed=vip&backgroundColor=ffd700';
+    } else {
+      let avatarKey = `${user.rank}-${user.gender}`;
+      avatarToShow = AVATARS[avatarKey];
+    }
 
     io.emit('chat message', {
       name: user.name,
