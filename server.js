@@ -9,7 +9,8 @@ const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-app.use(express.static(__dirname));
+// هذا السطر يخلي السيرفر يقرأ index.html صح في Render
+app.use(express.static(path.join(__dirname)));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -51,14 +52,14 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     if(socket.username){
-      // انتظر 100ms عشان لو فيه رسالة أخيرة وصلت قبل الفصل
+      // انتظر 200ms عشان لو فيه رسالة أخيرة وصلت قبل الفصل
       setTimeout(() => {
         io.emit('chat message', {name: 'النظام', text: `👋 ${socket.username} غادر الغرفة`});
         delete lastMessages[socket.username];
-      }, 100);
+      }, 200);
     }
   });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`10000 السيرفر شغال على المنفذ ${PORT}`));
+server.listen(PORT, () => console.log(`السيرفر شغال على المنفذ ${PORT}`));
