@@ -1,56 +1,71 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http, { cors: { origin: "*" } });
+const io = require('socket.io')(http);
+const fs = require('fs');
 
-app.use(express.static(__dirname));
-app.use(express.json());
+app.use(express.static('.'));
 
 const AVATARS = {
-  'زائر-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male&backgroundColor=00aaff',
-  'زائر-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female&backgroundColor=ff66cc',
-  'زائر-جنس3': 'https://api.dicebear.com/7.x/personas/svg?seed=neutral&backgroundColor=ffffff',
-  'عضو-ذكر': 'https://api.dicebear.com/7.x/personas/svg?seed=male2&backgroundColor=0088ff',
-  'عضو-انثى': 'https://api.dicebear.com/7.x/personas/svg?seed=female2&backgroundColor=ff4499',
-  'عضو-جنس3': 'https://api.dicebear.com/7.x/personas/svg?seed=neutral2&backgroundColor=eeeeee'
+  'زائر-ذكر': 'https://i.pravatar.cc/45?u=guestm',
+  'زائر-انثى': 'https://i.pravatar.cc/45?u=guestf',
+  'عضو-ذكر': 'https://i.pravatar.cc/45?u=memberm',
+  'عضو-انثى': 'https://i.pravatar.cc/45?u=memberf',
+  'مميز-ذكر': 'https://i.pravatar.cc/45?u=vvipm',
+  'مميز-انثى': 'https://i.pravatar.cc/45?u=vvipf'
 };
 
-const DB_FILE = path.join(__dirname, 'users.json');
 let usersDB = {};
 let onlineUsers = {};
 
-if(fs.existsSync(DB_FILE)){
-  usersDB = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+function loadDB() {
+  try {
+    usersDB = JSON.parse(fs.readFileSync('users.json', 'utf8'));
+  } catch(e) {
+    usersDB = {};
+    fs.writeFileSync('users.json', JSON.stringify(usersDB, null, 2));
+  }
 }
 
-function saveDB(){
-  fs.writeFileSync(DB_FILE, JSON.stringify(usersDB, null, 2));
+function saveDB() {
+  fs.writeFileSync('users.json', JSON.stringify(usersDB, null, 2));
 }
 
-function canSendMedia(rank) {
-  return ['مميز','مشرف','ادارة','ادمن','مالك'].includes(rank);
-}
+loadDB();
 
 io.on('connection', (socket) => {
+  console.log('مستخدم اتصل');
 
   socket.on('join', (data) => {
     let name = data.name || 'زائر';
+    let pass = data.password || '';
     let rank = usersDB[name]?.rank || 'زائر';
     let gender = usersDB[name]?.gender || data.gender || 'ذكر';
 
-    // زائر جديد = نحفظ الجنس اللي اختاره
-    if(!usersDB[name]) {
-      usersDB[name] = {rank, gender, avatar: null, balance: 0};
+    // دخول الأعضاء
+    if(data.from === 'member') {
+      if(!usersDB[name]) {
+        socket.emit('error', 'الاسم غير مسجل');
+        return;
+      }
+      if(usersDB[name].password !== pass) {
+        socket.emit('error', 'كلمة المرور خطأ');
+        return;
+      }
+      rank = usersDB[name].rank;
+      gender = usersDB[name].gender;
+    }
+
+    // زائر جديد
+    if(!usersDB[name] && rank === 'زائر') {
+      usersDB[name] = {rank, gender, password: '', avatar: null, balance: 0};
       saveDB();
-    } else {
-      // عضو/مميز قديم = تجاهل الجنس المرسل وخلي اللي بالملف
-      if(rank!== 'زائر') gender = usersDB[name].gender;
+    } else if(rank !== 'زائر') {
+      gender = usersDB[name].gender;
     }
 
     let avatarKey = `${rank}-${gender}`;
-    let avatar = (rank === 'مميز')? usersDB[name].avatar : AVATARS[avatarKey];
+    let avatar = (rank === 'مميز') ? usersDB[name].avatar : AVATARS[avatarKey];
     if(!avatar) avatar = AVATARS['زائر-ذكر'];
 
     onlineUsers[socket.id] = {name, rank, gender, avatar};
@@ -59,69 +74,44 @@ io.on('connection', (socket) => {
     socket.emit('myData', onlineUsers[socket.id]);
   });
 
-  socket.on('chat message', (data) => {
+  socket.on('chat message', (msg) => {
     let user = onlineUsers[socket.id];
-    if(!user) return;
-
-    let avatarToShow;
-    if(user.rank === 'مميز') {
-      avatarToShow = user.avatar || 'https://api.dicebear.com/7.x/personas/svg?seed=vip&backgroundColor=ffd700';
-    } else {
-      let avatarKey = `${user.rank}-${user.gender}`;
-      avatarToShow = AVATARS[avatarKey];
+    if(user) {
+      io.emit('chat message', {
+        name: user.name,
+        rank: user.rank,
+        gender: user.gender,
+        avatar: user.avatar,
+        text: msg.text,
+        time: msg.time
+      });
     }
-
-    io.emit('chat message', {
-      name: user.name,
-      rank: user.rank,
-      gender: user.gender,
-      avatar: avatarToShow,
-      text: data.text,
-      time: data.time
-    });
   });
 
   socket.on('sendMedia', (data) => {
     let user = onlineUsers[socket.id];
-    if(!user) return;
-
-    if(!canSendMedia(user.rank)) {
-      socket.emit('error', 'ممنوع: رفع الصور واليوتيوب للمميز فقط 💎');
-      return;
-    }
-
-    if(data.type === 'image' && data.url.startsWith('http')) {
+    if(user && ['مميز','مشرف','ادارة','ادمن','مالك'].includes(user.rank)) {
       io.emit('newMedia', {
-        type: 'image',
-        url: data.url,
         name: user.name,
         rank: user.rank,
         gender: user.gender,
         avatar: user.avatar,
-        time: data.time
-      });
-    }
-
-    if(data.type === 'youtube' && (data.url.includes('youtube.com') || data.url.includes('youtu.be'))) {
-      io.emit('newMedia', {
-        type: 'youtube',
+        type: data.type,
         url: data.url,
-        name: user.name,
-        rank: user.rank,
-        gender: user.gender,
-        avatar: user.avatar,
         time: data.time
       });
+    } else {
+      socket.emit('error', 'هذي الميزة للمميز فقط');
     }
   });
 
   socket.on('disconnect', () => {
     let user = onlineUsers[socket.id];
-    if(user){
+    if(user) {
       io.emit('system', {text: `${user.name} غادر`});
       delete onlineUsers[socket.id];
     }
   });
 });
 
-http.listen(3000, () => console.log('السيرفر شغال على http://localhost:3000'));
+http.listen(3000, () => console.log('السيرفر شغال على 3000'));
