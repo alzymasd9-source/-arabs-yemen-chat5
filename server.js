@@ -9,14 +9,12 @@ const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// ملفات الموقع
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// دالة التاريخ والوقت: يوم/شهر ساعة:دقيقة ص/م
 function getDateNow(){
   const d = new Date();
   const day = d.getDate();
@@ -29,26 +27,35 @@ function getDateNow(){
   return `${day}/${month} ${hours}:${minutes} ${ampm}`;
 }
 
+// نخزن آخر رسالة لكل مستخدم
+const lastMessages = {};
+
 io.on('connection', (socket) => {
   console.log('مستخدم اتصل: ' + socket.id);
   
   socket.on('join', (data) => {
     socket.username = data.name;
     console.log(data.name + ' دخل');
-    // رسالة النظام بدون وقت وتاريخ
     io.emit('chat message', {name: 'النظام', text: `👋 ${data.name} انضم للغرفة`});
   });
 
   socket.on('chat message', (data) => {
     console.log(data.name + ': ' + data.text);
-    // الرسالة العادية مع الوقت والتاريخ
-    io.emit('chat message', {name: data.name, text: data.text, time: getDateNow()});
+    const time = getDateNow();
+    
+    // خزن آخر رسالة للعضو
+    lastMessages[data.name] = {text: data.text, time: time};
+    
+    io.emit('chat message', {name: data.name, text: data.text, time: time});
   });
 
   socket.on('disconnect', () => {
     if(socket.username){
-      // رسالة النظام بدون وقت وتاريخ
-      io.emit('chat message', {name: 'النظام', text: `👋 ${socket.username} غادر الغرفة`});
+      // انتظر 100ms عشان لو فيه رسالة أخيرة وصلت قبل الفصل
+      setTimeout(() => {
+        io.emit('chat message', {name: 'النظام', text: `👋 ${socket.username} غادر الغرفة`});
+        delete lastMessages[socket.username];
+      }, 100);
     }
   });
 });
