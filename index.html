@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شات بلس الملكي</title>
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
 body{background:#121212;color:#e0e0e0;margin:0;font-family:'Segoe UI',Arial;overflow:hidden}
 #gate-container{display:flex;align-items:center;justify-content:center;height:100vh}
@@ -17,6 +17,7 @@ input,select{width:90%;padding:12px;margin:8px 0;background:#252525;color:white;
 #chat-container{display:none;flex-direction:column;height:100vh}
 #messages{flex:1;overflow-y:auto;padding:15px;background:#1a1a1a}
 .msg{background:#2a2a2a;padding:10px;margin-bottom:8px;border-radius:8px;text-align:right}
+.msg.system{color:#f1c40f;background:#2a2310;text-align:center}
 #input-area{display:flex;padding:10px;background:#181818;border-top:1px solid #333}
 #input-area input{flex:1;margin:0 5px}
 #input-area button{padding:12px 20px;background:#3498db;color:white;border:none;border-radius:6px;cursor:pointer}
@@ -100,8 +101,8 @@ input.value='';
 
 socket.on('chat message', (data)=>{
 const div = document.createElement('div');
-div.className = 'msg';
-div.innerHTML = `<b>${data.name}:</b> ${data.text}`;
+div.className = data.name==='النظام' ? 'msg system' : 'msg';
+div.innerHTML = data.name==='النظام' ? data.text : `<b>${data.name}:</b> ${data.text}`;
 document.getElementById('messages').appendChild(div);
 document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 });
