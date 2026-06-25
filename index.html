@@ -2,75 +2,46 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شات بلس الملكي</title>
 <style>
-body{background:#121212;color:white;font-family:Arial;margin:0;padding:0}
-#gate-container{display:flex;justify-content:center;align-items:center;height:100vh}
-.gate-card{background:#181818;padding:30px;border-radius:10px;width:350px;text-align:center}
-.gate-tabs{display:flex;gap:5px;margin-bottom:20px}
-.gate-tab-btn{flex:1;padding:10px;background:#333;color:#aaa;border:none;border-radius:5px;cursor:pointer}
-.gate-tab-btn.active{background:#3498db;color:white}
-input{width:90%;padding:10px;margin:8px 0;background:#222;color:white;border:1px solid #444;border-radius:5px}
-button.main-btn{width:90%;padding:12px;background:#0f9d58;color:white;border:none;border-radius:5px;margin-top:10px;cursor:pointer}
+body{background:#121212;color:white;text-align:center;font-family:Arial}
+button{padding:10px 20px;margin:5px;border:none;border-radius:5px;cursor:pointer}
+.active{background:#3498db;color:white}
+.inactive{background:#333;color:#aaa}
+.panel{display:none;margin-top:20px}
+.panel.show{display:block}
 </style>
 </head>
 <body>
-
-<div id="gate-container">
-<div class="gate-card">
 <h2>🌙 شات بلس الملكي</h2>
-<div class="gate-tabs">
-<button id="tab-v-btn" class="gate-tab-btn active" onclick="toggleGateTab('visitor')">زائر سريع</button>
-<button id="tab-m-btn" class="gate-tab-btn" onclick="toggleGateTab('member')">الأعضاء</button>
-<button id="tab-r-btn" class="gate-tab-btn" onclick="toggleGateTab('register')">تسجيل</button>
+
+<button id="v" class="active" onclick="show('v')">زائر سريع</button>
+<button id="m" class="inactive" onclick="show('m')">الأعضاء</button>
+<button id="r" class="inactive" onclick="show('r')">تسجيل</button>
+
+<div id="v-panel" class="panel show">
+<p>لوحة الزائر شغالة</p>
 </div>
 
-<div id="gate-visitor-panel">
-<input type="text" id="v-name" placeholder="اكتب اسمك">
-<select id="v-gender" style="width:94%;padding:10px;margin:8px 0;background:#222;color:white;border:1px solid #444;border-radius:5px">
-<option value="" disabled selected>اختر الجنس</option>
-<option value="ذكر">ذكر</option>
-<option value="أنثى">أنثى</option>
-</select>
-<button class="main-btn" onclick="alert('زائر: '+document.getElementById('v-name').value)">دخول فوري</button>
+<div id="m-panel" class="panel">
+<p>لوحة الأعضاء - اكتب اسمك وكلمة السر</p>
+<input placeholder="الاسم المستخدم"><br>
+<input type="password" placeholder="الباسورد">
 </div>
 
-<div id="gate-member-panel" style="display:none;">
-<input type="text" placeholder="الاسم المستخدم">
+<div id="r-panel" class="panel">
+<p>لوحة التسجيل - انشئ حساب جديد</p>
+<input placeholder="الاسم"><br>
 <input type="password" placeholder="كلمة السر">
-<button class="main-btn">دخول</button>
-</div>
-
-<div id="gate-register-panel" style="display:none;">
-<input type="text" placeholder="الاسم">
-<input type="password" placeholder="كلمة السر">
-<input type="email" placeholder="الايميل">
-<button class="main-btn">تسجيل حساب</button>
-</div>
-</div>
 </div>
 
 <script>
-function toggleGateTab(type){
-document.querySelectorAll('.gate-tab-btn').forEach(b=>b.classList.remove('active'));
-document.getElementById('gate-visitor-panel').style.display='none';
-document.getElementById('gate-member-panel').style.display='none';
-document.getElementById('gate-register-panel').style.display='none';
-
-if(type=='visitor'){
-document.getElementById('tab-v-btn').classList.add('active');
-document.getElementById('gate-visitor-panel').style.display='block';
-}
-else if(type=='member'){
-document.getElementById('tab-m-btn').classList.add('active');
-document.getElementById('gate-member-panel').style.display='block';
-}
-else{
-document.getElementById('tab-r-btn').classList.add('active');
-document.getElementById('gate-register-panel').style.display='block';
+function show(id){
+document.querySelectorAll('button').forEach(b=>{b.className='inactive'});
+document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+document.getElementById(id).className='active';
+document.getElementById(id+'-panel').classList.add('show');
 }
 </script>
-
 </body>
 </html>
