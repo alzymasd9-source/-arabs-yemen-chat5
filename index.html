@@ -4,23 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شات بلس الملكي</title>
-<script src="/socket.io/socket.io.js"></script>
 <style>
-body {font-family:'Segoe UI',Arial; background:#121212; color:#e0e0e0; margin:0; padding:0; overflow:hidden;}
-#gate-container {position:fixed; top:0; left:0; width:100vw; height:100vh; background:#121212; display:flex; align-items:center; justify-content:center;}
-.gate-card {width:380px; background:#181818; padding:30px; border-radius:14px; text-align:center; border:1px solid #2d2d2d;}
-.gate-tabs {display:flex; gap:10px; margin-bottom:20px;}
-.gate-tab-btn {flex:1; padding:12px; background:#222; color:#aaa; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:15px;}
-.gate-tab-btn.active {background:#3498db; color:white;}
-.gate-card input,.gate-card select {width:92%; padding:12px; margin-bottom:12px; background:#252525; color:white; border:1px solid #333; border-radius:6px; text-align:center; font-size:15px;}
-.gate-card button.main-btn {width:92%; padding:12px; background:#0f9d58; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px; font-size:16px;}
+body{background:#121212;color:white;font-family:Arial;margin:0;padding:0}
+#gate-container{display:flex;justify-content:center;align-items:center;height:100vh}
+.gate-card{background:#181818;padding:30px;border-radius:10px;width:350px;text-align:center}
+.gate-tabs{display:flex;gap:5px;margin-bottom:20px}
+.gate-tab-btn{flex:1;padding:10px;background:#333;color:#aaa;border:none;border-radius:5px;cursor:pointer}
+.gate-tab-btn.active{background:#3498db;color:white}
+input{width:90%;padding:10px;margin:8px 0;background:#222;color:white;border:1px solid #444;border-radius:5px}
+button.main-btn{width:90%;padding:12px;background:#0f9d58;color:white;border:none;border-radius:5px;margin-top:10px;cursor:pointer}
 </style>
 </head>
 <body>
 
 <div id="gate-container">
 <div class="gate-card">
-<h2 style="margin-top:0;">🌙 شات بلس الملكي</h2>
+<h2>🌙 شات بلس الملكي</h2>
 <div class="gate-tabs">
 <button id="tab-v-btn" class="gate-tab-btn active" onclick="toggleGateTab('visitor')">زائر سريع</button>
 <button id="tab-m-btn" class="gate-tab-btn" onclick="toggleGateTab('member')">الأعضاء</button>
@@ -29,45 +28,47 @@ body {font-family:'Segoe UI',Arial; background:#121212; color:#e0e0e0; margin:0;
 
 <div id="gate-visitor-panel">
 <input type="text" id="v-name" placeholder="اكتب اسمك">
-<select id="v-gender">
+<select id="v-gender" style="width:94%;padding:10px;margin:8px 0;background:#222;color:white;border:1px solid #444;border-radius:5px">
 <option value="" disabled selected>اختر الجنس</option>
-<option value="ذكر">👦 ذكر</option>
-<option value="أنثى">👧 أنثى</option>
+<option value="ذكر">ذكر</option>
+<option value="أنثى">أنثى</option>
 </select>
-<button class="main-btn" onclick="alert('الزر شغال! اسمك: '+document.getElementById('v-name').value)">دخول فوري للشات</button>
+<button class="main-btn" onclick="alert('زائر: '+document.getElementById('v-name').value)">دخول فوري</button>
 </div>
 
 <div id="gate-member-panel" style="display:none;">
 <input type="text" placeholder="الاسم المستخدم">
-<input type="password" placeholder="الباسورد">
+<input type="password" placeholder="كلمة السر">
 <button class="main-btn">دخول</button>
 </div>
 
 <div id="gate-register-panel" style="display:none;">
 <input type="text" placeholder="الاسم">
-<input type="password" placeholder="الباسورد">
-<input type="text" placeholder="الايميل">
-<button class="main-btn">تسجيل</button>
+<input type="password" placeholder="كلمة السر">
+<input type="email" placeholder="الايميل">
+<button class="main-btn">تسجيل حساب</button>
 </div>
 </div>
 </div>
 
 <script>
 function toggleGateTab(type){
-document.querySelectorAll('.gate-tab-btn').forEach(b=>b.classList.remove('active'))
-document.getElementById('gate-visitor-panel').style.display='none'
-document.getElementById('gate-member-panel').style.display='none'
-document.getElementById('gate-register-panel').style.display='none'
+document.querySelectorAll('.gate-tab-btn').forEach(b=>b.classList.remove('active'));
+document.getElementById('gate-visitor-panel').style.display='none';
+document.getElementById('gate-member-panel').style.display='none';
+document.getElementById('gate-register-panel').style.display='none';
 
 if(type=='visitor'){
-document.getElementById('tab-v-btn').classList.add('active')
-document.getElementById('gate-visitor-panel').style.display='block'
-}else if(type=='member'){
-document.getElementById('tab-m-btn').classList.add('active')
-document.getElementById('gate-member-panel').style.display='block'
-}else{
-document.getElementById('tab-r-btn').classList.add('active')
-document.getElementById('gate-register-panel').style.display='block'
+document.getElementById('tab-v-btn').classList.add('active');
+document.getElementById('gate-visitor-panel').style.display='block';
+}
+else if(type=='member'){
+document.getElementById('tab-m-btn').classList.add('active');
+document.getElementById('gate-member-panel').style.display='block';
+}
+else{
+document.getElementById('tab-r-btn').classList.add('active');
+document.getElementById('gate-register-panel').style.display='block';
 }
 </script>
 
