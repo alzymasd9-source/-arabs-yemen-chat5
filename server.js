@@ -3,7 +3,6 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
-const path = require('path');
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -12,7 +11,7 @@ let usersDB = {};
 let onlineUsers = {};
 let mutedUsers = {};
 let userLogs = {};
-let rooms = {اللبي: []};
+let rooms = {"اللبي": []};
 
 const USERS_FILE = 'users.json';
 const LOGS_FILE = 'logs.json';
@@ -24,12 +23,12 @@ function saveUsers(){ fs.writeFileSync(USERS_FILE, JSON.stringify(usersDB, null,
 function saveLogs(){ fs.writeFileSync(LOGS_FILE, JSON.stringify(userLogs, null, 2)); }
 
 function hasPermission(rank, need){
-  const order = {زائر:1,عضو:2,مميز:3,مشرف غرفة:4,مسؤول غرفة:5,مالك غرفة:6,مشرف:7,ادارة:8,ادمن:9,مالك:10};
+  const order = {"زائر":1,"عضو":2,"مميز":3,"مشرف غرفة":4,"مسؤول غرفة":5,"مالك غرفة":6,"مشرف":7,"ادارة":8,"ادمن":9,"مالك":10};
   return order[rank] >= order[need];
 }
 
 function canModerate(adminRank, targetRank){
-  const order = {زائر:1,عضو:2,مميز:3,مشرف غرفة:4,مسؤول غرفة:5,مالك غرفة:6,مشرف:7,ادارة:8,ادمن:9,مالك:10};
+  const order = {"زائر":1,"عضو":2,"مميز":3,"مشرف غرفة":4,"مسؤول غرفة":5,"مالك غرفة":6,"مشرف":7,"ادارة":8,"ادمن":9,"مالك":10};
   return order[adminRank] > order[targetRank];
 }
 
@@ -39,26 +38,16 @@ function addLog(target, action, by, byRank, minutes, reason){
   saveLogs();
 }
 
-function getRoomRank(name, room){
-  let u = usersDB[name];
-  if(u.rank === 'مالك') return 'مالك';
-  if(u.rank === 'ادمن') return 'ادمن';
-  if(u.rank === 'ادارة') return 'ادارة';
-  if(u.rank === 'مشرف') return 'مشرف';
-  return 'عضو';
-}
-
 io.on('connection', (socket) => {
   socket.on('login', (data) => {
     let user = usersDB[data.name];
 
     if(!user){
-      // أول شخص يسجل يصير مالك
       let isFirstUser = Object.keys(usersDB).length === 0;
       user = {
         name: data.name,
         password: data.password,
-        rank: isFirstUser? 'مالك' : 'عضو',
+        rank: isFirstUser? "مالك" : "عضو",
         credits: 0,
         gender: data.gender,
         avatar: 'https://i.pravatar.cc/50',
@@ -81,8 +70,8 @@ io.on('connection', (socket) => {
       }
     }
 
-    onlineUsers[socket.id] = {name: data.name, rank: user.rank, room: 'اللبي'};
-    rooms['اللبي'].push(socket.id);
+    onlineUsers[socket.id] = {name: data.name, rank: user.rank, room: "اللبي"};
+    rooms["اللبي"].push(socket.id);
     user.lastSeen = Date.now();
 
     socket.emit('loginSuccess', {name: data.name, rank: user.rank, credits: user.credits, avatar: user.avatar});
@@ -91,42 +80,23 @@ io.on('connection', (socket) => {
 
   socket.on('getUserBox', (name) => {
     let u = usersDB[name];
-    socket.emit('userBoxData', {
-      name: u.name,
-      avatar: u.avatar,
-      age: '--',
-      gender: u.gender
-    });
+    socket.emit('userBoxData', {name: u.name, avatar: u.avatar, age: '--', gender: u.gender});
   });
 
   socket.on('getFullProfile', (name) => {
     let u = usersDB[name];
     let online = Object.values(onlineUsers).find(x => x.name === name);
     socket.emit('fullProfileData', {
-      name: u.name,
-      avatar: u.avatar,
-      wall: u.wall,
-      rank: u.rank,
-      status: u.status,
-      likes: u.likedBy.length,
-      credits: u.credits,
-      gender: u.gender,
-      room: online?.room || 'غير متصل',
-      about: u.about,
-      friends: u.friends,
-      lastSeen: u.lastSeen,
-      lang: u.lang,
-      theme: u.theme,
-      ip: socket.handshake.address,
-      location: 'اليمن',
-      prevAccount: null,
-      otherAccounts: null
+      name: u.name, avatar: u.avatar, wall: u.wall, rank: u.rank, status: u.status,
+      likes: u.likedBy.length, credits: u.credits, gender: u.gender, room: online?.room || 'غير متصل',
+      about: u.about, friends: u.friends, lastSeen: u.lastSeen, lang: u.lang, theme: u.theme,
+      ip: socket.handshake.address, location: 'اليمن'
     });
   });
 
   socket.on('mute', (data) => {
     let admin = onlineUsers[socket.id];
-    if(!hasPermission(admin.rank, 'مشرف غرفة')) return;
+    if(!hasPermission(admin.rank, "مشرف غرفة")) return;
     let target = Object.values(onlineUsers).find(u => u.name === data.target);
     if(!target ||!canModerate(admin.rank, target.rank)) return;
     mutedUsers[data.target] = Date.now() + data.minutes * 60000;
@@ -136,7 +106,7 @@ io.on('connection', (socket) => {
 
   socket.on('kick', (data) => {
     let admin = onlineUsers[socket.id];
-    if(!hasPermission(admin.rank, 'مسؤول غرفة')) return;
+    if(!hasPermission(admin.rank, "مسؤول غرفة")) return;
     let targetSocket = Object.keys(onlineUsers).find(id => onlineUsers[id].name === data.target);
     if(!targetSocket ||!canModerate(admin.rank, onlineUsers[targetSocket].rank)) return;
     addLog(data.target, 'طرد', admin.name, admin.rank, data.minutes, data.reason);
@@ -146,13 +116,13 @@ io.on('connection', (socket) => {
 
   socket.on('getUserLog', (name) => {
     let admin = onlineUsers[socket.id];
-    if(!hasPermission(admin.rank, 'ادارة')) return;
+    if(!hasPermission(admin.rank, "ادارة")) return;
     socket.emit('userLogData', userLogs[name] || []);
   });
 
   socket.on('clearUserLog', (name) => {
     let admin = onlineUsers[socket.id];
-    if(admin.rank!== 'مالك') return;
+    if(admin.rank!== "مالك") return;
     addLog(name, 'مسح السجل', admin.name, admin.rank, null, 'مسح بواسطة المالك');
     delete userLogs[name];
     saveLogs();
@@ -161,7 +131,7 @@ io.on('connection', (socket) => {
 
   socket.on('exportUserLog', (name) => {
     let admin = onlineUsers[socket.id];
-    if(admin.rank!== 'مالك') return;
+    if(admin.rank!== "مالك") return;
     socket.emit('exportLogData', {name, logs: userLogs[name] || []});
     addLog(name, 'تصدير السجل', admin.name, admin.rank, null, 'تصدير PDF');
   });
@@ -182,4 +152,5 @@ io.on('connection', (socket) => {
   });
 });
 
-http.listen(3000, () => console.log('Server on 3000'));
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => console.log('Server on', PORT));
