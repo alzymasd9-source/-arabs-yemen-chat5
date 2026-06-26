@@ -1,255 +1,379 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شات اليمن</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>شات</title>
 <style>
-body{margin:0;font-family:tahoma;background:url('https://i.imgur.com/3ZQZQZQ.jpg') no-repeat center fixed;background-size:cover;color:#eee}
-
-#loginBox{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999
-}
-.login-form{
-  background:rgba(255,255,255,0.95);padding:25px;border-radius:15px;
-  width:340px;box-shadow:0 0 30px rgba(0,0,0,0.5);color:#333
-}
-.login-form h2{text-align:center;margin:0 0 5px;color:#006699;font-size:28px}
-.login-form p{text-align:center;color:#0099cc;margin:0 0 20px;font-size:14px}
-.login-form input{
-  width:100%;padding:12px;margin:8px 0;
-  background:#fff;border:1px solid #ccc;border-radius:8px;
-  color:#333;font-size:16px;box-sizing:border-box;text-align:center
-}
-.login-form button{
-  width:100%;padding:12px;margin-top:10px;
-  border:none;border-radius:8px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer
-}
-.btn-guest{background:#00aa00}
-.btn-member{background:#003344}
-
-#chat{display:none;flex-direction:column;height:100vh}
-#header{background:#00aa55;padding:15px;text-align:center;font-weight:bold;font-size:18px}
-#messages{flex:1;overflow-y:auto;padding:10px;background:#0f0f0f}
-#media-box{padding:8px 10px;background:#1a1a1a;border-top:1px solid #333;display:flex;gap:10px}
-#media-box button{padding:8px 12px;background:#2a2a2a;border:1px solid #444;border-radius:6px;color:#eee;cursor:pointer;font-size:18px}
-#media-box button:disabled{cursor:not-allowed;opacity:0.3}
-#input-box{display:flex;padding:10px;background:#1a1a1a;border-top:1px solid #333;gap:8px}
-#msg{flex:1;padding:10px;border:none;border-radius:8px;background:#2a2a2a;color:#eee;outline:none;font-size:15px}
-button.send{padding:10px 20px;background:#00aa55;border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:bold}
-
-.msg-row{display:flex;align-items:flex-start;margin:12px 0;gap:8px}
-.msg-row.me{flex-direction:row-reverse}
-.avatar{width:45px;height:45px;border-radius:50%;border:2px solid;flex-shrink:0;object-fit:cover;background:#1a1a1a;padding:4px}
-.msg-content{flex:1;max-width:75%}
-.msg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px;color:#888}
-.msg-name{font-weight:bold;font-size:14px}
-.msg-text{padding:10px 14px;background:#2a2a2a;border-radius:12px;border:1px solid #333;word-wrap:break-word}
-.msg-row.me .msg-text{background:#004422;border-color:#00ff88}
+body{background:#0a0a0a;color:#eee;font-family:tahoma;margin:0;padding:0}
+.popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e2e3e;border:2px solid #00aaff;border-radius:12px;padding:15px;z-index:1000;display:none}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:999;display:none}
+.rank-مالك{color:gold;font-weight:bold}
+.rank-ادمن{color:#ff00ff;font-weight:bold}
+.rank-ادارة{color:red;font-weight:bold}
+.rank-مشرف{color:#00ff00;font-weight:bold}
+.rank-عضو{color:#aaa}
+button{cursor:pointer}
+.tabBtn{flex:1;padding:12px;background:transparent;border:none;color:#aaa;font-size:14px}
+.tabBtn.active{color:#00aaff;border-bottom:2px solid #00aaff}
+.tabContent{display:none}
+.tabContent.active{display:block}
 </style>
 </head>
 <body>
 
-<div id="loginBox">
-  <div class="login-form">
-    <h2>شات اليمن</h2>
-    <p>غرفة دردشة شباب وبنات اليمن</p>
-    
-    <!-- الزرين -->
-    <div style="display:flex;gap:10px;margin-bottom:15px">
-      <button class="btn-guest" onclick="showGuestForm()">دخول الزوار</button>
-      <button class="btn-member" onclick="showMemberForm()">دخول الأعضاء</button>
-    </div>
+<div id="loginBox" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e2e3e;padding:20px;border-radius:10px;border:2px solid #00aaff">
+  <h3>تسجيل دخول</h3>
+  <input id="loginName" placeholder="الاسم" style="width:200px;padding:8px;margin:5px;background:#0a0a0a;border:1px solid #333;color:#eee"><br>
+  <input id="loginPass" type="password" placeholder="كلمة السر" style="width:200px;padding:8px;margin:5px;background:#0a0a0a;border:1px solid #333;color:#eee"><br>
+  <select id="loginGender" style="width:216px;padding:8px;margin:5px;background:#0a0a0a;border:1px solid #333;color:#eee">
+    <option value="ذكر">ذكر</option>
+    <option value="أنثى">أنثى</option>
+  </select><br>
+  <button onclick="login()" style="width:216px;padding:8px;background:#00aaff;border:none;color:#fff;border-radius:5px;margin-top:10px">دخول</button>
+</div>
 
-    <!-- فورم الزوار -->
-    <div id="guestForm" style="display:none">
-      <input type="text" id="inputNameGuest" placeholder="الإسم المستعار" maxlength="20" autocomplete="off">
-      
-      <div style="display:flex;justify-content:center;gap:40px;margin:15px 0">
-        <label style="cursor:pointer;font-size:18px;color:#00aaff;font-weight:bold">
-          <input type="radio" name="gender" value="ذكر" checked> ذكر
-        </label>
-        <label style="cursor:pointer;font-size:18px;color:#ff4499;font-weight:bold">
-          <input type="radio" name="gender" value="انثى"> أنثى
-        </label>
+<div id="chatBox" style="display:none">
+  <div id="usersList" style="position:fixed;right:0;top:0;width:200px;height:100%;background:#1e2e3e;border-left:2px solid #00aaff;padding:10px;overflow-y:auto"></div>
+  <div id="messages" style="margin-right:220px;height:calc(100vh - 60px);overflow-y:auto;padding:10px"></div>
+  <input id="msgInput" placeholder="اكتب رسالة..." style="position:fixed;bottom:10px;right:230px;width:calc(100% - 250px);padding:10px;background:#1e2e3e;border:1px solid #333;color:#eee">
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- البوكس المنبثق -->
+<div class="popup" id="userBoxPopup" style="width:320px">
+  <div style="text-align:center;padding:15px;background:linear-gradient(135deg,#0a2a1a,#0d3d2f)">
+    <img id="boxAvatar" src="" style="width:70px;height:70px;border-radius:50%;border:3px solid #00aaff">
+    <div id="boxName" style="font-size:18px;font-weight:bold;margin-top:8px"></div>
+    <div id="boxInfo" style="font-size:13px;color:#aaa;margin-top:5px"></div>
+  </div>
+  <div style="padding:10px">
+    <button onclick="viewFullProfile()" style="width:100%;padding:10px;background:#00aaff;color:#fff;border:none;border-radius:8px;margin:5px 0">👤 عرض الملف الشخصي</button>
+    <button id="btnPrivateMsg" onclick="alert('خاص')" style="width:100%;padding:10px;background:#2ecc71;color:#fff;border:none;border-radius:8px;margin:5px 0">💬 رسالة</button>
+    <button id="btnCmd" onclick="showUserCmd()" style="width:100%;padding:10px;background:#ff6600;color:#fff;border:none;border-radius:8px;margin:5px 0;display:none">⚡ الأمر</button>
+  </div>
+  <button onclick="closeAll()" style="position:absolute;top:10px;left:10px;background:transparent;border:none;color:#fff;font-size:24px">×</button>
+</div>
+
+<!-- الملف الشخصي -->
+<div class="popup" id="fullProfile" style="width:100%;max-width:420px;height:100%;top:0;left:50%;transform:translateX(-50%);border-radius:0;display:none;flex-direction:column">
+  <div style="background:#0a2a1a;padding:12px;border-bottom:2px solid #00aaff;display:flex;justify-content:space-between;align-items:center">
+    <button onclick="closeFullProfile()" style="background:transparent;border:none;color:#fff;font-size:24px">×</button>
+    <span style="font-weight:bold">الملف الشخصي</span>
+    <div>
+      <button id="profileCmdBtn" onclick="showUserCmd()" style="background:transparent;border:none;color:#ff6600;font-size:20px;margin:0 5px;display:none">⚡</button>
+      <button id="profileLogBtn" onclick="openUserLog()" style="background:transparent;border:none;color:#ffaa00;font-size:20px;margin:0 5px;display:none">📝</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;background:#0d1a2a">
+    <div style="position:relative;height:150px;background:#2a3f54" id="wallBg">
+      <img id="profileAvatarBig" src="" style="width:90px;height:90px;border-radius:50%;border:4px solid #00aaff;position:absolute;bottom:-45px;left:15px;background:#1e2e3e">
+      <div style="position:absolute;bottom:-40px;left:120px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="profileRankEmoji" style="font-size:20px"></span>
+          <span id="profileRankText" style="font-weight:bold;font-size:16px"></span>
+        </div>
+        <div id="profileStatus" style="font-size:13px;color:#aaa;margin-top:5px">خير جالس هنا</div>
       </div>
-      
-      <button class="btn-guest" onclick="enterChatGuest()">دخول</button>
     </div>
-
-    <!-- فورم الأعضاء -->
-    <div id="memberForm" style="display:none">
-      <input type="text" id="inputNameMember" placeholder="الإسم المستعار" maxlength="20" autocomplete="off">
-      <input type="password" id="inputPassMember" placeholder="كلمة المرور" autocomplete="off">
-      <button class="btn-member" onclick="enterChatMember()">دخول</button>
+    <div style="display:flex;justify-content:space-around;padding:15px;margin-top:10px;border-bottom:1px solid #2a3f54">
+      <button onclick="likeProfileUser()" style="background:transparent;border:none;color:#ff4444;font-size:16px"><span id="profileLikesCount">0</span> ❤️</button>
+      <button onclick="alert('خاص')" style="background:transparent;border:none;color:#00aaff;font-size:16px">رسائل 💬</button>
+      <button id="cmdBtnBelow" onclick="showUserCmd()" style="background:transparent;border:none;color:#ff6600;font-size:16px;display:none">⚡</button>
+    </div>
+    <div style="display:flex;border-bottom:2px solid #1e2e3e">
+      <button class="tabBtn active" onclick="openTab('infoTab')">معلوماتي</button>
+      <button class="tabBtn" onclick="openTab('friendsTab')">الأصدقاء</button>
+      <button class="tabBtn" onclick="openTab('detailsTab')">معلومات</button>
+    </div>
+    <div id="infoTab" class="tabContent active" style="padding:15px">
+      <div style="margin:10px 0">💲 الرصيد: <span id="profileCreditsBig">0</span></div>
+      <div style="margin:10px 0">🌍 البلد: <span id="profileCountry">اليمن 🇾🇪</span></div>
+      <div style="margin:10px 0">👤 الجنس: <span id="profileGender">ذكر</span></div>
+      <div style="margin:10px 0">🏠 الغرفة: <span id="profileRoom">اللبي</span></div>
+      <div style="margin:10px 0">📝 النبذة: <div id="profileAbout" style="color:#aaa;margin-top:5px">لا يوجد</div></div>
+    </div>
+    <div id="friendsTab" class="tabContent" style="padding:15px"><div id="profileFriendsList"></div></div>
+    <div id="detailsTab" class="tabContent" style="padding:15px">
+      <div style="margin:10px 0">🕒 آخر تواجد: <span id="lastSeen">الآن</span></div>
+      <div style="margin:10px 0">🌐 اللغة: <span id="profileLang">العربية</span></div>
+      <div style="margin:10px 0">🎨 الثيم: <span id="profileTheme">Dark</span></div>
+      <div id="ownerOnly" style="display:none">
+        <div style="margin:10px 0">🔒 IP: <span id="profileIP">0.0.0.0</span></div>
+        <div style="margin:10px 0">🗺️ الموقع: <span id="profileLocation">اليمن</span></div>
+      </div>
     </div>
   </div>
 </div>
 
-<div id="chat">
-  <div id="header">💬 شات اليمن</div>
-  <div id="messages"></div>
-
-  <div id="media-box">
-    <button id="btnImage" onclick="sendImage()" title="إرسال صورة">🖼️</button>
-    <button id="btnYoutube" onclick="sendYoutube()" title="إرسال يوتيوب">🎵</button>
+<!-- سجل المخالفات -->
+<div class="popup" id="userLogPopup" style="width:380px;height:500px">
+  <div style="background:#0a2a1a;padding:12px;border-bottom:2px solid #00aaff">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span>📝 سجل مخالفات <span id="logUserName"></span></span>
+      <div>
+        <button id="exportLogBtn" onclick="exportUserLog()" style="background:#00aaff;border:none;color:#fff;padding:5px 8px;border-radius:5px;font-size:12px;margin-left:5px;display:none">📄 PDF</button>
+        <button id="clearLogBtn" onclick="clearUserLog()" style="background:red;border:none;color:#fff;padding:5px 8px;border-radius:5px;font-size:12px;margin-left:5px;display:none">🗑️ مسح</button>
+        <button onclick="closeAll()" style="background:transparent;border:none;color:#fff;font-size:24px">×</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:5px">
+      <input type="text" id="searchLog" placeholder="ابحث..." onkeyup="searchLog()" style="flex:1;padding:6px;background:#1e2e3e;border:1px solid #2a3f54;color:#eee;border-radius:5px;font-size:12px">
+      <select id="filterLog" onchange="searchLog()" style="padding:6px;background:#1e2e3e;border:1px solid #2a3f54;color:#eee;border-radius:5px;font-size:12px">
+        <option value="الكل">الكل</option>
+        <option value="كتم">🔇 كتم</option>
+        <option value="طرد">👢 طرد</option>
+      </select>
+      <button id="sortBtn" onclick="toggleSort()" style="padding:6px 10px;background:#0d3d2f;border:1px solid #00aaff;color:#00aaff;border-radius:5px;font-size:12px">⬆️</button>
+    </div>
+    <div id="logCount" style="font-size:11px;color:#666;text-align:center;padding:5px 0">0 نتيجة</div>
   </div>
+  <div id="userLogList" style="height:390px;overflow-y:auto;padding:10px"></div>
+</div>
 
-  <div id="input-box">
-    <input id="msg" placeholder="اكتب رسالتك..." onkeypress="if(event.key=='Enter')send()">
-    <button class="send" onclick="send()">إرسال</button>
+<!-- نافذة الأوامر -->
+<div class="popup" id="userCmdPopup" style="width:300px">
+  <div style="background:#0a2a1a;padding:12px;border-bottom:2px solid #ff6600">
+    <span>⚡ أوامر <span id="cmdUserName"></span></span>
+    <button onclick="closeAll()" style="float:left;background:transparent;border:none;color:#fff;font-size:24px">×</button>
+  </div>
+  <div style="padding:15px">
+    <input type="text" id="cmdReason" placeholder="السبب..." style="width:100%;padding:8px;margin-bottom:10px;background:#1e2e3e;border:1px solid #2a3f54;color:#eee">
+    <div id="cmdButtons"></div>
   </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-var socket = io();
-var myName, myRank, myGender;
+const socket = io();
+let myName = '', myRank = '', currentClickedUser = '';
+let currentLogs = [], sortOrder = 'asc';
 
-function showGuestForm(){
-  document.getElementById('guestForm').style.display = 'block';
-  document.getElementById('memberForm').style.display = 'none';
+function login(){
+  let name = document.getElementById('loginName').value;
+  let pass = document.getElementById('loginPass').value;
+  let gender = document.getElementById('loginGender').value;
+  if(!name ||!pass) return alert('اكمل البيانات');
+  socket.emit('login', {name, password: pass, gender});
 }
 
-function showMemberForm(){
-  document.getElementById('memberForm').style.display = 'block';
-  document.getElementById('guestForm').style.display = 'none';
-}
-
-function enterChatGuest(){
-  myName = document.getElementById('inputNameGuest').value.trim();
-  myRank = 'زائر';
-  myGender = document.querySelector('input[name="gender"]:checked').value;
-
-  if(!myName){ alert('اكتب اسمك أول'); return; }
-
+socket.on('loginSuccess', (data) => {
+  myName = data.name; myRank = data.rank;
   document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('chat').style.display = 'flex';
-  socket.emit('join', {name: myName, rank: myRank, gender: myGender});
-}
-
-function enterChatMember(){
-  myName = document.getElementById('inputNameMember').value.trim();
-  let pass = document.getElementById('inputPassMember').value;
-
-  if(!myName){ alert('اكتب اسمك أول'); return; }
-  if(!pass){ alert('اكتب كلمة المرور'); return; }
-
-  document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('chat').style.display = 'flex';
-  socket.emit('join', {name: myName, password: pass, from: 'member'});
-}
-
-socket.on('myData', (data) => {
-  myRank = data.rank;
-  myGender = data.gender;
-  updateMediaButtons();
+  document.getElementById('chatBox').style.display = 'block';
 });
 
-socket.on('system', (data) => {
-  let div = document.createElement('div');
-  div.style.textAlign = 'center';
-  div.style.color = '#00ff88';
-  div.style.margin = '8px 0';
-  div.style.fontSize = '13px';
-  div.style.background = '#1a2a1a';
-  div.style.padding = '6px';
-  div.style.borderRadius = '8px';
-  div.innerHTML = `👋 ${data.text}`;
-  document.getElementById('messages').appendChild(div);
-  document.getElementById('messages').scrollTop = 99999;
+socket.on('userList', (users) => {
+  let html = '';
+  users.forEach(u => {
+    html += `<div onclick="openUserBox('${u.name}')" style="padding:8px;margin:3px 0;background:#2a3f54;border-radius:5px;cursor:pointer" class="rank-${u.rank}">${u.name}</div>`;
+  });
+  document.getElementById('usersList').innerHTML = html;
 });
 
-function updateMediaButtons() {
-  let canMedia = ['مميز','مشرف','ادارة','ادمن','مالك'].includes(myRank);
-  document.getElementById('btnImage').disabled =!canMedia;
-  document.getElementById('btnYoutube').disabled =!canMedia;
+function openUserBox(name){
+  currentClickedUser = name;
+  socket.emit('getUserBox', name);
 }
 
-function getBorderColor(rank, gender) {
-  if(gender === 'انثى') {
-    if(rank === 'زائر') return '#ff66cc';
-    if(rank === 'عضو') return '#ff4499';
-    return '#ffdd00';
+socket.on('userBoxData', (data) => {
+  document.getElementById('userBoxPopup').style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('boxAvatar').src = data.avatar;
+  document.getElementById('boxName').innerText = data.name;
+  document.getElementById('boxInfo').innerText = `${data.age} سنة ${data.gender} 🇾🇪`;
+  if(['مشرف غرفة','مسؤول غرفة','مالك غرفة','مشرف','ادارة','ادمن','مالك'].includes(myRank)){
+    document.getElementById('btnCmd').style.display = 'block';
   }
-  if(rank === 'زائر') return '#00aaff';
-  if(rank === 'عضو') return '#0088ff';
-  return '#ffd700';
-}
-
-function getRankNum(rank) {
-  if(rank === 'زائر') return '1';
-  if(rank === 'عضو') return '2';
-  return '👑';
-}
-
-socket.on('chat message', (data) => {
-  addMessage(data);
-  document.getElementById('messages').scrollTop = 99999;
 });
 
-socket.on('newMedia', (data) => {
-  addMessage(data, true);
-  document.getElementById('messages').scrollTop = 99999;
+function viewFullProfile(){
+  closeAll();
+  socket.emit('getFullProfile', currentClickedUser);
+}
+
+socket.on('fullProfileData', (data) => {
+  document.getElementById('fullProfile').style.display = 'flex';
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('profileAvatarBig').src = data.avatar;
+  let rankEmoji = {زائر:'🤖',عضو:'👤',مميز:'💎',مشرف:'🛡️',ادارة:'☆',ادمن:'⭐',مالك:'👑'}[data.rank];
+  document.getElementById('profileRankEmoji').innerText = rankEmoji;
+  document.getElementById('profileRankText').innerText = data.rank;
+  document.getElementById('profileRankText').className = `rank-${data.rank}`;
+  document.getElementById('profileStatus').innerText = data.status;
+  document.getElementById('profileLikesCount').innerText = data.likes;
+  document.getElementById('profileCreditsBig').innerText = data.credits;
+  document.getElementById('profileCountry').innerText = data.country || 'اليمن 🇾🇪';
+  document.getElementById('profileGender').innerText = data.gender;
+  document.getElementById('profileRoom').innerText = data.room;
+  document.getElementById('profileAbout').innerText = data.about || 'لا يوجد';
+  document.getElementById('lastSeen').innerText = new Date(data.lastSeen).toLocaleString('ar-EG');
+  document.getElementById('profileLang').innerText = data.lang;
+  document.getElementById('profileTheme').innerText = data.theme;
+  currentClickedUser = data.name;
+
+  if(['مشرف غرفة','مسؤول غرفة','مالك غرفة','مشرف','ادارة','ادمن','مالك'].includes(myRank)){
+    document.getElementById('profileCmdBtn').style.display = 'block';
+    document.getElementById('cmdBtnBelow').style.display = 'block';
+  }
+  if(['ادارة','ادمن','مالك'].includes(myRank)){
+    document.getElementById('profileLogBtn').style.display = 'block';
+  }
+  if(myRank === 'مالك'){
+    document.getElementById('ownerOnly').style.display = 'block';
+    document.getElementById('profileIP').innerText = data.ip;
+    document.getElementById('profileLocation').innerText = data.location;
+  }
 });
 
-function addMessage(data, isMedia=false) {
-  let row = document.createElement('div');
-  row.className = 'msg-row' + (data.name == myName? ' me' : '');
+function closeAll(){
+  document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
+  document.getElementById('overlay').style.display = 'none';
+}
 
-  let rankNum = getRankNum(data.rank);
-  let borderColor = getBorderColor(data.rank, data.gender);
-  let nameColor = data.rank === 'مميز'? '#ffd700' : '#00ff88';
+function closeFullProfile(){ closeAll(); }
 
-  let content = isMedia?
-    (data.type === 'image'? `<img src="${data.url}" style="max-width:200px;border-radius:8px;margin-top:5px">` :
-     `<iframe width="200" height="113" src="https://www.youtube.com/embed/${(data.url.split('v=')[1]||data.url.split('youtu.be/')[1]).split('&')[0]}" frameborder="0" allowfullscreen style="border-radius:8px;margin-top:5px"></iframe>`)
-    : data.text;
+function openTab(tabName){
+  document.querySelectorAll('.tabContent').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+}
 
-  row.innerHTML = `
-    <img src="${data.avatar}" class="avatar" style="border-color:${borderColor}" onerror="this.src='https://i.pravatar.cc/45?u=${data.name}'">
-    <div class="msg-content">
-      <div class="msg-header">
-        <span class="msg-name" style="color:${nameColor}">${rankNum} ${data.name}</span>
-        <span>${data.time}</span>
+function showUserCmd(){
+  document.getElementById('userCmdPopup').style.display = 'block';
+  document.getElementById('cmdUserName').innerText = currentClickedUser;
+  let html = '';
+  if(['مشرف غرفة','مسؤول غرفة','مالك غرفة','مشرف','ادارة','ادمن','مالك'].includes(myRank)){
+    html += `<button onclick="muteUser(5)" style="width:100%;padding:8px;background:orange;border:none;color:#fff;border-radius:5px;margin:3px 0">كتم 5 دقائق</button>`;
+  }
+  if(['مسؤول غرفة','مالك غرفة','مشرف','ادارة','ادمن','مالك'].includes(myRank)){
+    html += `<button onclick="kickUser(5)" style="width:100%;padding:8px;background:red;border:none;color:#fff;border-radius:5px;margin:3px 0">طرد 5 دقائق</button>`;
+  }
+  document.getElementById('cmdButtons').innerHTML = html;
+}
+
+function muteUser(min){
+  let reason = document.getElementById('cmdReason').value || 'بدون سبب';
+  socket.emit('mute', {target: currentClickedUser, minutes: min, reason});
+  closeAll();
+}
+
+function kickUser(min){
+  let reason = document.getElementById('cmdReason').value || 'بدون سبب';
+  socket.emit('kick', {target: currentClickedUser, minutes: min, reason});
+  closeAll();
+}
+
+function openUserLog(){
+  socket.emit('getUserLog', currentClickedUser);
+}
+
+socket.on('userLogData', (logs) => {
+  document.getElementById('userLogPopup').style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('logUserName').innerText = currentClickedUser;
+  if(myRank === 'مالك'){
+    document.getElementById('clearLogBtn').style.display = 'inline-block';
+    document.getElementById('exportLogBtn').style.display = 'inline-block';
+  }
+  currentLogs = logs;
+  sortOrder = 'asc';
+  document.getElementById('sortBtn').innerText = '⬆️';
+  searchLog();
+});
+
+function displayLogs(logs){
+  if(logs.length === 0){
+    document.getElementById('userLogList').innerHTML = '<div style="text-align:center;color:#666;padding:50px">لا يوجد نتائج</div>';
+    document.getElementById('logCount').innerText = `0 نتيجة من ${currentLogs.length}`;
+    return;
+  }
+  let sortedLogs = [...logs].sort((a,b) => sortOrder === 'desc'? b.time - a.time : a.time - b.time);
+  let html = '';
+  sortedLogs.forEach(log => {
+    let color = log.action === 'كتم'? '#ffaa00' : 'red';
+    let icon = log.action === 'كتم'? '🔇' : '👢';
+    html += `<div style="background:#1e2e3e;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid ${color}">
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:${color};font-weight:bold">${icon} ${log.action}</span>
+        <span style="font-size:12px;color:#888">${new Date(log.time).toLocaleString('ar-EG')}</span>
       </div>
-      <div class="msg-text">${content}</div>
-    </div>
-  `;
-  document.getElementById('messages').appendChild(row);
+      <div style="font-size:13px;color:#ccc">بواسطة: <span class="rank-${log.byRank}">${log.by}</span></div>
+      ${log.minutes? `<div style="font-size:13px;color:#ccc">المدة: ${log.minutes} دقيقة</div>` : ''}
+      ${log.reason? `<div style="font-size:13px;color:#ff6666;margin-top:5px">السبب: ${log.reason}</div>` : ''}
+    </div>`;
+  });
+  document.getElementById('userLogList').innerHTML = html;
+  document.getElementById('logCount').innerText = `${sortedLogs.length} نتيجة من ${currentLogs.length} - ${sortOrder === 'desc'? 'تنازلي' : 'تصاعدي'}`;
 }
 
-function send(){
-  let msg = document.getElementById('msg');
-  if(msg.value.trim()){
-    socket.emit('chat message', {
-      text: msg.value,
-      time: new Date().toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit'})
-    });
-    msg.value = '';
+function searchLog(){
+  let search = document.getElementById('searchLog').value.toLowerCase();
+  let filter = document.getElementById('filterLog').value;
+  let filtered = currentLogs.filter(log => {
+    let matchSearch = log.reason.toLowerCase().includes(search) || log.by.toLowerCase().includes(search);
+    let matchFilter = filter === 'الكل' || log.action === filter;
+    return matchSearch && matchFilter;
+  });
+  displayLogs(filtered);
+}
+
+function toggleSort(){
+  sortOrder = sortOrder === 'desc'? 'asc' : 'desc';
+  document.getElementById('sortBtn').innerText = sortOrder === 'desc'? '⬇️' : '⬆️';
+  searchLog();
+}
+
+function clearUserLog(){
+  if(myRank!== 'مالك') return;
+  if(confirm(`مسح سجل ${currentClickedUser}؟`)){
+    socket.emit('clearUserLog', currentClickedUser);
   }
 }
 
-function sendImage() {
-  if(!['مميز','مشرف','ادارة','ادمن','مالك'].includes(myRank)) {
-    alert('هذي الميزة للمميز فقط 💎');
-    return;
-  }
-  let url = prompt('حط رابط الصورة:');
-  if(url) socket.emit('sendMedia', {type:'image', url:url, time:new Date().toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit'})});
+socket.on('logCleared', (name) => {
+  alert(`تم مسح سجل ${name}`);
+  document.getElementById('userLogList').innerHTML = '<div style="text-align:center;color:#666;padding:50px">لا يوجد مخالفات</div>';
+});
+
+function exportUserLog(){
+  socket.emit('exportUserLog', currentClickedUser);
 }
 
-function sendYoutube() {
-  if(!['مميز','مشرف','ادارة','ادمن','مالك'].includes(myRank)) {
-    alert('هذي الميزة للمميز فقط 💎');
-    return;
-  }
-  let url = prompt('حط رابط يوتيوب:');
-  if(url) socket.emit('sendMedia', {type:'youtube', url:url, time:new Date().toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit'})});
+socket.on('exportLogData', (data) => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.text(`سجل مخالفات: ${data.name}`, 105, 20, {align:'center'});
+  let y = 40;
+  data.logs.reverse().forEach((log,i) => {
+    doc.setFontSize(12);
+    doc.text(`${i+1}. ${log.action} - ${new Date(log.time).toLocaleString('ar-EG')}`, 20, y);
+    y += 7;
+    doc.setFontSize(10);
+    doc.text(`بواسطة: ${log.by} - ${log.byRank}`, 25, y);
+    y += 6;
+    if(log.minutes) { doc.text(`المدة: ${log.minutes} دقيقة`, 25, y); y += 6; }
+    doc.text(`السبب: ${log.reason}`, 25, y);
+    y += 10;
+  });
+  doc.save(`سجل_${data.name}.pdf`);
+});
+
+function likeProfileUser(){
+  socket.emit('likeUser', currentClickedUser);
 }
+
+socket.on('chat', (msg) => {
+  let div = document.createElement('div');
+  div.innerHTML = `<span style="color:${msg.color}">${msg.name}: ${msg.text}</span> <span style="font-size:11px;color:#666">${msg.time}</span>`;
+  document.getElementById('messages').appendChild(div);
+});
 
 socket.on('error', (msg) => alert(msg));
 </script>
 </body>
-  </html>
+        </html>
