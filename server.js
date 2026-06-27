@@ -15,7 +15,7 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('public/uploads'));
 if(!fs.existsSync('./public/uploads')) fs.mkdirSync('./public/uploads',{recursive:true});
 
-mongoose.connect('mongodb://127.0.0.1:27017/yemenchat');
+mongoose.connect(process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/yemenchat');
 
 const JWT_SECRET = "yemen123";
 const ADMIN_KEY = "owner123";
