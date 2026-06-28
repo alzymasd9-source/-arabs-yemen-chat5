@@ -1,148 +1,184 @@
-let socket, token, user, currentRoom = 'عام اليمن', muted = false;
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const mongoose = require('mongoose');
+const path = require('path');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const $ = id => document.getElementById(id);
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
-// ===== 1. تسجيل + دخول =====
-async function register(){
-  const res = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({name:$('name').value,password:$('pass').value,gender:$('gender').value,age:$('age').value})
+const PORT = process.env.PORT || 3000;
+const MONGO_URL = process.env.MONGO_URL;
+const JWT_SECRET = process.env.JWT_SECRET || 'yemen_secret_key_2026';
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ===== قاعدة البيانات =====
+mongoose.connect(MONGO_URL).then(() => console.log('MongoDB Connected')).catch(err => console.log(err));
+
+// 1. نظام المستخدمين + الرتب + الملف الشخصي
+const UserSchema = new mongoose.Schema({
+  name: { type: String, unique: true },
+  password: String,
+  gender: String,
+  age: Number,
+  rank: { type: String, default: 'عضو' }, // عضو, مشرف, اداري, مالك
+  avatar: { type: String, default: '' },
+  bio: { type: String, default: '' },
+  country: { type: String, default: 'اليمن' },
+  createdAt: { type: Date, default: Date.now },
+  isBanned: { type: Boolean, default: false }
+});
+const User = mongoose.model('User', UserSchema);
+
+// 2. الرسائل
+const MessageSchema = new mongoose.Schema({ room: String, userId: mongoose.Schema.Types.ObjectId, name: String, rank: String, msg: String, time: { type: Date, default: Date.now } });
+const Message = mongoose.model('Message', MessageSchema);
+
+// 3. الغرف
+const RoomSchema = new mongoose.Schema({ name: String, type: String, password: { type: String, default: '' } });
+const Room = mongoose.model('Room', RoomSchema);
+
+// ===== صلاحيات الرتب =====
+const ranks = {
+  'عضو': 1,
+  'مشرف': 2, // كتم، حذف رسائل
+  'اداري': 3, // طرد، حظر
+  'مالك': 4 // كل الصلاحيات + اضافة اداريين
+};
+const hasPermission = (userRank, neededRank) => ranks[userRank] >= ranks[neededRank];
+
+// ===== تسجيل + دخول =====
+app.post('/api/register', async (req, res) => {
+  const { name, password, gender, age } = req.body;
+  if (await User.findOne({ name })) return res.status(400).json({ error: 'الاسم موجود' });
+  const hash = await bcrypt.hash(password, 10);
+  const isFirst = (await User.countDocuments()) === 0;
+  const user = await User.create({ name, password: hash, gender, age, rank: isFirst? 'مالك' : 'عضو' });
+  const token = jwt.sign({ id: user._id, rank: user.rank }, JWT_SECRET);
+  res.json({ token, user: { name: user.name, rank: user.rank } });
+});
+
+app.post('/api/login', async (req, res) => {
+  const { name, password } = req.body;
+  const user = await User.findOne({ name });
+  if (!user ||!(await bcrypt.compare(password, user.password))) return res.status(400).json({ error: 'خطأ في الدخول' });
+  if (user.isBanned) return res.status(403).json({ error: 'محظور' });
+  const token = jwt.sign({ id: user._id, rank: user.rank }, JWT_SECRET);
+  res.json({ token, user: { name: user.name, rank: user.rank, gender: user.gender, age: user.age, avatar: user.avatar, bio: user.bio } });
+});
+
+// ===== ملف شخصي - تعديل وتغير =====
+app.post('/api/profile', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const data = jwt.verify(token, JWT_SECRET);
+  const { avatar, bio, age } = req.body;
+  await User.findByIdAndUpdate(data.id, { avatar, bio, age });
+  res.json({ success: true });
+});
+
+// ===== نظام الغرف =====
+app.get('/init', async (req, res) => {
+  const rooms = [ { name: 'عام اليمن', type: 'عام' }, { name: 'صنعاء', type: 'محافظات' }, { name: 'عدن', type: 'محافظات' }, { name: 'تعز', type: 'محافظات' }, { name: 'VIP', type: 'خاص' } ];
+  await Room.deleteMany({});
+  await Room.insertMany(rooms);
+  res.send('تم انشاء الغرف');
+});
+app.get('/api/rooms', async (req, res) => { res.json(await Room.find({})); });
+app.get('/api/messages/:room', async (req, res) => { res.json((await Message.find({ room: req.params.room }).limit(100).sort({ time: -1 })).reverse()); });
+
+// ===== لوحة تحكم المالك - كامل الصلاحيات =====
+const auth = (rank) => (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const data = jwt.verify(token, JWT_SECRET);
+    if (!hasPermission(data.rank, rank)) return res.status(403).json({ error: 'ممنوع' });
+    req.user = data;
+    next();
+  } catch { res.status(401).json({ error: 'غير مصرح' }); }
+};
+
+// 1. ترقية / تنزيل رتب
+app.post('/api/admin/setRank', auth('مالك'), async (req, res) => {
+  const { name, rank } = req.body;
+  if (!ranks[rank]) return res.status(400).json({ error: 'رتبة غلط' });
+  await User.updateOne({ name }, { rank });
+  res.json({ success: true });
+});
+
+// 2. حظر / فك حظر
+app.post('/api/admin/ban', auth('اداري'), async (req, res) => {
+  await User.updateOne({ name: req.body.name }, { isBanned: true });
+  res.json({ success: true });
+});
+app.post('/api/admin/unban', auth('اداري'), async (req, res) => {
+  await User.updateOne({ name: req.body.name }, { isBanned: false });
+  res.json({ success: true });
+});
+
+// 3. حذف كل رسائل مستخدم
+app.post('/api/admin/clearUser', auth('مشرف'), async (req, res) => {
+  await Message.deleteMany({ name: req.body.name });
+  res.json({ success: true });
+});
+
+// 4. انشاء غرفة جديدة
+app.post('/api/admin/createRoom', auth('اداري'), async (req, res) => {
+  await Room.create({ name: req.body.name, type: req.body.type, password: req.body.password || '' });
+  res.json({ success: true });
+});
+
+// 5. حذف غرفة
+app.post('/api/admin/deleteRoom', auth('اداري'), async (req, res) => {
+  await Room.deleteOne({ name: req.body.name });
+  res.json({ success: true });
+});
+
+// ===== Socket.IO =====
+const onlineUsers = {}; // {socketId: {id, name, rank, room}}
+
+io.on('connection', (socket) => {
+  socket.on('join', async (data) => {
+    const user = await User.findById(data.userId);
+    if (!user || user.isBanned) return socket.emit('error', 'محظور');
+    onlineUsers[socket.id] = { id: user._id, name: user.name, rank: user.rank, room: data.room };
+    socket.join(data.room);
+    io.to(data.room).emit('system', `${user.name} [${user.rank}] دخل`);
+    io.to(data.room).emit('users', Object.values(onlineUsers).filter(u => u.room === data.room));
   });
-  const data = await res.json();
-  if(data.error) return $('loginError').innerText=data.error;
-  saveSession(data);
-}
 
-async function login(){
-  const res = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({name:$('name').value,password:$('pass').value})
+  socket.on('chatMessage', async (data) => {
+    const user = onlineUsers[socket.id]; if (!user) return;
+    const msg = await Message.create({ room: user.room, userId: user.id, name: user.name, rank: user.rank, msg: data.msg });
+    io.to(user.room).emit('message', { name: user.name, rank: user.rank, msg: data.msg, time: msg.time });
   });
-  const data = await res.json();
-  if(data.error) return $('loginError').innerText=data.error;
-  saveSession(data);
-}
 
-function saveSession(data){
-  token = data.token; user = data.user;
-  localStorage.setItem('token',token); localStorage.setItem('user',JSON.stringify(user));
-  startChat();
-}
+  // كتم - صلاحية مشرف
+  socket.on('mute', async (data) => {
+    const admin = onlineUsers[socket.id]; if (!admin ||!hasPermission(admin.rank, 'مشرف')) return;
+    io.to(data.targetId).emit('muted', data.time); // بالثواني
+  });
 
-// ===== 2. بدء الشات + Socket =====
-async function startChat(){
-  $('login').classList.add('hidden');
-  $('chat').classList.remove('hidden');
-  if(user.rank==='مالك' || user.rank==='اداري') $('adminBtn').classList.remove('hidden');
+  // طرد - صلاحية اداري
+  socket.on('kick', async (data) => {
+    const admin = onlineUsers[socket.id]; if (!admin ||!hasPermission(admin.rank, 'اداري')) return;
+    io.sockets.sockets.get(data.targetId)?.disconnect(true);
+  });
 
-  socket = io();
-  const userId = JSON.parse(atob(token.split('.')[1])).id;
-  socket.emit('join',{userId, room: currentRoom});
-
-  loadRooms(); loadMessages();
-
-  socket.on('message', m => addMsg(m));
-  socket.on('system', txt => $('messages').innerHTML += `<div style="color:#94a3b8;text-align:center;font-size:12px;margin:5px 0">${txt}</div>`);
-  socket.on('users', list => renderUsers(list));
-  socket.on('muted', sec => { muted=true; $('msgInput').disabled=true; setTimeout(()=>{muted=false;$('msgInput').disabled=false}, sec*1000); alert(`تم كتمك ${sec} ثانية`); });
-  socket.on('error', e => alert(e));
-}
-
-function addMsg(m){
-  const badge = m.rank==='مالك'?'malik':m.rank==='اداري'?'adari':m.rank==='مشرف'?'mushref':'';
-  $('messages').innerHTML += `<div class="msg"><span class="badge ${badge}">${m.rank}</span><span class="name">${m.name}</span>: ${m.msg}</div>`;
-  $('messages').scrollTop = $('messages').scrollHeight;
-}
-
-function sendMsg(){
-  if(muted) return alert('انت مكتوم');
-  const msg = $('msgInput').value.trim(); if(!msg) return;
-  socket.emit('chatMessage',{msg}); $('msgInput').value='';
-}
-
-// ===== 3. نظام الغرف =====
-async function loadRooms(){
-  const rooms = await fetch('/api/rooms').then(r=>r.json());
-  $('rooms').innerHTML = rooms.map(r=>`<div class="room ${r.name===currentRoom?'active':''}" onclick="joinRoom('${r.name}')">${r.name}</div>`).join('');
-}
-async function loadMessages(){
-  const msgs = await fetch('/api/messages/'+encodeURIComponent(currentRoom)).then(r=>r.json());
-  $('messages').innerHTML = msgs.map(m=>`<div class="msg"><span class="badge ${m.rank==='مالك'?'malik':m.rank==='اداري'?'adari':m.rank==='مشرف'?'mushref':''}">${m.rank}</span><span class="name">${m.name}</span>: ${m.msg}</div>`).join('');
-  $('messages').scrollTop = $('messages').scrollHeight;
-}
-function joinRoom(name){
-  currentRoom=name; $('roomName').innerText=name;
-  const userId = JSON.parse(atob(token.split('.')[1])).id;
-  socket.emit('join',{userId, room: name});
-  loadRooms(); loadMessages();
-}
-
-// ===== 4. قائمة المتصلين + كتم + طرد =====
-function renderUsers(list){
-  $('users').innerHTML = list.map(u=>{
-    let btns = '';
-    if(user.rank==='مشرف' || user.rank==='اداري' || user.rank==='مالك'){
-      btns += `<button style="font-size:10px;padding:2px 5px;margin-right:5px" onclick="muteUser('${u.id}',60)">كتم</button>`;
+  socket.on('disconnect', () => {
+    const user = onlineUsers[socket.id];
+    if (user) {
+      io.to(user.room).emit('system', `${user.name} خرج`);
+      delete onlineUsers[socket.id];
+      io.to(user.room).emit('users', Object.values(onlineUsers).filter(u => u.room === user.room));
     }
-    if(user.rank==='اداري' || user.rank==='مالك'){
-      btns += `<button style="font-size:10px;padding:2px 5px;background:#dc2626" onclick="kickUser('${u.id}')">طرد</button>`;
-    }
-    return `<div class="user"><span class="badge ${u.rank==='مالك'?'malik':u.rank==='اداري'?'adari':u.rank==='مشرف'?'mushref':''}">${u.rank}</span>${u.name} ${btns}</div>`;
-  }).join('');
-  $('usersCount').innerText = list.length;
-}
-function muteUser(targetId, sec){ socket.emit('mute',{targetId,time:sec}); }
-function kickUser(targetId){ if(confirm('متأكد تبغى تطرده؟')) socket.emit('kick',{targetId}); }
-
-// ===== 5. الملف الشخصي - تعديل وتغير =====
-function showProfile(){
-  $('chat').classList.add('hidden'); $('profile').classList.remove('hidden');
-  $('pAvatar').value=user.avatar||''; $('pBio').value=user.bio||''; $('pAge').value=user.age||'';
-}
-function hideProfile(){$('profile').classList.add('hidden');$('chat').classList.remove('hidden');}
-async function saveProfile(){
-  await fetch('/api/profile',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({avatar:$('pAvatar').value,bio:$('pBio').value,age:$('pAge').value})
   });
-  user.avatar=$('pAvatar').value; user.bio=$('pBio').value; user.age=$('pAge').value;
-  localStorage.setItem('user',JSON.stringify(user));
-  alert('تم الحفظ'); hideProfile();
-}
+});
 
-// ===== 6. لوحة تحكم المالك - كامل الصلاحيات =====
-function showAdmin(){$('chat').classList.add('hidden');$('admin').classList.remove('hidden');}
-function hideAdmin(){$('admin').classList.add('hidden');$('chat').classList.remove('hidden');}
-
-async function setRank(){
-  const name=$('aName').value, rank=$('aRank').value;
-  const res = await fetch('/api/admin/setRank',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({name,rank})});
-  alert((await res.json()).success?'تمت الترقية':'فشل');
-}
-async function banUser(){
-  const res = await fetch('/api/admin/ban',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({name:$('bName').value})});
-  alert((await res.json()).success?'تم الحظر':'فشل');
-}
-async function unbanUser(){
-  const res = await fetch('/api/admin/unban',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({name:$('bName').value})});
-  alert((await res.json()).success?'تم فك الحظر':'فشل');
-}
-async function createRoom(){
-  const res = await fetch('/api/admin/createRoom',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({name:$('rName').value,type:'عام'})});
-  alert((await res.json()).success?'تم انشاء الغرفة':'فشل'); loadRooms();
-}
-async function clearUserMsgs(){
-  const res = await fetch('/api/admin/clearUser',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({name:$('bName').value})});
-  alert((await res.json()).success?'تم مسح رسائله':'فشل');
-}
-
-function logout(){localStorage.clear();location.reload();}
-
-// ===== 7. تشغيل تلقائي اذا مسجل قبل =====
-if(localStorage.getItem('token')){
-  token = localStorage.getItem('token');
-  user = JSON.parse(localStorage.getItem('user'));
-  startChat();
-}
+server.listen(PORT, () => console.log(`Server ON on port ${PORT}`));
