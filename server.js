@@ -119,7 +119,7 @@ io.on('connection', (socket)=>{
   online.set(socket.id, {...u, muted:false, room:'ردهة', id:socket.id});
   socket.join('ردهة');
   io.to('ردهة').emit('chat message', {name:'النظام', text:`انضم ${u.name} [${u.role}] اهلا وسهلا`, system:1});
-  updateUsers('ردهة');
+  updateUsers('العامة');
 
   socket.on('chat message', async msg=>{
     const me = online.get(socket.id);
