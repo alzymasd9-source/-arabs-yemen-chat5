@@ -47,6 +47,7 @@ const Room = mongoose.model('Room', RoomSchema);
 
 // ===== صلاحيات الرتب =====
 const ranks = {
+  'زائر': 0,
   'عضو': 1,
   'مشرف': 2, // كتم، حذف رسائل
   'اداري': 3, // طرد، حظر
@@ -62,7 +63,7 @@ app.post('/api/register', async (req, res) => {
   const isFirst = (await User.countDocuments()) === 0;
   const user = await User.create({ name, password: hash, gender, age, rank: isFirst? 'مالك' : 'عضو' });
   const token = jwt.sign({ id: user._id, rank: user.rank }, JWT_SECRET);
-  res.json({ token, user: { name: user.name, rank: user.rank } });
+  res.json({ token, user: { name: user.name, rank: user.rank, gender: user.gender, age: user.age } });
 });
 
 app.post('/api/login', async (req, res) => {
@@ -104,15 +105,11 @@ const auth = (rank) => (req, res, next) => {
   } catch { res.status(401).json({ error: 'غير مصرح' }); }
 };
 
-// 1. ترقية / تنزيل رتب
 app.post('/api/admin/setRank', auth('مالك'), async (req, res) => {
   const { name, rank } = req.body;
-  if (!ranks[rank]) return res.status(400).json({ error: 'رتبة غلط' });
   await User.updateOne({ name }, { rank });
   res.json({ success: true });
 });
-
-// 2. حظر / فك حظر
 app.post('/api/admin/ban', auth('اداري'), async (req, res) => {
   await User.updateOne({ name: req.body.name }, { isBanned: true });
   res.json({ success: true });
@@ -121,33 +118,44 @@ app.post('/api/admin/unban', auth('اداري'), async (req, res) => {
   await User.updateOne({ name: req.body.name }, { isBanned: false });
   res.json({ success: true });
 });
-
-// 3. حذف كل رسائل مستخدم
 app.post('/api/admin/clearUser', auth('مشرف'), async (req, res) => {
   await Message.deleteMany({ name: req.body.name });
   res.json({ success: true });
 });
-
-// 4. انشاء غرفة جديدة
 app.post('/api/admin/createRoom', auth('اداري'), async (req, res) => {
   await Room.create({ name: req.body.name, type: req.body.type, password: req.body.password || '' });
   res.json({ success: true });
 });
-
-// 5. حذف غرفة
 app.post('/api/admin/deleteRoom', auth('اداري'), async (req, res) => {
   await Room.deleteOne({ name: req.body.name });
   res.json({ success: true });
 });
 
-// ===== Socket.IO =====
-const onlineUsers = {}; // {socketId: {id, name, rank, room}}
+// ===== Socket.IO مع دعم الزوار =====
+const onlineUsers = {}; // {socketId: {id, name, rank, room, gender, age}}
 
 io.on('connection', (socket) => {
   socket.on('join', async (data) => {
-    const user = await User.findById(data.userId);
-    if (!user || user.isBanned) return socket.emit('error', 'محظور');
-    onlineUsers[socket.id] = { id: user._id, name: user.name, rank: user.rank, room: data.room };
+    let user;
+
+    // 1. لو زائر: نسوي له حساب مؤقت بدون ما نحفظه في DB
+    if(data.rank === 'زائر'){
+      user = {
+        _id: socket.id,
+        name: data.name || 'زائر'+Math.floor(Math.random()*1000),
+        rank: 'زائر',
+        gender: data.gender,
+        age: data.age
+      };
+    }
+    // 2. لو عضو: نجيبه من قاعدة البيانات
+    else {
+      if(!data.userId) return socket.emit('error', 'خطأ دخول');
+      user = await User.findById(data.userId);
+      if (!user || user.isBanned) return socket.emit('error', 'محظور');
+    }
+
+    onlineUsers[socket.id] = { id: user._id, name: user.name, rank: user.rank, room: data.room, gender: user.gender, age: user.age };
     socket.join(data.room);
     io.to(data.room).emit('system', `${user.name} [${user.rank}] دخل`);
     io.to(data.room).emit('users', Object.values(onlineUsers).filter(u => u.room === data.room));
@@ -155,17 +163,20 @@ io.on('connection', (socket) => {
 
   socket.on('chatMessage', async (data) => {
     const user = onlineUsers[socket.id]; if (!user) return;
-    const msg = await Message.create({ room: user.room, userId: user.id, name: user.name, rank: user.rank, msg: data.msg });
-    io.to(user.room).emit('message', { name: user.name, rank: user.rank, msg: data.msg, time: msg.time });
+    // الزائر ما نحفظ رسائله عشان ما نثقل قاعدة البيانات
+    if(user.rank!== 'زائر'){
+      await Message.create({ room: user.room, userId: user.id, name: user.name, rank: user.rank, msg: data.msg });
+    }
+    io.to(user.room).emit('message', { name: user.name, rank: user.rank, gender: user.gender, age: user.age, msg: data.msg, time: new Date() });
   });
 
-  // كتم - صلاحية مشرف
+  // كتم - صلاحية مشرف وفوق
   socket.on('mute', async (data) => {
     const admin = onlineUsers[socket.id]; if (!admin ||!hasPermission(admin.rank, 'مشرف')) return;
     io.to(data.targetId).emit('muted', data.time); // بالثواني
   });
 
-  // طرد - صلاحية اداري
+  // طرد - صلاحية اداري وفوق
   socket.on('kick', async (data) => {
     const admin = onlineUsers[socket.id]; if (!admin ||!hasPermission(admin.rank, 'اداري')) return;
     io.sockets.sockets.get(data.targetId)?.disconnect(true);
