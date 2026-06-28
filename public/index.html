@@ -21,8 +21,8 @@ header{display:flex;justify-content:space-between;align-items:center;background:
 #chatArea{margin-right:210px;height:calc(100% - 60px);display:flex;flex-direction:column}
 #messages{flex:1;overflow:auto;padding:10px}
 .msg{background:#334155;padding:8px 12px;border-radius:8px;margin:5px 0}
-.msg .name{color:#fbbf24;font-weight:bold;font-size:13px}
-.msg .rank{color:#22d3ee;font-size:11px}
+.msg.name{color:#fbbf24;font-weight:bold;font-size:13px}
+.msg.rank{color:#22d3ee;font-size:11px}
 #inputArea{display:flex;gap:10px;padding:10px;background:#1e293b}
 #inputArea input{flex:1}
 #usersList{position:absolute;left:10px;top:60px;width:180px;background:#1e293b;border-radius:8px;padding:10px;max-height:300px;overflow:auto}
@@ -57,9 +57,9 @@ header{display:flex;justify-content:space-between;align-items:center;background:
     <h3 id="roomName">عام اليمن</h3>
     <button class="danger" onclick="logout()">خروج</button>
   </header>
-  
+
   <div id="rooms"></div>
-  
+
   <div id="chatArea">
     <div id="messages"></div>
     <div id="inputArea">
@@ -67,7 +67,7 @@ header{display:flex;justify-content:space-between;align-items:center;background:
       <button onclick="sendMsg()">ارسال</button>
     </div>
   </div>
-  
+
   <div id="usersList"><h4>المتصلين <span id="usersCount">0</span></h4><div id="users"></div></div>
 </div>
 
@@ -91,7 +91,7 @@ header{display:flex;justify-content:space-between;align-items:center;background:
     <input id="aName" placeholder="اسم المستخدم">
     <select id="aRank"><option>عضو</option><option>مشرف</option><option>اداري</option><option>مالك</option></select>
     <button onclick="setRank()">تغيير الرتبة</button>
-    
+
     <h4>حظر مستخدم</h4>
     <input id="bName" placeholder="اسم المستخدم">
     <button class="danger" onclick="banUser()">حظر</button>
@@ -100,7 +100,7 @@ header{display:flex;justify-content:space-between;align-items:center;background:
     <h4>انشاء غرفة</h4>
     <input id="rName" placeholder="اسم الغرفة">
     <button onclick="createRoom()">انشاء</button>
-    
+
     <button onclick="hideAdmin()">اغلاق</button>
   </div>
 </div>
