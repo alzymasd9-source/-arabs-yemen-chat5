@@ -1,145 +1,118 @@
-<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>يمن شات</title>
-<style>
-body{margin:0;font-family:'Tajawal',sans-serif;background:#0a0a0a;color:#fff}
-input,button{font-family:inherit}
-.modal{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:50}
-.modal>div{background:#111;padding:20px;border-radius:12px;width:90%;max-width:350px;border:1px solid #222}
-input,button,.btn{width:100%;padding:10px;margin:6px 0;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;box-sizing:border-box}
-button,.btn{background:#8b5cf6;cursor:pointer;border:0;font-weight:700}
-.app{display:none;height:100vh;grid-template-columns:260px 1fr 280px}
-.sidebar{background:#0d0d0d;border-left:1px solid #222;padding:10px;overflow:auto}
-.chat{display:flex;flex-direction:column}
-.header{padding:8px 12px;border-bottom:1px solid #222;display:flex;align-items:center;gap:8px;background:#0d0d0d}
-.messages{flex:1;overflow:auto;padding:12px}
-.msg{display:flex;gap:8px;margin:8px 0;align-items:flex-start}
-.msg.me{flex-direction:row-reverse}
-.avatar{width:38px;height:38px;border-radius:50%;border:2px solid #fff;background:#333}
-.bubble{background:#1a1a1a;padding:8px 12px;border-radius:12px;max-width:70%;word-wrap:break-word}
-.me.bubble{background:#8b5cf6}
-.bubble img{max-width:200px;border-radius:8px}
-.users{background:#0d0d0d;border-right:1px solid #222;padding:10px;overflow:auto}
-.user{display:flex;align-items:center;gap:8px;padding:6px;border-radius:8px;cursor:pointer}
-.user:hover{background:#1a1a1a}
-.toolbar{display:flex;gap:6px;padding:8px;border-top:1px solid #222;background:#0d0d0d}
-#chatInput{flex:1}
-.tabs{display:flex;gap:6px;margin-bottom:8px}
-.tabs.btn{flex:1;background:#1a1a1a;font-size:13px}
-.tabs.btn.active{background:#8b5cf6}
-.banItem{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #333}
-</style></head><body>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Pro - تطبيق الشات</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- الشريط الجانبي -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>💬 Discord Pro</h1>
+                <p class="subtitle">شات كتابي - شات اليمن</p>
+            </div>
 
-<div id="home" class="modal"><div>
-  <h2>يمن شات</h2>
-  <div class="tabs"><div class="btn active" onclick="tab('login')">دخول</div><div class="btn" onclick="tab('reg')">تسجيل</div><div class="btn" onclick="tab('guest')">زائر</div></div>
-  <div id="loginBox">
-    <input id="lName" placeholder="الاسم">
-    <input id="lPass" type="password" placeholder="كلمة المرور">
-    <input id="lKey" placeholder="كود المالك - اختياري">
-    <button onclick="login()">دخول</button>
-  </div>
-  <div id="regBox" style="display:none">
-    <input id="rName" placeholder="الاسم">
-    <input id="rEmail" placeholder="ايميل">
-    <input id="rPass" type="password" placeholder="كلمة المرور">
-    <select id="rGender"><option>ذكر</option><option>انثى</option><option>آخر</option></select>
-    <button onclick="register()">تسجيل</button>
-  </div>
-  <div id="guestBox" style="display:none">
-    <input id="gName" placeholder="اسم الزائر">
-    <select id="gGender"><option>ذكر</option><option>انثى</option><option>آخر</option></select>
-    <button onclick="guest()">دخول كزائر</button>
-  </div>
-</div></div>
+            <!-- معلومات المستخدم -->
+            <div class="user-info">
+                <div class="user-profile">
+                    <span class="avatar" id="userAvatar">👤</span>
+                    <div class="user-details">
+                        <input 
+                            type="text" 
+                            id="usernameInput" 
+                            placeholder="أدخل اسمك"
+                            class="username-input"
+                        >
+                        <select id="statusSelect" class="status-select">
+                            <option value="online">🟢 نشط</option>
+                            <option value="idle">🟡 بعيد</option>
+                            <option value="dnd">🔴 مشغول</option>
+                            <option value="offline">⚫ غير متصل</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-<div id="app" class="app">
-  <div class="sidebar">
-    <h3 id="myName"></h3>
-    <div id="ownerTools" style="display:none">
-      <div class="btn" onclick="openBanLog()">📋 سجل الحظر</div>
+            <!-- قائمة الغرف -->
+            <div class="channels">
+                <h3>الغرف</h3>
+                <div class="channel-list">
+                    <div class="channel active" data-room="عام">
+                        <span>#</span> عام
+                    </div>
+                    <div class="channel" data-room="تطوير">
+                        <span>#</span> تطوير
+                    </div>
+                    <div class="channel" data-room="عشوائي">
+                        <span>#</span> عشوائي
+                    </div>
+                    <div class="channel" data-room="مساعدة">
+                        <span>#</span> مساعدة
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة المستخدمين النشطين -->
+            <div class="online-users">
+                <h3>المستخدمون النشطون</h3>
+                <div id="usersList" class="users-list">
+                    <p class="empty-state">لا يوجد مستخدمون متصلون</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- منطقة الشات الرئيسية -->
+        <main class="chat-main">
+            <!-- رأس الشات -->
+            <header class="chat-header">
+                <div class="header-title">
+                    <h2 id="currentRoom"># عام</h2>
+                    <p id="roomDescription">غرفة الشات العامة</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" title="البحث">🔍</button>
+                    <button class="btn-icon" title="الإعدادات">⚙️</button>
+                </div>
+            </header>
+
+            <!-- منطقة الرسائل -->
+            <div class="messages-container">
+                <div id="messagesArea" class="messages-area">
+                    <div class="welcome-message">
+                        <h3>👋 مرحباً بك في تطبيق الشات!</h3>
+                        <p>اختر غرفة وابدأ المحادثة</p>
+                    </div>
+                </div>
+
+                <!-- مؤشر الكتابة -->
+                <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                    <p><span id="typingUser"></span> يكتب...</p>
+                </div>
+            </div>
+
+            <!-- منطقة إدخال الرسالة -->
+            <footer class="chat-footer">
+                <div class="input-container">
+                    <button class="btn-attach" title="إرسال ملف">📎</button>
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="اكتب رسالتك هنا..."
+                        class="message-input"
+                    >
+                    <button id="sendBtn" class="btn-send" title="إرسال">📤</button>
+                </div>
+                <div class="chat-info">
+                    <p id="onlineCount">المتصلون: 0</p>
+                </div>
+            </footer>
+        </main>
     </div>
-    <div class="btn" onclick="openShop()">🛒 المتجر</div>
-    <div class="btn" onclick="location.reload()">تسجيل الخروج</div>
-    <hr>
-    <h4>الغرف</h4>
-    <div id="rooms"><div class="btn" onclick="joinRoom('ردهة')">ردهة</div></div>
-  </div>
 
-  <div class="chat">
-    <div class="header"><h3 id="roomName">ردهة</h3></div>
-    <div class="messages" id="messages"></div>
-    <div class="toolbar">
-      <input id="chatInput" placeholder="اكتب رسالة...">
-      <input type="file" id="file" accept="image/*,audio/*,application/pdf" style="display:none">
-      <button onclick="file.click()">📎</button>
-      <button onclick="send()">ارسال</button>
-    </div>
-  </div>
-
-  <div class="users">
-    <h4>الأعضاء</h4>
-    <div id="usersList"></div>
-  </div>
-</div>
-
-<div class="modal" id="shopBox"><div>
-  <h3>المتجر <span style="float:left;cursor:pointer" onclick="shopBox.style.display='none'">×</span></h3>
-  <div id="shopList"></div>
-</div></div>
-
-<div class="modal" id="banLogBox"><div>
-  <h3>سجل الحظر <span style="float:left;cursor:pointer" onclick="banLogBox.style.display='none'">×</span></h3>
-  <div id="banLogList" style="font-size:13px;max-height:400px;overflow:auto"></div>
-</div></div>
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const home=document.getElementById('home'),app=document.getElementById('app'),roomsDiv=document.getElementById('rooms');
-const messagesDiv=document.getElementById('messages'),usersList=document.getElementById('usersList');
-const input=document.getElementById('chatInput'),file=document.getElementById('file');
-const ROLES={'مالك':5,'ادمن':4,'مشرف':3,'مميز':2,'عضو':1,'زائر':0};
-let socket,token,myData,currentRoom='ردهة';
-
-function tab(t){document.querySelectorAll('.tabs.btn').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
-  loginBox.style.display=t==='login'?'block':'none';
-  regBox.style.display=t==='reg'?'block':'none';
-  guestBox.style.display=t==='guest'?'block':'none';
-}
-async function api(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',token},body:JSON.stringify(body)});return r.json();}
-async function login(){const d=await api('/login',{name:lName.value,pass:lPass.value,key:lKey.value});if(d.token)localStorage.token=d.token,startApp(d.token);else alert(d.err);}
-async function register(){const d=await api('/register',{name:rName.value,pass:rPass.value,email:rEmail.value,gender:rGender.value});if(d.ok)alert('تم'),tab('login');else alert(d.err);}
-async function guest(){const d=await api('/guest',{name:gName.value,gender:gGender.value});if(d.token)localStorage.token=d.token,startApp(d.token);else alert(d.err);}
-if(localStorage.token)startApp(localStorage.token);
-
-function startApp(t){token=t;myData=jwt_decode(t);
-  home.style.display='none';app.style.display='grid';myName.textContent=myData.name+' ['+myData.role+']';
-  if(myData.role==='مالك')ownerTools.style.display='block';
-
-  socket=io({auth:{token}});
-  socket.on('connect',()=>{joinRoom('ردهة');});
-
-  socket.on('chat message',m=>{const isMe=m.id===socket.id;messagesDiv.insertAdjacentHTML('beforeend',`<div class="msg ${isMe?'me':''}"><div class="avatar"></div><div><b style="color:${m.color}">${m.name}</b><div class="bubble">${m.type==='image'?`<img src="${m.text}">`:m.type==='audio'?`<audio controls src="${m.text}">`:m.type==='file'?`<a href="${m.text}" target="_blank">📎 ملف</a>`:m.text}</div></div></div>`);messagesDiv.scrollTop=messagesDiv.scrollHeight;});
-
-  socket.on('room users',list=>{usersList.innerHTML=list.map(u=>`<div class="user">
-    <div class="avatar" style="width:32px;height:32px"></div>
-    <div style="flex:1"><span style="color:${u.color}">${u.role==='مالك'?'👑':u.role==='ادمن'?'⭐':u.role==='مشرف'?'🛡️':''}${u.name}</span><br><small style="color:#aaa">${u.role}</small></div>
-    ${ROLES[myData.role]>ROLES[u.role]?`<button onclick="socket.emit('mod action',{action:'mute',targetId:'${u.id}',minutes:5})">🔇</button>${ROLES[myData.role]>=4?`<button onclick="socket.emit('mod action',{action:'kick',targetId:'${u.id}'})">⛔</button>`:''}${myData.role==='مالك'?`<button onclick="let d=prompt('أيام؟');socket.emit('mod action',{action:'banip',targetId:'${u.id}',days:d})">🔨</button>`:''}`:''}
-  </div>`).join('');});
-
-  socket.on('err',alert);
-  input.onkeypress=e=>e.key==='Enter'&&send();
-}
-
-function joinRoom(room){socket.emit('join room',room);currentRoom=room;roomName.textContent=room;messagesDiv.innerHTML='';fetch('/history/'+room,{headers:{token}}).then(x=>x.json()).then(h=>h.forEach(m=>socket.emit('chat message',m)));}
-function send(){const v=input.value.trim();if(!v)return;socket.emit('chat message',v);input.value='';}
-file.onchange=async()=>{const f=file.files[0];if(!f)return;const fd=new FormData();fd.append('file',f);const r=await fetch('/upload',{method:'POST',headers:{token},body:fd}).then(x=>x.json());const type=f.type.startsWith('image/')?'image':f.type.startsWith('audio/')?'audio':'file';socket.emit('chat media',{url:r.url,type});};
-
-async function openShop(){shopBox.style.display='flex';const d=await fetch('/shop',{headers:{token}}).then(x=>x.json());shopList.innerHTML=d.map(i=>`<div style="display:flex;gap:8px;align-items:center;border-bottom:1px solid #333;padding:8px"><div style="flex:1">${i.name} - ${i.price} نقطة</div><button onclick="buy('${i.id}')">شراء</button></div>`).join('');}
-async function buy(id){const d=await api('/buy',{id});if(d.token){localStorage.token=d.token;alert('تم');location.reload();}else alert(d.err);}
-
-async function openBanLog(){banLogBox.style.display='flex';const d=await fetch('/banlog',{headers:{token}}).then(x=>x.json());banLogList.innerHTML=d.length?d.map(x=>`<div class="banItem"><div><b>${x.ip}</b><br>${x.reason}<br><small>${x.by} - ${new Date(x.time).toLocaleString('ar-YE')}</small></div><button class="btn" style="width:auto;background:#c0392b" onclick="unbanIP('${x.ip}',this)">🔓</button></div>`).join(''):'فاضي';}
-async function unbanIP(ip,btn){if(!confirm('فك حظر؟'))return;await fetch('/unban',{method:'POST',headers:{'Content-Type':'application/json',token},body:JSON.stringify({ip})});btn.closest('.banItem').remove();}
-
-function jwt_decode(t){return JSON.parse(atob(t.split('.')[1]));}
-</script></body></html>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
