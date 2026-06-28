@@ -3,103 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شات اليمن العربي</title>
-<link rel="stylesheet" href="style.css">
+<title>شات اليمن</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
+body{background:#0f172a;color:#fff;overflow:hidden}
+.hidden{display:none!important}
+#login,#chat,#profile,#admin{position:absolute;width:100%;height:100%;padding:20px}
+.box{background:#1e293b;padding:20px;border-radius:12px;max-width:400px;margin:50px auto}
+input,select,button,textarea{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none;background:#334155;color:#fff;font-size:15px}
+button{background:#6366f1;cursor:pointer;font-weight:bold}
+button.danger{background:#dc2626}
+header{display:flex;justify-content:space-between;align-items:center;background:#1e293b;padding:10px 15px}
+#rooms{width:200px;background:#1e293b;height:100%;float:right;overflow:auto;padding:10px}
+.room{padding:10px;margin:5px 0;background:#334155;border-radius:6px;cursor:pointer}
+.room.active{background:#6366f1}
+#chatArea{margin-right:210px;height:calc(100% - 60px);display:flex;flex-direction:column}
+#messages{flex:1;overflow:auto;padding:10px}
+.msg{background:#334155;padding:8px 12px;border-radius:8px;margin:5px 0}
+.msg .name{color:#fbbf24;font-weight:bold;font-size:13px}
+.msg .rank{color:#22d3ee;font-size:11px}
+#inputArea{display:flex;gap:10px;padding:10px;background:#1e293b}
+#inputArea input{flex:1}
+#usersList{position:absolute;left:10px;top:60px;width:180px;background:#1e293b;border-radius:8px;padding:10px;max-height:300px;overflow:auto}
+.user{padding:5px;font-size:14px}
+.badge{font-size:10px;padding:2px 5px;border-radius:4px;margin-right:5px}
+.badge.malik{background:#f59e0b}.badge.adari{background:#ef4444}.badge.mushref{background:#3b82f6}
+</style>
 </head>
 <body>
 
-<div id="loginPage" class="page active">
-  <div class="login-box">
-    <h1>شات اليمن العربي</h1>
-    <div class="login-section">
-      <button class="btn-main" onclick="showGuestForm()">دخول الزوار</button>
-      <div id="guestForm" class="hidden">
-        <div class="input-group">
-          <input id="guestName" placeholder="اكتب اسمك هنا">
-          <div class="gender-select">
-            <button onclick="toggleGenderList()">الجنس ▼</button>
-            <div id="genderList" class="hidden">
-              <div onclick="selectGender('ذكر','blue')">ذكر</div>
-              <div onclick="selectGender('انثى','pink')">انثى</div>
-              <div onclick="selectGender('آخر','white')">آخر</div>
-            </div>
-          </div>
-        </div>
-        <button class="btn-main" onclick="guestLogin()">دخول</button>
-      </div>
-    </div>
-    <hr>
-    <div class="login-section">
-      <button class="btn-main" onclick="toggleBox('memberForm')">دخول الأعضاء</button>
-      <div id="memberForm" class="hidden">
-        <input id="memberName" placeholder="اسم المستخدم">
-        <input id="memberPass" type="password" placeholder="الباسورد">
-        <button class="btn-main" onclick="memberLogin()">دخول</button>
-      </div>
-    </div>
-    <hr>
-    <div class="login-section">
-      <button class="btn-main" onclick="toggleBox('registerForm')">تسجيل</button>
-      <div id="registerForm" class="hidden">
-        <input id="regName" placeholder="اسم المستخدم">
-        <input id="regPass" type="password" placeholder="الباسورد">
-        <input id="regEmail" type="email" placeholder="البريد الالكتروني">
-        <button class="btn-main" onclick="register()">انشاء حساب</button>
-      </div>
-    </div>
+<!-- 1. شاشة تسجيل دخول -->
+<div id="login">
+  <div class="box">
+    <h2>دخول / تسجيل شات اليمن</h2>
+    <input id="name" placeholder="الاسم">
+    <input id="pass" type="password" placeholder="كلمة السر">
+    <select id="gender"><option value="ذكر">ذكر</option><option value="انثى">انثى</option></select>
+    <input id="age" type="number" placeholder="العمر">
+    <button onclick="register()">تسجيل</button>
+    <button onclick="login()">دخول</button>
+    <p id="loginError" style="color:#f87171"></p>
   </div>
 </div>
 
-<div id="roomsPage" class="page">
-  <div class="login-box">
-    <h2>اختر الغرفة</h2>
-    <div id="roomsList2"></div>
-  </div>
-</div>
-
-<div id="chatPage" class="page">
-  <header class="topbar">
-    <div class="topbar-right">
-      <span class="icon" onclick="toggleSidebar()">☰</span>
-      <span class="icon">Store</span>
-      <span class="icon">✉️</span>
-      <span class="icon" onclick="showUsers()">👥</span>
-      <span class="icon">❤️</span>
+<!-- 2. شاشة الشات -->
+<div id="chat" class="hidden">
+  <header>
+    <div>
+      <button onclick="showProfile()">ملفي</button>
+      <button id="adminBtn" onclick="showAdmin()" class="hidden">لوحة التحكم</button>
     </div>
-    <div class="topbar-left">
-      <img id="myAvatar" class="avatar" src="" onclick="openProfile()">
-    </div>
+    <h3 id="roomName">عام اليمن</h3>
+    <button class="danger" onclick="logout()">خروج</button>
   </header>
-  <div class="chat-wrapper">
-    <div id="chatBox"></div>
+  
+  <div id="rooms"></div>
+  
+  <div id="chatArea">
+    <div id="messages"></div>
+    <div id="inputArea">
+      <input id="msgInput" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
+      <button onclick="sendMsg()">ارسال</button>
+    </div>
   </div>
-  <footer class="inputbar">
-    <span class="icon">+</span>
-    <span class="icon">😊</span>
-    <input id="messageInput" placeholder="اكتب هنا...">
-    <span class="icon">🎤</span>
-    <button id="sendBtn" class="send-btn">➤</button>
-  </footer>
-  <div class="bottombar">
-    <span class="icon">🔊</span>
-    <span class="icon">▶️</span>
-    <span id="roomNameNow">عام</span>
-    <span class="icon">⚙️</span>
-    <span class="icon" onclick="goHome()">🏠</span>
-    <span class="icon" onclick="openProfile()">👤</span>
-  </div>
-  <div id="sidebar" class="sidebar hidden">
-    <div onclick="goRooms()">الغرف</div>
-    <div>الإعدادات</div>
-    <div onclick="logout()">تسجيل الخروج</div>
-  </div>
-  <div id="usersSidebar" class="sidebar hidden">
-    <input placeholder="🔍 ابحث عن عضو">
-    <div id="usersList"></div>
+  
+  <div id="usersList"><h4>المتصلين <span id="usersCount">0</span></h4><div id="users"></div></div>
+</div>
+
+<!-- 3. شاشة الملف الشخصي -->
+<div id="profile" class="hidden">
+  <div class="box">
+    <h2>تعديل الملف الشخصي</h2>
+    <input id="pAvatar" placeholder="رابط الصورة">
+    <textarea id="pBio" placeholder="نبذة عنك"></textarea>
+    <input id="pAge" type="number" placeholder="العمر">
+    <button onclick="saveProfile()">حفظ</button>
+    <button onclick="hideProfile()">رجوع</button>
   </div>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="script.js"></script>
+<!-- 4. لوحة تحكم المالك -->
+<div id="admin" class="hidden">
+  <div class="box" style="max-width:600px">
+    <h2>لوحة تحكم المالك</h2>
+    <h4>ترقية رتبة</h4>
+    <input id="aName" placeholder="اسم المستخدم">
+    <select id="aRank"><option>عضو</option><option>مشرف</option><option>اداري</option><option>مالك</option></select>
+    <button onclick="setRank()">تغيير الرتبة</button>
+    
+    <h4>حظر مستخدم</h4>
+    <input id="bName" placeholder="اسم المستخدم">
+    <button class="danger" onclick="banUser()">حظر</button>
+    <button onclick="unbanUser()">فك حظر</button>
+
+    <h4>انشاء غرفة</h4>
+    <input id="rName" placeholder="اسم الغرفة">
+    <button onclick="createRoom()">انشاء</button>
+    
+    <button onclick="hideAdmin()">اغلاق</button>
+  </div>
+</div>
+
+<script src="/script.js"></script>
 </body>
 </html>
