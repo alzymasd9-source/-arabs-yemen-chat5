@@ -1,118 +1,105 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Pro - تطبيق الشات</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات اليمن العربي</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- الشريط الجانبي -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>💬 Discord Pro</h1>
-                <p class="subtitle">شات كتابي - شات اليمن</p>
+
+<div id="loginPage" class="page active">
+  <div class="login-box">
+    <h1>شات اليمن العربي</h1>
+    <div class="login-section">
+      <button class="btn-main" onclick="showGuestForm()">دخول الزوار</button>
+      <div id="guestForm" class="hidden">
+        <div class="input-group">
+          <input id="guestName" placeholder="اكتب اسمك هنا">
+          <div class="gender-select">
+            <button onclick="toggleGenderList()">الجنس ▼</button>
+            <div id="genderList" class="hidden">
+              <div onclick="selectGender('ذكر','blue')">ذكر</div>
+              <div onclick="selectGender('انثى','pink')">انثى</div>
+              <div onclick="selectGender('آخر','white')">آخر</div>
             </div>
-
-            <!-- معلومات المستخدم -->
-            <div class="user-info">
-                <div class="user-profile">
-                    <span class="avatar" id="userAvatar">👤</span>
-                    <div class="user-details">
-                        <input 
-                            type="text" 
-                            id="usernameInput" 
-                            placeholder="أدخل اسمك"
-                            class="username-input"
-                        >
-                        <select id="statusSelect" class="status-select">
-                            <option value="online">🟢 نشط</option>
-                            <option value="idle">🟡 بعيد</option>
-                            <option value="dnd">🔴 مشغول</option>
-                            <option value="offline">⚫ غير متصل</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- قائمة الغرف -->
-            <div class="channels">
-                <h3>الغرف</h3>
-                <div class="channel-list">
-                    <div class="channel active" data-room="عام">
-                        <span>#</span> عام
-                    </div>
-                    <div class="channel" data-room="تطوير">
-                        <span>#</span> تطوير
-                    </div>
-                    <div class="channel" data-room="عشوائي">
-                        <span>#</span> عشوائي
-                    </div>
-                    <div class="channel" data-room="مساعدة">
-                        <span>#</span> مساعدة
-                    </div>
-                </div>
-            </div>
-
-            <!-- قائمة المستخدمين النشطين -->
-            <div class="online-users">
-                <h3>المستخدمون النشطون</h3>
-                <div id="usersList" class="users-list">
-                    <p class="empty-state">لا يوجد مستخدمون متصلون</p>
-                </div>
-            </div>
-        </aside>
-
-        <!-- منطقة الشات الرئيسية -->
-        <main class="chat-main">
-            <!-- رأس الشات -->
-            <header class="chat-header">
-                <div class="header-title">
-                    <h2 id="currentRoom"># عام</h2>
-                    <p id="roomDescription">غرفة الشات العامة</p>
-                </div>
-                <div class="header-actions">
-                    <button class="btn-icon" title="البحث">🔍</button>
-                    <button class="btn-icon" title="الإعدادات">⚙️</button>
-                </div>
-            </header>
-
-            <!-- منطقة الرسائل -->
-            <div class="messages-container">
-                <div id="messagesArea" class="messages-area">
-                    <div class="welcome-message">
-                        <h3>👋 مرحباً بك في تطبيق الشات!</h3>
-                        <p>اختر غرفة وابدأ المحادثة</p>
-                    </div>
-                </div>
-
-                <!-- مؤشر الكتابة -->
-                <div id="typingIndicator" class="typing-indicator" style="display: none;">
-                    <p><span id="typingUser"></span> يكتب...</p>
-                </div>
-            </div>
-
-            <!-- منطقة إدخال الرسالة -->
-            <footer class="chat-footer">
-                <div class="input-container">
-                    <button class="btn-attach" title="إرسال ملف">📎</button>
-                    <input 
-                        type="text" 
-                        id="messageInput" 
-                        placeholder="اكتب رسالتك هنا..."
-                        class="message-input"
-                    >
-                    <button id="sendBtn" class="btn-send" title="إرسال">📤</button>
-                </div>
-                <div class="chat-info">
-                    <p id="onlineCount">المتصلون: 0</p>
-                </div>
-            </footer>
-        </main>
+          </div>
+        </div>
+        <button class="btn-main" onclick="guestLogin()">دخول</button>
+      </div>
     </div>
+    <hr>
+    <div class="login-section">
+      <button class="btn-main" onclick="toggleBox('memberForm')">دخول الأعضاء</button>
+      <div id="memberForm" class="hidden">
+        <input id="memberName" placeholder="اسم المستخدم">
+        <input id="memberPass" type="password" placeholder="الباسورد">
+        <button class="btn-main" onclick="memberLogin()">دخول</button>
+      </div>
+    </div>
+    <hr>
+    <div class="login-section">
+      <button class="btn-main" onclick="toggleBox('registerForm')">تسجيل</button>
+      <div id="registerForm" class="hidden">
+        <input id="regName" placeholder="اسم المستخدم">
+        <input id="regPass" type="password" placeholder="الباسورد">
+        <input id="regEmail" type="email" placeholder="البريد الالكتروني">
+        <button class="btn-main" onclick="register()">انشاء حساب</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="app.js"></script>
+<div id="roomsPage" class="page">
+  <div class="login-box">
+    <h2>اختر الغرفة</h2>
+    <div id="roomsList2"></div>
+  </div>
+</div>
+
+<div id="chatPage" class="page">
+  <header class="topbar">
+    <div class="topbar-right">
+      <span class="icon" onclick="toggleSidebar()">☰</span>
+      <span class="icon">Store</span>
+      <span class="icon">✉️</span>
+      <span class="icon" onclick="showUsers()">👥</span>
+      <span class="icon">❤️</span>
+    </div>
+    <div class="topbar-left">
+      <img id="myAvatar" class="avatar" src="" onclick="openProfile()">
+    </div>
+  </header>
+  <div class="chat-wrapper">
+    <div id="chatBox"></div>
+  </div>
+  <footer class="inputbar">
+    <span class="icon">+</span>
+    <span class="icon">😊</span>
+    <input id="messageInput" placeholder="اكتب هنا...">
+    <span class="icon">🎤</span>
+    <button id="sendBtn" class="send-btn">➤</button>
+  </footer>
+  <div class="bottombar">
+    <span class="icon">🔊</span>
+    <span class="icon">▶️</span>
+    <span id="roomNameNow">عام</span>
+    <span class="icon">⚙️</span>
+    <span class="icon" onclick="goHome()">🏠</span>
+    <span class="icon" onclick="openProfile()">👤</span>
+  </div>
+  <div id="sidebar" class="sidebar hidden">
+    <div onclick="goRooms()">الغرف</div>
+    <div>الإعدادات</div>
+    <div onclick="logout()">تسجيل الخروج</div>
+  </div>
+  <div id="usersSidebar" class="sidebar hidden">
+    <input placeholder="🔍 ابحث عن عضو">
+    <div id="usersList"></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
