@@ -1,117 +1,31 @@
-ڨconst socket = io();
-const chatBox = document.getElementById('chatBox');
-const usersList = document.getElementById('usersList');
-const roomsList2 = document.getElementById('roomsList2');
-const messageInput = document.getElementById('messageInput');
-const sendBtn = document.getElementById('sendBtn');
-
-let myData = {name:'', gender:'ذكر', color:'blue', age: Math.floor(Math.random() * 80) + 20, rank:'عضو'};
-let currentRoom = null;
-
-// ===== 1. اكواد صفحة الدخول =====
-function showGuestForm(){ document.getElementById('guestForm').classList.toggle('hidden'); }
-function toggleBox(id){ document.getElementById(id).classList.toggle('hidden'); }
-function toggleGenderList(){ document.getElementById('genderList').classList.toggle('hidden'); }
-
-function selectGender(gender, color){
-  myData.gender = gender;
-  myData.color = color;
-  document.getElementById('genderList').classList.add('hidden');
-}
-
-function guestLogin(){
-  const name = document.getElementById('guestName').value.trim();
-  if(!name) return alert('اكتب اسمك');
-  myData.name = name;
-  myData.rank = 'زائر';
-  enterChat();
-}
-
-function memberLogin(){ 
-  myData.name = document.getElementById('memberName').value; 
-  myData.rank = 'عضو';
-  enterChat(); 
-}
-
-function register(){ 
-  myData.name = document.getElementById('regName').value; 
-  myData.rank = 'عضو جديد';
-  enterChat(); 
-}
-
-function enterChat(){
-  document.getElementById('loginPage').classList.remove('active');
-  document.getElementById('roomsPage').classList.add('active');
-  document.getElementById('myAvatar').style.borderColor = myData.color; // لون الاطار حسب الجنس
-  socket.emit('join', myData); // ارسل بياناتي للسيرفر
-}
-
-function logout(){ location.reload(); }
-function goHome(){ goRooms(); }
-function goRooms(){
-  document.getElementById('chatPage').classList.remove('active');
-  document.getElementById('roomsPage').classList.add('active');
-}
-function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('hidden'); }
-function showUsers(){ document.getElementById('usersSidebar').classList.toggle('hidden'); }
-function openProfile(){ alert(`الاسم: ${myData.name}\nالرتبة: ${myData.rank}\nالجنس: ${myData.gender}\nالعمر: ${myData.age}`); }
-
-// ===== 2. اكواد الغرف المعدل =====
-socket.on('rooms', (rooms) => {
-  roomsList2.innerHTML = '';
-  rooms.forEach(room => {
-    roomsList2.innerHTML += `<div class="room-item" onclick="enterRoom('${room._id}','${room.name}')">${room.name}</div>`;
-  });
-});
-
-function enterRoom(roomId, roomName){
-  currentRoom = roomId;
-  document.getElementById('roomsPage').classList.remove('active');
-  document.getElementById('chatPage').classList.add('active');
-  document.getElementById('roomNameNow').innerText = roomName;
-  socket.emit('joinRoom', roomId); // ادخل الغرفة
-  chatBox.innerHTML = `<div class="msg"><b style="color:${myData.color}">انضم للغرفة ${myData.name} [${myData.rank}] اهلا وسهلا</b></div>`;
-}
-
-// ===== 3. اكواد الشات =====
-socket.on('oldMessages', (msgs) => {
-  msgs.forEach(msg => addMsg(msg));
-});
-
-socket.on('users', (users) => {
-  usersList.innerHTML = '';
-  users.forEach(user => {
-    usersList.innerHTML += `<div class="user-item"><span style="color:${user.color}">●</span> ${user.name}</div>`;
-  });
-});
-
-socket.on('message', (msg) => addMsg(msg));
-
-function addMsg(msg){
-  chatBox.innerHTML += `
-    <div class="msg">
-      <b class="username" style="color:${msg.user.color || '#000'}">${msg.user.name}</b>:
-      <span class="msg-text">${msg.text}</span>
-    </div>
-  `;
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-sendBtn.onclick = () => {
-  if(messageInput.value.trim() && currentRoom){
-    socket.emit('sendMessage', {roomId: currentRoom, text: messageInput.value, user: myData});
-    messageInput.value = '';
-  }
-};
-messageInput.addEventListener('keypress', e => {
-  if(e.key === 'Enter') sendBtn.click();
-});
-
-// المنشن بالضغط على الاسم فقط
-document.body.addEventListener('click', (e) => {
-  if (e.target.classList.contains('username')) {
-    const username = e.target.innerText;
-    messageInput.value = username + ' ';
-    messageInput.focus();
-  }
-});
+:root { --blue: #38bdf8; --pink: #ec4899; --white: #fff; --bg: #0f172a; --box: #1e293b; }
+body { margin:0; font-family: 'Tajawal', sans-serif; background: var(--bg); color: #fff; direction: rtl; }
+.hidden { display: none !important; }
+.page { display: none; height: 100vh; }
+.page.active { display: block; }
+.login-box { max-width: 400px; margin: 50px auto; background: var(--box); padding: 20px; border-radius: 12px; text-align: center; }
+.login-box h1 { color: var(--blue); margin-bottom: 20px; }
+.btn-main { width: 100%; padding: 12px; margin: 8px 0; background: var(--blue); border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; }
+.input-group { display: flex; gap: 5px; margin: 8px 0; }
+.input-group input { flex:1; padding: 10px; border-radius: 8px; border: none; background: #334155; color: #fff; }
+.gender-select { position: relative; }
+.gender-select button { padding: 10px; border-radius: 8px; border: none; background: #334155; color: #fff; }
+#genderList { position: absolute; top: 100%; right: 0; background: #334155; border-radius: 8px; width: 100px; z-index: 10; }
+#genderList div { padding: 8px; cursor: pointer; }
+#genderList div:hover { background: #475569; }
+input { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: none; background: #334155; color: #fff; box-sizing: border-box; }
+hr { border: none; border-top: 1px solid #334155; margin: 15px 0; }
+.topbar { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 8px 12px; }
+.topbar .icon { margin: 0 6px; font-size: 20px; cursor: pointer; }
+.avatar { width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--blue); cursor: pointer; }
+.chat-wrapper { height: calc(100vh - 130px); background: #fff; color: #000; overflow-y: auto; padding: 10px; }
+.msg { margin-bottom: 8px; }
+.username { cursor: pointer; font-weight: bold; }
+.inputbar { display: flex; align-items: center; background: #334155; padding: 8px; }
+.inputbar .icon { font-size: 22px; margin: 0 6px; cursor: pointer; }
+#messageInput { flex:1; padding: 10px; border-radius: 20px; border: none; }
+.send-btn { background: var(--blue); border: none; border-radius: 50%; width: 40px; height: 40px; color: #000; font-size: 18px; cursor: pointer; }
+.bottombar { display: flex; justify-content: space-around; align-items: center; background: #000; padding: 8px; font-size: 18px; }
+.sidebar { position: fixed; top:0; right:0; width: 250px; height: 100%; background: var(--box); padding: 15px; z-index: 20; }
+.sidebar div { padding: 10px; margin: 5px 0; background: #334155; border-radius: 8px; cursor: pointer; }
+.room-item { padding: 12px; margin: 8px 0; background: #334155; border-radius: 8px; cursor: pointer; text-align: center; }
