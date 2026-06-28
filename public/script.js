@@ -1,0 +1,109 @@
+const socket = io();
+const chatBox = document.getElementById('chatBox');
+const usersList = document.getElementById('usersList');
+const roomsList2 = document.getElementById('roomsList2');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+
+let myData = {name:'', gender:'ذكر', color:'blue', age: Math.floor(Math.random() * 80) + 20, rank:'عضو'};
+let currentRoom = null;
+
+function showGuestForm(){ document.getElementById('guestForm').classList.toggle('hidden'); }
+function toggleBox(id){ document.getElementById(id).classList.toggle('hidden'); }
+function toggleGenderList(){ document.getElementById('genderList').classList.toggle('hidden'); }
+
+function selectGender(gender, color){
+  myData.gender = gender;
+  myData.color = color;
+  document.getElementById('genderList').classList.add('hidden');
+}
+
+function guestLogin(){
+  const name = document.getElementById('guestName').value.trim();
+  if(!name) return alert('اكتب اسمك');
+  myData.name = name;
+  myData.rank = 'زائر';
+  enterChat();
+}
+
+function memberLogin(){ 
+  myData.name = document.getElementById('memberName').value; 
+  myData.rank = 'عضو';
+  enterChat(); 
+}
+
+function register(){ 
+  myData.name = document.getElementById('regName').value; 
+  myData.rank = 'عضو جديد';
+  enterChat(); 
+}
+
+function enterChat(){
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('roomsPage').classList.add('active');
+  document.getElementById('myAvatar').style.borderColor = myData.color;
+  socket.emit('join', myData);
+}
+
+function logout(){ location.reload(); }
+function goHome(){ goRooms(); }
+function goRooms(){
+  document.getElementById('chatPage').classList.remove('active');
+  document.getElementById('roomsPage').classList.add('active');
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('hidden'); }
+function showUsers(){ document.getElementById('usersSidebar').classList.toggle('hidden'); }
+function openProfile(){ alert(`الاسم: ${myData.name}\nالرتبة: ${myData.rank}\nالجنس: ${myData.gender}\nالعمر: ${myData.age}`); }
+
+socket.on('rooms', (rooms) => {
+  roomsList2.innerHTML = '';
+  rooms.forEach(room => {
+    roomsList2.innerHTML += `<div class="room-item" onclick="enterRoom('${room._id}','${room.name}')">${room.name}</div>`;
+  });
+});
+
+function enterRoom(roomId, roomName){
+  currentRoom = roomId;
+  document.getElementById('roomsPage').classList.remove('active');
+  document.getElementById('chatPage').classList.add('active');
+  document.getElementById('roomNameNow').innerText = roomName;
+  socket.emit('joinRoom', roomId);
+  chatBox.innerHTML = `<div class="msg"><b style="color:${myData.color}">انضم للغرفة ${myData.name} [${myData.rank}] اهلا وسهلا</b></div>`;
+}
+
+socket.on('oldMessages', (msgs) => { msgs.forEach(msg => addMsg(msg)); });
+socket.on('users', (users) => {
+  usersList.innerHTML = '';
+  users.forEach(user => {
+    usersList.innerHTML += `<div class="user-item"><span style="color:${user.color}">●</span> ${user.name}</div>`;
+  });
+});
+socket.on('message', (msg) => addMsg(msg));
+
+function addMsg(msg){
+  chatBox.innerHTML += `
+    <div class="msg">
+      <b class="username" style="color:${msg.user.color || '#000'}">${msg.user.name}</b>:
+      <span class="msg-text">${msg.text}</span>
+    </div>
+  `;
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+sendBtn.onclick = () => {
+  if(messageInput.value.trim() && currentRoom){
+    socket.emit('sendMessage', {roomId: currentRoom, text: messageInput.value, user: myData});
+    messageInput.value = '';
+  }
+};
+messageInput.addEventListener('keypress', e => {
+  if(e.key === 'Enter') sendBtn.click();
+});
+
+document.body.addEventListener('click', (e) => {
+  if (e.target.classList.contains('username')) {
+    const username = e.target.innerText;
+    messageInput.value = username + ' ';
+    messageInput.focus();
+  }
+});
