@@ -1,7 +1,7 @@
 {
   "name": "yemen-chat",
   "version": "2.0.0",
-  "description": "شات اليمن العربي - نظام غرف ورتب",
+  "description": "شات ＭＳＡＲ - نظام غرف",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
