@@ -4,67 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>شات اليمن العربي</title>
+<link rel="stylesheet" href="/style.css">
 <script src="/socket.io/socket.io.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
-body{background:#0f172a;color:#fff;overflow:hidden}
-.hidden{display:none!important}
-.flex{display:flex;align-items:center;gap:8px}
-
-/* ===== صفحة البداية ===== */
-#home{width:100%;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:linear-gradient(180deg,#1e293b,#0f172a)}
-#home h1{font-size:32px;margin-bottom:30px;color:#fbbf24}
-.box{background:#1e293b;padding:20px;border-radius:12px;width:90%;max-width:350px;margin:10px 0;text-align:center}
-input,select,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none;background:#334155;color:#fff;font-size:15px}
-button{background:#6366f1;cursor:pointer;font-weight:bold}
-.btn-guest{background:#22c55e}
-.btn-member{background:#3b82f6}
-.btn-register{background:#f59e0b}
-.gender-box{display:flex;gap:5px}
-.gender-box select{flex:1}
-
-/* ===== صفحة الغرف ===== */
-#roomsPage{width:100%;height:100vh;padding:20px;background:#0f172a}
-#roomsPage h2{margin-bottom:15px;text-align:center}
-.roomCard{background:#1e293b;padding:15px;border-radius:10px;margin:10px 0;cursor:pointer;text-align:center;font-size:18px}
-.roomCard:hover{background:#334155}
-
-/* ===== واجهة الشات ===== */
-#chatPage{width:100%;height:100vh;display:flex;flex-direction:column;background:#fff;color:#000}
-.topbar{background:#000;color:#fff;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
-.topbar .left,.topbar .right{display:flex;gap:12px;font-size:20px}
-.avatar{width:32px;height:32px;border-radius:50%;border:3px solid #fff}
-.avatar.male{border-color:#3b82f6}
-.avatar.female{border-color:#ec4899}
-.avatar.other{border-color:#fff}
-
-.chatArea{flex:1;overflow:auto;padding:10px;background:#f3f4f6}
-.msg{background:#e5e7eb;padding:8px 12px;border-radius:8px;margin:5px 0;max-width:80%}
-.msg .name{font-weight:bold;font-size:13px}
-.msg .time{font-size:11px;color:#6b7280}
-.vip{color:#f59e0b}
-
-.inputBar{background:#d1d5db;padding:8px;display:flex;align-items:center;gap:8px}
-.inputBar input{flex:1;padding:10px;border-radius:20px;border:none}
-.iconBtn{background:#fff;color:#000;border-radius:50%;width:40px;height:40px;display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:18px}
-
-.bottombar{background:#000;color:#fff;padding:8px;display:flex;justify-content:space-around;font-size:22px}
-.bottombar span{cursor:pointer}
-
-/* ===== القائمة الجانبية ===== */
-#sideMenu{position:absolute;top:0;right:-250px;width:250px;height:100%;background:#1e293b;transition:0.3s;z-index:999;padding:20px}
-#sideMenu.active{right:0}
-#sideMenu h3{margin-bottom:10px}
-
-/* ===== ملف شخصي ===== */
-#profilePage{position:absolute;top:0;left:0;width:100%;height:100%;background:#0f172a;padding:20px;z-index:998}
-</style>
 </head>
 <body>
 
 <!-- 1. الصفحة الرئيسية -->
 <div id="home">
-  <h1>شات اليمن العربي</h1>
+  <h1>شات ＭＳＡＲ</h1>
   
   <!-- دخول الزوار -->
   <div class="box">
@@ -115,11 +62,11 @@ button{background:#6366f1;cursor:pointer;font-weight:bold}
 <div id="chatPage" class="hidden">
   <!-- الشريط العلوي -->
   <div class="topbar">
-    <div class="left">
+    <div class="left flex">
       <span onclick="toggleMenu()">☰</span>
       <span>Store</span>
       <span>✉️</span>
-      <span onclick="toggleUsers()">👥</span>
+      <span onclick="toggleUsers()">👥 <span id="usersCount">0</span></span>
       <span>❤️</span>
     </div>
     <div class="right">
@@ -170,91 +117,6 @@ button{background:#6366f1;cursor:pointer;font-weight:bold}
   </div>
 </div>
 
-<script>
-let socket, user = {}, currentRoom = 'عام اليمن', soundOn = true;
-
-// تعبئة العمر 20 الى 99
-for(let i=20;i<=99;i++) document.getElementById('guestAge').innerHTML += `<option>${i}</option>`;
-
-const $ = id => document.getElementById(id);
-function toggleBox(id){$(id).classList.toggle('hidden')}
-function showGuestBox(){$('guestBox').classList.remove('hidden')}
-
-// ===== دخول زائر =====
-function joinGuest(){
-  user = {name:$('guestName').value||'زائر', gender:$('guestGender').value, age:$('guestAge').value, rank:'زائر'};
-  setAvatarColor();
-  showRooms();
-}
-
-// ===== تسجيل + دخول =====
-async function register(){
-  const res = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({name:$('regName').value,password:$('regPass').value,gender:'ذكر',age:25})});
-  const data = await res.json();
-  if(!data.error){alert('تم التسجيل'); user=data.user; showRooms();}
-  else alert(data.error);
-}
-async function login(){
-  const res = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({name:$('loginName').value,password:$('loginPass').value})});
-  const data = await res.json();
-  if(!data.error){user=data.user; setAvatarColor(); showRooms();}
-  else alert(data.error);
-}
-
-// ===== لون الايقونه حسب الجنس =====
-function setAvatarColor(){
-  $('myAvatar').classList.remove('male','female','other');
-  if(user.gender==='ذكر') $('myAvatar').classList.add('male');
-  else if(user.gender==='انثى') $('myAvatar').classList.add('female');
-  else $('myAvatar').classList.add('other');
-}
-
-// ===== الغرف =====
-async function showRooms(){
-  $('home').classList.add('hidden');
-  $('roomsPage').classList.remove('hidden');
-  const rooms = await fetch('/api/rooms').then(r=>r.json());
-  $('roomsList').innerHTML = rooms.map(r=>`<div class="roomCard" onclick="joinRoom('${r.name}')">${r.name}</div>`).join('');
-  $('menuRooms').innerHTML = $('roomsList').innerHTML;
-}
-async function joinRoom(name){
-  currentRoom=name; $('currentRoomName').innerText=name;
-  $('roomsPage').classList.add('hidden');
-  $('chatPage').classList.remove('hidden');
-  
-  socket = io();
-  socket.emit('join',{name:user.name,gender:user.gender,age:user.age,rank:user.rank,room:name});
-  
-  const msgs = await fetch('/api/messages/'+encodeURIComponent(name)).then(r=>r.json());
-  $('messages').innerHTML = msgs.map(m=>msgHTML(m)).join('');
-  $('messages').innerHTML += `<div style="text-align:center;color:#22c55e;margin:10px 0">انضم للغرفة ${user.name} [${user.rank}] اهلا وسهلا</div>`;
-  
-  socket.on('message', m => $('messages').innerHTML += msgHTML(m));
-  socket.on('system', t => $('messages').innerHTML += `<div style="text-align:center;color:#6b7280;font-size:12px">${t}</div>`);
-}
-function msgHTML(m){
-  const vip = m.rank==='مالك'||m.rank==='اداري' ? '[زينة مميز]' : '';
-  const color = m.rank==='مالك'?'color:#f59e0b':m.rank==='اداري'?'color:#ef4444':'';
-  return `<div class="msg"><span class="name" style="${color}" onclick="alert('ملف ${m.name}')">${m.name}</span> <span class="vip">${vip}</span><div>${m.msg}</div><div class="time">${new Date(m.time).toLocaleTimeString('ar')}</div></div>`;
-}
-function sendMsg(){
-  const msg = $('msgInput').value.trim(); if(!msg) return;
-  socket.emit('chatMessage',{msg}); $('msgInput').value='';
-}
-
-// ===== القوائم =====
-function toggleMenu(){$('sideMenu').classList.toggle('active')}
-function toggleUsers(){alert('قائمة المستخدمين')}
-function toggleSound(){soundOn=!soundOn; alert(soundOn?'الصوت شغال':'تم الكتم')}
-function showProfile(){
-  $('pName').innerText=user.name; $('pAge').innerText=user.age; $('pGender').innerText=user.gender;
-  $('profilePage').classList.remove('hidden');
-}
-function hideProfile(){$('profilePage').classList.add('hidden')}
-function goHome(){$('chatPage').classList.add('hidden');$('roomsPage').classList.remove('hidden');if(socket)socket.disconnect()}
-function logout(){location.reload()}
-</script>
+<script src="/script.js"></script>
 </body>
 </html>
