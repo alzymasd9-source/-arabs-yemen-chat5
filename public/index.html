@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ＭＳＡＲ</title>
+<title>شات ＭＳＡＲ</title>
 <link rel="stylesheet" href="/style.css">
 <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -11,7 +11,7 @@
 
 <!-- 1. الصفحة الرئيسية -->
 <div id="home">
-  <h1>شات ＭＳＡＲ</h1>
+  <h1 style="font-size:42px;letter-spacing:3px;font-weight:900;background:linear-gradient(90deg,#fbbf24,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 20px #fbbf24;">شات ＭＳＡＲ</h1>
   
   <!-- دخول الزوار -->
   <div class="box">
@@ -54,7 +54,7 @@
 
 <!-- 2. صفحة اختيار الغرف -->
 <div id="roomsPage" class="hidden">
-  <h2>اختر الغرفة</h2>
+  <h2>اختر الغرفة - ＭＳＡＲ</h2>
   <div id="roomsList"></div>
 </div>
 
@@ -64,7 +64,7 @@
   <div class="topbar">
     <div class="left flex">
       <span onclick="toggleMenu()">☰</span>
-      <span>Store</span>
+      <span style="color:#fbbf24;font-weight:bold;">ＭＳＡＲ</span>
       <span>✉️</span>
       <span onclick="toggleUsers()">👥 <span id="usersCount">0</span></span>
       <span>❤️</span>
@@ -89,7 +89,7 @@
   <!-- الشريط السفلي -->
   <div class="bottombar">
     <span onclick="toggleSound()">🔊</span>
-    <span onclick="alert('اذاعة')">▶️</span>
+    <span onclick="alert('اذاعة ＭＳＡＲ')">▶️</span>
     <span id="currentRoomName">عام اليمن</span>
     <span>⚙️</span>
     <span onclick="goHome()">🏠</span>
@@ -99,7 +99,7 @@
 
 <!-- القائمة الجانبية -->
 <div id="sideMenu">
-  <h3>القائمة</h3>
+  <h3 style="color:#fbbf24;">ＭＳＡＲ</h3>
   <div id="menuRooms"></div>
   <button onclick="toggleMenu()">اغلاق</button>
   <button onclick="logout()">تسجيل الخروج</button>
@@ -108,7 +108,7 @@
 <!-- ملف شخصي -->
 <div id="profilePage" class="hidden">
   <div class="box">
-    <h2>ملفي الشخصي</h2>
+    <h2>ملفي - ＭＳＡＲ</h2>
     <p>الاسم: <span id="pName"></span></p>
     <p>العمر: <span id="pAge"></span></p>
     <p>الجنس: <span id="pGender"></span></p>
