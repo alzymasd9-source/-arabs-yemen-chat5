@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شات غرف الجوال مع الإيموجي</title>
+    <title>شات غرف الجوال مع نظام الحظر</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f7fb; margin: 0; padding: 0; }
         #chat-container { max-width: 500px; margin: 20px auto; background: #fff; height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; position: relative; }
         
-        /* شريط التحكم بالرتب والغرف */
         #control-bar { display: flex; background: #007bff; padding: 10px; gap: 5px; }
         #control-bar select, #control-bar input { padding: 8px; border: none; border-radius: 5px; outline: none; font-size: 13px; }
         #name-input { flex: 1; }
@@ -20,7 +19,7 @@
         .sent { background: #e3f2fd; align-self: flex-end; color: #333; border: 1px solid #bbdefb; }
         .system-msg { background: #fff3cd; color: #856404; align-self: center; text-align: center; font-size: 12px; border-radius: 5px !important; max-width: 90% !important; padding: 5px 10px !important; }
 
-        /* ألوان الرتب */
+        /* الرتب والتنسيقات */
         .badge { font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 3px; color: #fff; margin-left: 5px; display: inline-block; }
         .role-admin { color: #d32f2f; font-weight: bold; }
         .role-admin .badge { background: #d32f2f; }
@@ -29,18 +28,17 @@
         .role-user { color: #0288d1; font-weight: bold; }
         .role-user .badge { background: #0288d1; }
 
-        /* أسفل الشات وأزرار الإرسال */
+        /* زر الحظر الأحمر */
+        .ban-btn { color: #d32f2f; cursor: pointer; margin-right: 8px; font-size: 12px; font-weight: normal; text-decoration: underline; }
+
         #form-container { display: flex; padding: 10px; background: #fff; border-top: 1px solid #eee; position: relative; }
         #msg-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
         
-        /* زر الإيموجي */
         #emoji-btn { background: #f0f0f0; border: 1px solid #ddd; padding: 0 12px; margin-left: 5px; border-radius: 5px; cursor: pointer; font-size: 18px; display: flex; align-items: center; }
         #send-btn { background: #007bff; color: white; border: none; padding: 0 20px; margin-right: 5px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* تصميم صندوق الإيموجي المنبثق */
         #emoji-picker { display: none; position: absolute; bottom: 60px; right: 10px; background: #fff; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; width: 220px; padding: 10px; grid-template-columns: repeat(5, 1fr); gap: 5px; z-index: 100; }
-        #emoji-picker span { font-size: 22px; text-align: center; cursor: pointer; padding: 3px; border-radius: 4px; transition: background 0.2s; user-select: none; }
-        #emoji-picker span:hover { background: #f0f0f0; }
+        #emoji-picker span { font-size: 22px; text-align: center; cursor: pointer; padding: 3px; border-radius: 4px; user-select: none; }
     </style>
 </head>
 <body>
@@ -62,12 +60,10 @@
 
     <ul id="messages"></ul>
     
-    <!-- لوحة الإيموجي المنبثقة -->
     <div id="emoji-picker">
         <span>😂</span><span>🤣</span><span>😍</span><span>🥰</span><span>😘</span>
         <span>😊</span><span>😎</span><span>😉</span><span>😭</span><span>💔</span>
-        <span>❤️</span><span>🔥</span><span>👍</span><span>👏</span><span>تق</span>
-        <span>🌹</span><span>✨</span><span>👑</span><span>🤍</span><span>👋</span>
+        <span>❤️</span><span>🔥</span><span>👍</span><span>👏</span><span>🌹</span>
     </div>
 
     <div id="form-container">
@@ -86,37 +82,34 @@
     const roleSelect = document.getElementById('role-select');
     const roomSelect = document.getElementById('room-select');
     const sendBtn = document.getElementById('send-btn');
-    
-    // عناصر الإيموجي الجديدة
     const emojiBtn = document.getElementById('emoji-btn');
     const emojiPicker = document.getElementById('emoji-picker');
 
     let currentRoom = roomSelect.value;
-    socket.emit('join room', currentRoom);
+    
+    // إرسال طلب الانضمام للغرفة
+    function joinChatRoom() {
+        socket.emit('join room', { room: currentRoom, name: nameInput.value || 'زائر' });
+    }
+    
+    joinChatRoom();
 
     roomSelect.addEventListener('change', () => {
         messages.innerHTML = '';
         currentRoom = roomSelect.value;
-        socket.emit('join room', currentRoom);
+        joinChatRoom();
     });
 
-    // إظهار وإخفاء لوحة الإيموجي عند الضغط على الزر
-    emojiBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        emojiPicker.style.display = (emojiPicker.style.display === 'grid') ? 'none' : 'grid';
+    // تبديل الاسم يعيد تسجيل الدخول للغرفة بالاسم الجديد
+    nameInput.addEventListener('change', () => {
+        messages.innerHTML = '';
+        joinChatRoom();
     });
 
-    // إغلاق اللوحة تلقائياً عند الضغط في أي مكان خارجها
-    document.addEventListener('click', () => {
-        emojiPicker.style.display = 'none';
-    });
-
-    // عند الضغط على أي إيموجي، يتم إدراجه داخل صندوق النص مباشرة
+    emojiBtn.addEventListener('click', (e) => { e.stopPropagation(); emojiPicker.style.display = (emojiPicker.style.display === 'grid') ? 'none' : 'grid'; });
+    document.addEventListener('click', () => { emojiPicker.style.display = 'none'; });
     emojiPicker.querySelectorAll('span').forEach(emoji => {
-        emoji.addEventListener('click', () => {
-            msgInput.value += emoji.innerText;
-            msgInput.focus(); // إعادة مؤشر الكتابة لصندوق النص
-        });
+        emoji.addEventListener('click', () => { msgInput.value += emoji.innerText; msgInput.focus(); });
     });
 
     sendBtn.addEventListener('click', sendMessage);
@@ -131,9 +124,14 @@
                 text: msgInput.value
             });
             msgInput.value = '';
-            emojiPicker.style.display = 'none'; // إخفاء القائمة بعد الإرسال
+            emojiPicker.style.display = 'none';
         }
     }
+
+    // استقبال رسالة طرد من السيرفر وإغلاق الشات للمطرود
+    socket.on('banned', (msg) => {
+        document.body.innerHTML = `<div style="text-align:center; margin-top:100px; color:#d32f2f; font-family:Arial; font-size:24px; font-weight:bold;">🚫 ${msg}</div>`;
+    });
 
     socket.on('chat message', (data) => {
         const li = document.createElement('li');
@@ -147,17 +145,30 @@
             li.innerText = data.text;
         } else {
             li.className = (data.name === nameInput.value) ? 'sent' : 'received';
+            
+            // إضافة زر الحظر فقط إذا كان القارئ (أنت) مشرفاً أو رئيساً، والمرسِل شخصاً آخر وليس أنت نفسك
+            let banHtml = '';
+            if ((roleSelect.value === 'admin' || roleSelect.value === 'mod') && data.name !== nameInput.value) {
+                banHtml = `<span class="ban-btn" onclick="banUser('${data.name}')">طرد ⛔</span>`;
+            }
+
             li.innerHTML = `
                 <span class="${roleClass}">
-                    <span class="badge">${roleTitle}</span> ${data.name}:
+                    <span class="badge">${roleTitle}</span> ${data.name}: ${banHtml}
                 </span>
                 <span style="margin-top:4px;">${data.text}</span>
             `;
         }
         messages.appendChild(li);
-        messages.scrollHeight;
         messages.scrollTop = messages.scrollHeight;
     });
+
+    // دالة إرسال أمر الطرد للخادم
+    function banUser(username) {
+        if (confirm(`هل أنت متأكد من حظر المستخدم [ ${username} ] نهائياً؟`)) {
+            socket.emit('admin ban user', username);
+        }
+    }
 </script>
 </body>
 </html>
