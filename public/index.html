@@ -1,67 +1,72 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>اليمن</title>
-<link rel="stylesheet" href="style.css">
-<script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شات الجوال كتابي</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f7fb; margin: 0; padding: 0; }
+        #chat-container { max-width: 500px; margin: 20px auto; background: #fff; height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; }
+        #messages { flex: 1; padding: 15px; overflow-y: auto; list-style-type: none; margin: 0; }
+        #messages li { padding: 10px 15px; margin-bottom: 10px; border-radius: 20px; max-width: 75%; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; }
+        .received { background: #eef2f7; align-self: flex-start; color: #333; }
+        .sent { background: #007bff; align-self: flex-end; color: #fff; }
+        .user-name { font-weight: bold; font-size: 12px; margin-bottom: 3px; color: #ff5722; }
+        #form-container { display: flex; padding: 10px; background: #fff; border-top: 1px solid #eee; }
+        #name-input { width: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-left: 5px; text-align: center; }
+        #msg-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
+        #send-btn { background: #007bff; color: white; border: none; padding: 0 20px; margin-right: 5px; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
-<div id="app">
-  <div id="home" class="center">
-    <h1>اليمن</h1>
-    <div class="box">
-      <h3>دخول زائر</h3>
-      <input id="guestName" placeholder="اسمك">
-      <select id="guestGender"><option>ذكر</option><option>انثى</option><option>آخر</option></select>
-      <select id="guestAge"></select>
-      <button onclick="joinGuest()">دخول</button>
-      <button onclick="toggleBox('guestBox')">تسجيل/دخول</button>
+
+<div id="chat-container">
+    <ul id="messages"></ul>
+    <div id="form-container">
+        <input id="name-input" type="text" placeholder="الاسم" value="زائر">
+        <input id="msg-input" type="text" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+        <button id="send-btn">إرسال</button>
     </div>
-    <div id="guestBox" class="box hidden">
-      <h3>تسجيل جديد</h3>
-      <input id="regName" placeholder="اسم المستخدم">
-      <input id="regPass" type="password" placeholder="كلمة السر">
-      <button onclick="register()">تسجيل</button>
-      <h3>دخول</h3>
-      <input id="loginName" placeholder="اسم المستخدم">
-      <input id="loginPass" type="password" placeholder="كلمة السر">
-      <button onclick="login()">دخول</button>
-    </div>
-  </div>
-  <div id="roomsPage" class="hidden">
-    <header><h2>غرف اليمن</h2><button onclick="logout()">خروج</button></header>
-    <div id="roomsList"></div>
-  </div>
-  <div id="chatPage" class="hidden">
-    <header>
-      <button onclick="toggleMenu()">☰</button>
-      <h2 id="currentRoomName"></h2>
-      <button onclick="goHome()">🏠</button>
-    </header>
-    <div id="sideMenu">
-      <button onclick="showProfile()">👤 ملفي</button>
-      <button onclick="toggleSound()">🔊 صوت</button>
-      <div id="menuRooms"></div>
-    </div>
-    <div id="messages"></div>
-    <div id="chatFooter">
-      <span id="usersCount">0</span>
-      <input id="msgInput" placeholder="اكتب رسالتك..." onkeydown="if(event.key==='Enter')sendMsg()">
-      <button onclick="sendMsg()">ارسال</button>
-    </div>
-  </div>
-  <div id="profilePage" class="hidden center">
-    <div class="box">
-      <div id="myAvatar" class="avatar big"></div>
-      <h3 id="pName"></h3>
-      <p>العمر: <span id="pAge"></span></p>
-      <p>الجنس: <span id="pGender"></span></p>
-      <button onclick="hideProfile()">رجوع</button>
-    </div>
-  </div>
 </div>
-<script src="script.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const messages = document.getElementById('messages');
+    const msgInput = document.getElementById('msg-input');
+    const nameInput = document.getElementById('name-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+
+    function sendMessage() {
+        if (msgInput.value.trim() !== '') {
+            // إرسال الاسم والرسالة للخادم
+            socket.emit('chat message', {
+                name: nameInput.value || 'زائر',
+                text: msgInput.value
+            });
+            msgInput.value = '';
+        }
+    }
+
+    // استقبال الرسالة من الخادم وعرضها في الشات فوراً
+    socket.on('chat message', (data) => {
+        const li = document.createElement('li');
+        
+        // تمييز إذا كانت الرسالة مرسلة من نفس المستخدم أو مستخدم آخر
+        if(data.name === nameInput.value) {
+            li.className = 'sent';
+            li.innerHTML = `<span class="user-name" style="color:#fff;">${data.name}</span>${data.text}`;
+        } else {
+            li.className = 'received';
+            li.innerHTML = `<span class="user-name">${data.name}</span>${data.text}`;
+        }
+        
+        messages.appendChild(li);
+        messages.scrollTop = messages.scrollHeight; // نزول تلقائي لآخر رسالة
+    });
+</script>
 </body>
 </html>
