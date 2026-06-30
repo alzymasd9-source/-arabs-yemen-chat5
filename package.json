@@ -1,23 +1,26 @@
 {
-  "name": "yemen-chat",
-  "version": "2.0.0",
-  "description": "شات ＭＳＡＲ - نظام غرف",
+  "name": "msar-chat",
+  "version": "1.0.0",
+  "description": "شات ＭＳＡＲ",
   "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node server.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2",
-    "socket.io": "^4.7.5",
-    "mongoose": "^8.3.2",
-    "cors": "^2.8.5",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
     "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.2.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "socket.io": "^4.7.4"
   }
 }
