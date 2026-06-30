@@ -5,36 +5,68 @@ const io = require('socket.io')(http);
 
 app.use(express.static('public'));
 
+// قائمة لتخزين الأسماء المحظورة مؤقتاً في الذاكرة
+const bannedUsers = new Set();
+
 io.on('connection', (socket) => {
     let currentRoom = '';
+    let myName = '';
 
-    // عندما يطلب المستخدم الانضمام لغرفة معينة
-    socket.on('join room', (roomName) => {
-        // إذا كان في غرفة سابقة، يخرج منها أولاً
-        if(currentRoom) {
-            socket.leave(currentRoom);
+    socket.on('join room', (data) => {
+        // التحقق أولاً إذا كان الاسم محظوراً
+        if (bannedUsers.has(data.name)) {
+            socket.emit('banned', 'نأسف، هذا الاسم محظور من دخول الشات!');
+            return;
         }
-        
-        currentRoom = roomName;
-        socket.join(roomName); // إدخال المستخدم للغرفة برمجياً
 
-        // إرسال رسالة نظام لكل الموجودين في الغرفة تفيد بدخول مستخدم جديد
-        io.to(roomName).emit('chat message', {
+        if(currentRoom) { socket.leave(currentRoom); }
+        
+        currentRoom = data.room;
+        myName = data.name;
+        socket.join(currentRoom);
+
+        // حفظ اسم المستخدم داخل السوكيت للوصول إليه عند الحظر
+        socket.username = myName;
+
+        io.to(currentRoom).emit('chat message', {
             isSystem: true,
-            text: `📢 مستخدم جديد انضم إلى [ ${roomName} ]`
+            text: `📢 [ ${myName} ] انضم إلى الغرفة`
         });
     });
 
-    // استقبال الرسالة وتوجيهها للغرفة المحددة فقط
     socket.on('chat message', (data) => {
+        // منع إرسال الرسالة إذا تم حظر المستخدم أثناء الجلسة
+        if (bannedUsers.has(data.name)) {
+            socket.emit('banned', 'تم حظرك مؤخراً، لا يمكنك إرسال رسائل.');
+            return;
+        }
         io.to(data.room).emit('chat message', data);
     });
 
+    // استقبال أمر الحظر من المشرفين
+    socket.on('admin ban user', (targetName) => {
+        bannedUsers.add(targetName); // إضافة الاسم لقائمة الحظر
+
+        // إرسال إشعار للغرفة بالطرد
+        io.to(currentRoom).emit('chat message', {
+            isSystem: true,
+            text: `🚫 قام الإشراف بحظر المستخدم [ ${targetName} ] وطره من الشات!`
+        });
+
+        // البحث عن اتصال الشخص المحظور وفصله فوراً
+        io.sockets.sockets.forEach((s) => {
+            if (s.username === targetName) {
+                s.emit('banned', 'لقد تم حظرك من قبل إدارة الشات للمخالفة.');
+                s.disconnect(true);
+            }
+        });
+    });
+
     socket.on('disconnect', () => {
-        if(currentRoom) {
+        if(currentRoom && myName && !bannedUsers.has(myName)) {
             io.to(currentRoom).emit('chat message', {
                 isSystem: true,
-                text: `❌ غادر أحد المستخدمين الغرفة`
+                text: `❌ غادر [ ${myName} ] الغرفة`
             });
         }
     });
@@ -42,5 +74,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
-    console.log(`الشات المطور يعمل على المنفذ ${PORT}`);
+    console.log(`الشات المطور مع نظام الحظر يعمل على المنفذ ${PORT}`);
 });
