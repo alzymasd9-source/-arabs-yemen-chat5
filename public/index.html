@@ -3,27 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شات الجوال كتابي</title>
+    <title>شات غرف الجوال مع الإيموجي</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f7fb; margin: 0; padding: 0; }
-        #chat-container { max-width: 500px; margin: 20px auto; background: #fff; height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; }
-        #messages { flex: 1; padding: 15px; overflow-y: auto; list-style-type: none; margin: 0; }
-        #messages li { padding: 10px 15px; margin-bottom: 10px; border-radius: 20px; max-width: 75%; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; }
+        #chat-container { max-width: 500px; margin: 20px auto; background: #fff; height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; position: relative; }
+        
+        /* شريط التحكم بالرتب والغرف */
+        #control-bar { display: flex; background: #007bff; padding: 10px; gap: 5px; }
+        #control-bar select, #control-bar input { padding: 8px; border: none; border-radius: 5px; outline: none; font-size: 13px; }
+        #name-input { flex: 1; }
+
+        #messages { flex: 1; padding: 15px; overflow-y: auto; list-style-type: none; margin: 0; display: flex; flex-direction: column; }
+        #messages li { padding: 10px 15px; margin-bottom: 10px; border-radius: 15px; max-width: 75%; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; }
+        
         .received { background: #eef2f7; align-self: flex-start; color: #333; }
-        .sent { background: #007bff; align-self: flex-end; color: #fff; }
-        .user-name { font-weight: bold; font-size: 12px; margin-bottom: 3px; color: #ff5722; }
-        #form-container { display: flex; padding: 10px; background: #fff; border-top: 1px solid #eee; }
-        #name-input { width: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-left: 5px; text-align: center; }
+        .sent { background: #e3f2fd; align-self: flex-end; color: #333; border: 1px solid #bbdefb; }
+        .system-msg { background: #fff3cd; color: #856404; align-self: center; text-align: center; font-size: 12px; border-radius: 5px !important; max-width: 90% !important; padding: 5px 10px !important; }
+
+        /* ألوان الرتب */
+        .badge { font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 3px; color: #fff; margin-left: 5px; display: inline-block; }
+        .role-admin { color: #d32f2f; font-weight: bold; }
+        .role-admin .badge { background: #d32f2f; }
+        .role-mod { color: #388e3c; font-weight: bold; }
+        .role-mod .badge { background: #388e3c; }
+        .role-user { color: #0288d1; font-weight: bold; }
+        .role-user .badge { background: #0288d1; }
+
+        /* أسفل الشات وأزرار الإرسال */
+        #form-container { display: flex; padding: 10px; background: #fff; border-top: 1px solid #eee; position: relative; }
         #msg-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        #send-btn { background: #007bff; color: white; border: none; padding: 0 20px; margin-right: 5px; border-radius: 5px; cursor: pointer; }
+        
+        /* زر الإيموجي */
+        #emoji-btn { background: #f0f0f0; border: 1px solid #ddd; padding: 0 12px; margin-left: 5px; border-radius: 5px; cursor: pointer; font-size: 18px; display: flex; align-items: center; }
+        #send-btn { background: #007bff; color: white; border: none; padding: 0 20px; margin-right: 5px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* تصميم صندوق الإيموجي المنبثق */
+        #emoji-picker { display: none; position: absolute; bottom: 60px; right: 10px; background: #fff; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; width: 220px; padding: 10px; grid-template-columns: repeat(5, 1fr); gap: 5px; z-index: 100; }
+        #emoji-picker span { font-size: 22px; text-align: center; cursor: pointer; padding: 3px; border-radius: 4px; transition: background 0.2s; user-select: none; }
+        #emoji-picker span:hover { background: #f0f0f0; }
     </style>
 </head>
 <body>
 
 <div id="chat-container">
+    <div id="control-bar">
+        <input id="name-input" type="text" placeholder="اكتب اسمك" value="زائر">
+        <select id="role-select">
+            <option value="user">عضو 👤</option>
+            <option value="mod">مشرف 🛡️</option>
+            <option value="admin">رئيس 👑</option>
+        </select>
+        <select id="room-select">
+            <option value="عامة">الغرفة العامة</option>
+            <option value="مسابقات">غرفة المسابقات</option>
+            <option value="روقان">غرفة الروقان</option>
+        </select>
+    </div>
+
     <ul id="messages"></ul>
+    
+    <!-- لوحة الإيموجي المنبثقة -->
+    <div id="emoji-picker">
+        <span>😂</span><span>🤣</span><span>😍</span><span>🥰</span><span>😘</span>
+        <span>😊</span><span>😎</span><span>😉</span><span>😭</span><span>💔</span>
+        <span>❤️</span><span>🔥</span><span>👍</span><span>👏</span><span>تق</span>
+        <span>🌹</span><span>✨</span><span>👑</span><span>🤍</span><span>👋</span>
+    </div>
+
     <div id="form-container">
-        <input id="name-input" type="text" placeholder="الاسم" value="زائر">
+        <button id="emoji-btn">😀</button>
         <input id="msg-input" type="text" placeholder="اكتب رسالتك هنا..." autocomplete="off">
         <button id="send-btn">إرسال</button>
     </div>
@@ -35,37 +83,80 @@
     const messages = document.getElementById('messages');
     const msgInput = document.getElementById('msg-input');
     const nameInput = document.getElementById('name-input');
+    const roleSelect = document.getElementById('role-select');
+    const roomSelect = document.getElementById('room-select');
     const sendBtn = document.getElementById('send-btn');
+    
+    // عناصر الإيموجي الجديدة
+    const emojiBtn = document.getElementById('emoji-btn');
+    const emojiPicker = document.getElementById('emoji-picker');
+
+    let currentRoom = roomSelect.value;
+    socket.emit('join room', currentRoom);
+
+    roomSelect.addEventListener('change', () => {
+        messages.innerHTML = '';
+        currentRoom = roomSelect.value;
+        socket.emit('join room', currentRoom);
+    });
+
+    // إظهار وإخفاء لوحة الإيموجي عند الضغط على الزر
+    emojiBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        emojiPicker.style.display = (emojiPicker.style.display === 'grid') ? 'none' : 'grid';
+    });
+
+    // إغلاق اللوحة تلقائياً عند الضغط في أي مكان خارجها
+    document.addEventListener('click', () => {
+        emojiPicker.style.display = 'none';
+    });
+
+    // عند الضغط على أي إيموجي، يتم إدراجه داخل صندوق النص مباشرة
+    emojiPicker.querySelectorAll('span').forEach(emoji => {
+        emoji.addEventListener('click', () => {
+            msgInput.value += emoji.innerText;
+            msgInput.focus(); // إعادة مؤشر الكتابة لصندوق النص
+        });
+    });
 
     sendBtn.addEventListener('click', sendMessage);
     msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
 
     function sendMessage() {
         if (msgInput.value.trim() !== '') {
-            // إرسال الاسم والرسالة للخادم
             socket.emit('chat message', {
+                room: currentRoom,
                 name: nameInput.value || 'زائر',
+                role: roleSelect.value,
                 text: msgInput.value
             });
             msgInput.value = '';
+            emojiPicker.style.display = 'none'; // إخفاء القائمة بعد الإرسال
         }
     }
 
-    // استقبال الرسالة من الخادم وعرضها في الشات فوراً
     socket.on('chat message', (data) => {
         const li = document.createElement('li');
-        
-        // تمييز إذا كانت الرسالة مرسلة من نفس المستخدم أو مستخدم آخر
-        if(data.name === nameInput.value) {
-            li.className = 'sent';
-            li.innerHTML = `<span class="user-name" style="color:#fff;">${data.name}</span>${data.text}`;
+        let roleClass = 'role-user';
+        let roleTitle = 'عضو';
+        if(data.role === 'admin') { roleClass = 'role-admin'; roleTitle = 'رئيس'; }
+        if(data.role === 'mod') { roleClass = 'role-mod'; roleTitle = 'مشرف'; }
+
+        if(data.isSystem) {
+            li.className = 'system-msg';
+            li.innerText = data.text;
         } else {
-            li.className = 'received';
-            li.innerHTML = `<span class="user-name">${data.name}</span>${data.text}`;
+            li.className = (data.name === nameInput.value) ? 'sent' : 'received';
+            li.innerHTML = `
+                <span class="${roleClass}">
+                    <span class="badge">${roleTitle}</span> ${data.name}:
+                </span>
+                <span style="margin-top:4px;">${data.text}</span>
+            `;
         }
-        
         messages.appendChild(li);
-        messages.scrollTop = messages.scrollHeight; // نزول تلقائي لآخر رسالة
+        messages.scrollHeight;
+        messages.scrollTop = messages.scrollHeight;
     });
 </script>
 </body>
