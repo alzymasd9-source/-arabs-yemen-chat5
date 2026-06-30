@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
-const path = require('path');
+const path = path = require('path');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -16,7 +16,7 @@ const io = new Server(server, { cors: { origin: "*" }, maxHttpBufferSize: 1e6 })
 
 const PORT = process.env.PORT || 10000;
 const MONGO_URL = process.env.MONGO_URL;
-const JWT_SECRET = process.env.JWT_SECRET || 'MSAR_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'yemen_secret_2026';
 
 app.use(helmet({contentSecurityPolicy: false}));
 app.use(compression());
@@ -25,11 +25,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'), {maxAge: '1d'}));
 app.use('/api/', rateLimit({windowMs: 60000, max: 100}));
 
-// التعديل المهم: لو مافي مونقو لا يعلق
 let dbConnected = false;
 if(MONGO_URL){
   mongoose.connect(MONGO_URL).then(() => {
-    console.log('MongoDB Connected MSAR');
+    console.log('MongoDB Connected اليمن');
     dbConnected = true;
   }).catch(err => console.log('MongoDB Error:', err));
 } else {
@@ -83,7 +82,7 @@ app.get('/init', async (req, res) => {
   if(!dbConnected) return res.send('بدون قاعدة بيانات');
   const rooms = [ { name: 'عام اليمن', type: 'عام' }, { name: 'صنعاء', type: 'محافظات' }, { name: 'عدن', type: 'محافظات' }, { name: 'تعز', type: 'محافظات' }, { name: 'VIP', type: 'خاص' } ];
   await Room.deleteMany({}); await Room.insertMany(rooms);
-  res.send('تم انشاء الغرف MSAR');
+  res.send('تم انشاء غرف اليمن');
 });
 app.get('/api/rooms', async (req, res) => {
   if(!dbConnected) return res.json([{name:'عام اليمن'},{name:'صنعاء'},{name:'عدن'},{name:'تعز'},{name:'VIP'}]);
@@ -150,4 +149,4 @@ io.on('connection', (socket) => {
 });
 function getRoomUsers(room){ const set = roomsCache.get(room); if(!set) return []; return Array.from(set).map(id => onlineUsers.get(id)).filter(Boolean); }
 
-server.listen(PORT, () => console.log(`MSAR Server ON port ${PORT}`));
+server.listen(PORT, () => console.log(`اليمن Server ON port ${PORT}`));
