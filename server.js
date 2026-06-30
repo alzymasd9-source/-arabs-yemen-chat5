@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" }, maxHttpBufferSize: 1e6 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000; // <-- تعدلنا هنا
 const MONGO_URL = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET || 'MSAR_secret_2026';
 
@@ -25,14 +25,12 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'), {maxAge: '1d'}));
 app.use('/api/', rateLimit({windowMs: 60000, max: 100}));
 
-mongoose.connect(MONGO_URL).then(() => console.log('MongoDB Connected')).catch(err => console.log(err));
+mongoose.connect(MONGO_URL).then(() => console.log('MongoDB Connected MSAR')).catch(err => console.log(err));
 
 const UserSchema = new mongoose.Schema({
   name: { type: String, unique: true, index: true },
   password: String, gender: String, age: Number,
   rank: { type: String, default: 'عضو' },
-  avatar: String, bio: String, country: {type: String, default: 'اليمن'},
-  createdAt: { type: Date, default: Date.now },
   isBanned: { type: Boolean, default: false }
 });
 const User = mongoose.model('User', UserSchema);
@@ -50,7 +48,6 @@ const Room = mongoose.model('Room', RoomSchema);
 const ranks = {'زائر': 0,'عضو': 1,'مشرف': 2,'اداري': 3,'مالك': 4};
 const hasPermission = (userRank, neededRank) => ranks[userRank] >= ranks[neededRank];
 
-// تسجيل - اول واحد = مالك
 app.post('/api/register', async (req, res) => {
   const { name, password, gender, age } = req.body;
   if(name.length<3) return res.status(400).json({ error: 'الاسم اقل شي 3 حروف' });
@@ -62,7 +59,6 @@ app.post('/api/register', async (req, res) => {
   res.json({ token, user: { name: user.name, rank: user.rank, gender: user.gender, age: user.age } });
 });
 
-// دخول
 app.post('/api/login', async (req, res) => {
   const { name, password } = req.body;
   const user = await User.findOne({ name }).lean();
@@ -75,14 +71,13 @@ app.post('/api/login', async (req, res) => {
 app.get('/init', async (req, res) => {
   const rooms = [ { name: 'عام اليمن', type: 'عام' }, { name: 'صنعاء', type: 'محافظات' }, { name: 'عدن', type: 'محافظات' }, { name: 'تعز', type: 'محافظات' }, { name: 'VIP', type: 'خاص' } ];
   await Room.deleteMany({}); await Room.insertMany(rooms);
-  res.send('تم انشاء الغرف');
+  res.send('تم انشاء الغرف MSAR');
 });
 app.get('/api/rooms', async (req, res) => { res.json(await Room.find({}).lean()); });
 app.get('/api/messages/:room', async (req, res) => {
   res.json(await Message.find({ room: req.params.room }).limit(50).sort({ time: -1 }).lean().then(r=>r.reverse()));
 });
 
-// لوحة تحكم المالك
 const auth = (rank) => (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -96,7 +91,6 @@ app.post('/api/admin/setRank', auth('مالك'), async (req, res) => {
   res.json({ success: true });
 });
 
-// ===== Socket.IO مع التوكن =====
 const onlineUsers = new Map();
 const roomsCache = new Map();
 
@@ -112,7 +106,6 @@ io.on('connection', (socket) => {
       }catch{ return socket.emit('error', 'جلسة منتهية سجل دخول'); }
       if (!user || user.isBanned) return socket.emit('error', 'محظور');
     }
-
     onlineUsers.set(socket.id, { id: user._id, name: user.name, rank: user.rank, room: data.room, gender: user.gender, age: user.age });
     if(!roomsCache.has(data.room)) roomsCache.set(data.room, new Set());
     roomsCache.get(data.room).add(socket.id);
@@ -120,7 +113,6 @@ io.on('connection', (socket) => {
     socket.to(data.room).emit('system', `${user.name} [${user.rank}] دخل`);
     io.to(data.room).emit('users', getRoomUsers(data.room));
   });
-
   socket.on('chatMessage', async (data) => {
     const user = onlineUsers.get(socket.id); if (!user ||!data.msg) return;
     const msgData = { name: user.name, rank: user.rank, gender: user.gender, age: user.age, msg: data.msg, time: new Date() };
@@ -128,7 +120,6 @@ io.on('connection', (socket) => {
     socket.to(user.room).emit('message', msgData);
     socket.emit('message', msgData);
   });
-
   socket.on('disconnect', () => {
     const user = onlineUsers.get(socket.id);
     if (user) {
@@ -141,4 +132,4 @@ io.on('connection', (socket) => {
 });
 function getRoomUsers(room){ const set = roomsCache.get(room); if(!set) return []; return Array.from(set).map(id => onlineUsers.get(id)).filter(Boolean); }
 
-server.listen(PORT, () => console.log(`MSAR Server ON on port ${PORT}`));
+server.listen(PORT, () => console.log(`MSAR Server ON port ${PORT}`));
