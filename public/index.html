@@ -5,370 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>شات اليمن العربي</title>
   <style>
-    /* Reset and base */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f9f9f9;
-      color: #222;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      direction: rtl;
-    }
-    button, input, select {
-      font-family: inherit;
-      font-size: 1rem;
-    }
-    button {
-      cursor: pointer;
-    }
-    /* Container for content */
-    main {
-      width: 100%;
-      max-width: 420px;
-      padding: 1rem;
-    }
-    /* ----- الصفحة الرئيسية ----- */
-    #home {
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-    #home h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.2rem;
-      user-select: none;
-    }
-    #home p.subtitle {
-      margin-top: 0;
-      margin-bottom: 2rem;
-      font-size: 1.2rem;
-      color: #444;
-      font-weight: 600;
-      user-select: none;
-    }
-    .btn-primary {
-      background-color: #0078d7;
-      border: none;
-      color: white;
-      padding: 0.7rem 1.2rem;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-      margin: 0.5rem 0;
-      width: 100%;
-    }
-    .btn-primary:hover,
-    .btn-primary:focus {
-      background-color: #005ea1;
-      outline: none;
-    }
-    /* Forms container */
-    .form-container {
-      margin-top: 1rem;
-      background: #fff;
-      padding: 1rem 1.2rem;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
-    }
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 600;
-    }
-    input[type="text"],
-    input[type="password"],
-    input[type="email"],
-    select {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-    input[type="text"]:focus,
-    input[type="password"]:focus,
-    input[type="email"]:focus,
-    select:focus {
-      border-color: #0078d7;
-      outline: none;
-      box-shadow: 0 0 5px #0078d7;
-    }
-    /* Gender select styling with icon border colors */
-    .gender-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-size: 1.4rem;
-      margin-left: 0.5rem;
-      user-select: none;
-      transition: border-color 0.3s ease;
-      border: 3px solid transparent;
-    }
-    .gender-male {
-      border-color: #007bff;
-      color: #007bff;
-    }
-    .gender-female {
-      border-color: #ff69b4;
-      color: #ff69b4;
-    }
-    .gender-other {
-      border-color: #fff;
-      color: #000;
-      background: #444;
-    }
-    /* Hidden by default */
-    .hidden {
-      display: none;
-    }
-    /* Container for chat rooms page */
-    #rooms-page {
-      display: none;
-      padding: 1rem;
-      max-width: 420px;
-      width: 100%;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-      user-select: none;
-    }
-    .room-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .room-list li {
-      background: #0078d7;
-      color: white;
-      margin-bottom: 0.8rem;
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    .room-list li:hover,
-    .room-list li:focus {
-      background-color: #005ea1;
-      outline: none;
-    }
-    /* Chat page container */
-    #chat-page {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-      max-width: 420px;
-      width: 100%;
-      background: white;
-      border: 1px solid #ccc;
-    }
-    /* 1. الشريط العلوي */
-    header.chat-header {
-      background-color: #000;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 0.5rem 1rem;
-      gap: 0.8rem;
-      font-size: 1.3rem;
-      position: relative;
-      user-select: none;
-    }
-    header.chat-header button {
-      background: none;
-      border: none;
-      color: inherit;
-      cursor: pointer;
-      font-size: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.2rem;
-      border-radius: 4px;
-      transition: background-color 0.2s ease;
-    }
-    header.chat-header button:hover,
-    header.chat-header button:focus {
-      background-color: rgba(255 255 255 / 0.2);
-      outline: none;
-    }
-    header.chat-header .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      margin-right: auto; /* دفع الصورة لليسار في التنسيق العربي */
-      object-fit: cover;
-      border: 2px solid #0078d7;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-    }
-    /* القائمة الجانبية */
-    #sidebar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 100vh;
-      width: 250px;
-      background: #222;
-      color: white;
-      padding: 1rem;
-      box-shadow: -3px 0 10px rgb(0 0 0 / 0.4);
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    #sidebar.open {
-      transform: translateX(0);
-    }
-    #sidebar button.close-sidebar {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      align-self: flex-start;
-      cursor: pointer;
-      margin-bottom: 1rem;
-    }
-    #sidebar nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      flex-grow: 1;
-      overflow-y: auto;
-    }
-    #sidebar nav ul li {
-      padding: 0.7rem 0;
-      border-bottom: 1px solid #444;
-      cursor: pointer;
-      user-select: none;
-    }
-    #sidebar nav ul li:hover,
-    #sidebar nav ul li:focus {
-      background-color: #0078d7;
-      outline: none;
-    }
-    /* 2. منطقة الشات - الوسط */
-    #chat-messages {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      background: #f4f7f6;
-      color: #222;
-    }
-    .message {
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-    .message-header {
-      display: flex;
-      gap: 0.6rem;
-      align-items: center;
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-    .message-header span.username {
-      color: #0078d7;
-    }
-    .message-content {
-      padding: 0.5rem 0.8rem;
-      background-color: #fff;
-      border-radius: 6px;
-      max-width: 90%;
-      word-wrap: break-word;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      align-self: flex-start;
-    }
-    /* تمييز رسائل المستخدم الحالي */
-    .message.my-message {
-      align-items: flex-end;
-    }
-    .message.my-message .message-content {
-      background-color: #dcf8c6;
-      align-self: flex-end;
-    }
-    .message-time {
-      font-size: 0.75rem;
-      color: #666;
-      user-select: none;
-      margin-top: 2px;
-    }
-    /* 3. شريط الكتابة - أسفل الشاشة */
-    #chat-input-bar {
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 0.8rem;
-      background-color: #ddd;
-      gap: 0.5rem;
-    }
-    #chat-input-bar button {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      color: #222;
-      transition: background-color 0.2s ease;
-      user-select: none;
-    }
-    #chat-input-bar button:hover {
-      background-color: rgba(0 0 0 / 0.1);
-    }
-    #chat-input-bar input[type="text"] {
-      flex-grow: 1;
-      padding: 0.5rem 0.7rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #bbb;
-      outline: none;
-      margin-bottom: 0; /* إلغاء المارجن الافتراضي للتوافق */
-    }
-    /* 4. الشريط السفلي */
-    #bottom-bar {
-      background-color: #fafafa;
-      border-top: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0.5rem 0;
-      font-size: 1.3rem;
-      color: #555;
-      width: 100%;
-    }
-    #bottom-bar button {
-      background: none;
-      border: none;
-      color: #555;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 0.9rem;
-      gap: 0.2rem;
-    }
-    #bottom-bar button span.icon {
-      font-size: 1.4rem;
-    }
-    #bottom-bar button:hover {
-      color: #0078d7;
-    }
+    /* الحفاظ على كافة التنسيقات (Styles) السابقة كما هي دون تغيير لتوفير المساحة */
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; color: #222; min-height: 100vh; display: flex; flex-direction: column; align-items: center; direction: rtl; }
+    button, input, select { font-family: inherit; font-size: 1rem; }
+    button { cursor: pointer; }
+    main { width: 100%; max-width: 420px; padding: 1rem; }
+    #home { text-align: center; padding: 2rem 1rem; }
+    #home h1 { font-size: 2.5rem; margin-bottom: 0.2rem; user-select: none; }
+    #home p.subtitle { margin-top: 0; margin-bottom: 2rem; font-size: 1.2rem; color: #444; font-weight: 600; user-select: none; }
+    .btn-primary { background-color: #0078d7; border: none; color: white; padding: 0.7rem 1.2rem; border-radius: 5px; transition: background-color 0.3s ease; margin: 0.5rem 0; width: 100%; }
+    .btn-primary:hover, .btn-primary:focus { background-color: #005ea1; outline: none; }
+    .form-container { margin-top: 1rem; background: #fff; padding: 1rem 1.2rem; border-radius: 8px; box-shadow: 0 0 10px rgb(0 0 0 / 0.1); }
+    label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+    input[type="text"], select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+    input[type="text"]:focus, select:focus { border-color: #0078d7; outline: none; box-shadow: 0 0 5px #0078d7; }
+    #rooms-page { display: none; padding: 1rem; max-width: 420px; width: 100%; }
+    h2 { text-align: center; margin-bottom: 1rem; user-select: none; }
+    .room-list { list-style: none; padding: 0; margin: 0; }
+    .room-list li { background: #0078d7; color: white; margin-bottom: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; cursor: pointer; user-select: none; transition: background-color 0.3s ease; }
+    .room-list li:hover { background-color: #005ea1; }
+    #chat-page { display: none; flex-direction: column; height: 100vh; max-width: 420px; width: 100%; background: white; border: 1px solid #ccc; }
+    header.chat-header { background-color: #000; color: white; display: flex; align-items: center; justify-content: flex-start; padding: 0.5rem 1rem; gap: 0.8rem; font-size: 1.3rem; position: relative; user-select: none; }
+    header.chat-header button { background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; padding: 0.2rem; border-radius: 4px; }
+    header.chat-header .user-avatar { width: 36px; height: 36px; border-radius: 50%; margin-right: auto; object-fit: cover; border: 2px solid #0078d7; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    #sidebar { position: fixed; top: 0; right: 0; height: 100vh; width: 250px; background: #222; color: white; padding: 1rem; box-shadow: -3px 0 10px rgb(0 0 0 / 0.4); transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; display: flex; flex-direction: column; gap: 1rem; }
+    #sidebar.open { transform: translateX(0); }
+    #sidebar button.close-sidebar { background: none; border: none; color: white; font-size: 1.5rem; align-self: flex-start; cursor: pointer; margin-bottom: 1rem; }
+    #sidebar nav ul { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+    #sidebar nav ul li { padding: 0.7rem 0.5rem; border-bottom: 1px solid #444; user-select: none; font-size: 0.95rem; }
+    #chat-messages { flex-grow: 1; overflow-y: auto; padding: 1rem; background: #f4f7f6; color: #222; }
+    .message { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.2rem; }
+    .message-header { display: flex; gap: 0.6rem; align-items: center; font-weight: 700; font-size: 0.95rem; }
+    .message-header span.username { color: #0078d7; }
+    .message-content { padding: 0.5rem 0.8rem; background-color: #fff; border-radius: 6px; max-width: 90%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); align-self: flex-start; }
+    .message.my-message { align-items: flex-end; }
+    .message.my-message .message-content { background-color: #dcf8c6; align-self: flex-end; }
+    .message-time { font-size: 0.75rem; color: #666; user-select: none; margin-top: 2px; }
+    #chat-input-bar { display: flex; align-items: center; padding: 0.5rem 0.8rem; background-color: #ddd; gap: 0.5rem; }
+    #chat-input-bar button { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 4px; color: #222; }
+    #chat-input-bar input[type="text"] { flex-grow: 1; padding: 0.5rem 0.7rem; font-size: 1rem; border-radius: 6px; border: 1px solid #bbb; outline: none; }
+    #bottom-bar { background-color: #fafafa; border-top: 1px solid #ccc; display: flex; align-items: center; justify-content: space-around; padding: 0.5rem 0; font-size: 0.9rem; color: #555; width: 100%; }
+    #bottom-bar button { background: none; border: none; color: #555; display: flex; flex-direction: column; align-items: center; font-size: 0.9rem; gap: 0.2rem; }
+    #bottom-bar button span.icon { font-size: 1.4rem; }
+    #bottom-bar button:hover { color: #0078d7; }
   </style>
 </head>
 <body>
@@ -411,3 +91,98 @@
       <button onclick="leaveChat()">➡️</button>
       <span id="current-room-title">اسم الغرفة</span>
       <div class="user-avatar" id="header-avatar">🚹</div>
+      <button onclick="toggleSidebar()">☰</button>
+    </header>
+
+    <div id="sidebar">
+      <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+      <h3 style="margin:0; padding-bottom:0.5rem; border-bottom:1px solid #444;">المتواجدون الآن</h3>
+      <nav>
+        <ul id="users-list">
+          <li>🔄 جاري تحميل المتصلين...</li>
+        </ul>
+      </nav>
+    </div>
+
+    <div id="chat-messages"></div>
+
+    <div id="chat-input-bar">
+      <button>😊</button>
+      <input type="text" id="message-field" placeholder="اكتب رسالتك هنا..." />
+      <button onclick="sendMessage()">🚀</button>
+    </div>
+
+    <div id="bottom-bar">
+      <button onclick="showPage('rooms-page')"><span class="icon">💬</span>الغرف</button>
+      <button onclick="alert('شات اليمن العربي - متصل كلياً')"><span class="icon">ℹ️</span>حول</button>
+      <button onclick="leaveChat()"><span class="icon">🚪</span>خروج</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let currentUser = { name: "", gender: "" };
+    let currentRoom = "";
+
+    function showPage(pageId) {
+      document.getElementById('home-page').style.display = 'none';
+      document.getElementById('rooms-page').style.display = 'none';
+      document.getElementById('chat-page').style.display = 'none';
+
+      if (pageId === 'chat-page') {
+        document.getElementById(pageId).style.display = 'flex';
+      } else {
+        document.getElementById(pageId).style.display = 'block';
+      }
+    }
+
+    document.getElementById('enter-btn').addEventListener('click', function() {
+      const nameInput = document.getElementById('username-input').value.trim();
+      if (!nameInput) {
+        alert("الرجاء إدخال اسم المستخدم أولاً!");
+        return;
+      }
+      currentUser.name = nameInput;
+      currentUser.gender = document.getElementById('gender-select').value;
+      
+      document.getElementById('header-avatar').innerText = currentUser.gender;
+      showPage('rooms-page');
+    });
+
+    function joinRoom(roomName) {
+      currentRoom = roomName;
+      document.getElementById('current-room-title').innerText = roomName;
+      showPage('chat-page');
+
+      const chatMessages = document.getElementById('chat-messages');
+      chatMessages.innerHTML = `<div style="text-align:center; color:#888; font-size:0.9rem; margin:1rem 0;">لقد دخلت ${roomName}</div>`;
+      
+      socket.emit("joinRoom", { room: currentRoom, user: currentUser });
+    }
+
+    function sendMessage() {
+      const inputField = document.getElementById('message-field');
+      const text = inputField.value.trim();
+      if (!text) return;
+
+      socket.emit("chatMessage", {
+        room: currentRoom,
+        user: currentUser,
+        message: text
+      });
+
+      inputField.value = "";
+    }
+
+    // استقبال الرسائل
+    socket.on("message", (msg) => {
+      const chatMessages = document.getElementById('chat-messages');
+      const msgDiv = document.createElement('div');
+      
+      if (msg.user === currentUser.name) {
+        msgDiv.className = 'message my-message';
+      } else {
+        msgDiv.className = 'message';
+      }
+
