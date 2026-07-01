@@ -1,6 +1,7 @@
 /**
  * server.js
- * خادم Node.js متكامل لإدارة غرف شات اليمن العربي والأعضاء المتصلين فورياً.
+ * خادم Node.js متكامل وجاهز للرفع على منصة Render
+ * يدعم المحادثات الفورية وإدارة قائمة المتصلين تلقائياً.
  */
 
 const express = require("express");
@@ -10,14 +11,25 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // السماح بالاتصالات من أي مكان لمنع مشاكل الـ CORS في المتصفحات
+    methods: ["GET", "POST"]
+  }
+});
 
-// خدمة الملفات الثابتة من مجلد المشروع
+// 1. خدمة الملفات الثابتة من مجلد المشروع الأساسي
 app.use(express.static(path.join(__dirname)));
+
+// 2. حل مشكلة (Cannot GET /) - مسار صريح لإرسال ملف الواجهة فوراً عند فتح الرابط
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // مصفوفة لتخزين المستخدمين المتصلين: { id, name, gender, room }
 let activeUsers = [];
 
+// 3. إدارة اتصالات الشات الفورية عبر Socket.io
 io.on("connection", (socket) => {
   console.log(`مستخدم متصل: ${socket.id}`);
 
@@ -40,7 +52,7 @@ io.on("connection", (socket) => {
       time: new Date().toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }),
     });
 
-    // إرسال قائمة الأعضاء المحدثة لجميع من في الغرفة
+    // إرسال قائمة الأعضاء المحدثة لجميع من في الغرفة فوراً
     const roomUsers = activeUsers.filter(u => u.room === room);
     io.to(room).emit("roomUsersList", roomUsers);
   });
@@ -55,9 +67,8 @@ io.on("connection", (socket) => {
     });
   });
 
-  // عند قطع الاتصال أو الخروج
+  // عند قطع الاتصال أو خروج المستخدم
   socket.on("disconnect", () => {
-    // البحث عن المستخدم المغادر قبل حذفه لإرسال إشعار خروج للغرفة
     const user = activeUsers.find(u => u.id === socket.id);
     
     if (user) {
@@ -71,7 +82,7 @@ io.on("connection", (socket) => {
         time: new Date().toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }),
       });
 
-      // تحديث قائمة الأعضاء للغرفة بعد خروج المستخدم
+      // تحديث قائمة الأعضاء للغرفة بعد الخروج
       const roomUsers = activeUsers.filter(u => u.room === user.room);
       io.to(user.room).emit("roomUsersList", roomUsers);
     }
@@ -79,7 +90,8 @@ io.on("connection", (socket) => {
   });
 });
 
+// 4. إعداد المنفذ (PORT) ليتوافق مع خوادم Render تلقائياً
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`الخادم يعمل على http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`الخادم يعمل بنجاح على المنفذ ${PORT}`);
 });
