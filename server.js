@@ -1,7 +1,6 @@
 /**
  * server.js
- * خادم Node.js متكامل وجاهز للرفع على منصة Render
- * يدعم المحادثات الفورية وإدارة قائمة المتصلين تلقائياً.
+ * خادم Node.js آمن يدعم صلاحيات المالك الحصري (Owner) والتحكم الكامل في الشات.
  */
 
 const express = require("express");
@@ -12,86 +11,102 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: "*", // السماح بالاتصالات من أي مكان لمنع مشاكل الـ CORS في المتصفحات
-    methods: ["GET", "POST"]
-  }
+  cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// 1. خدمة الملفات الثابتة من مجلد المشروع الأساسي
 app.use(express.static(path.join(__dirname)));
 
-// 2. حل مشكلة (Cannot GET /) - مسار صريح لإرسال ملف الواجهة فوراً عند فتح الرابط
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// مصفوفة لتخزين المستخدمين المتصلين: { id, name, gender, room }
+// مصفوفة تتبع المتصلين
 let activeUsers = [];
 
-// 3. إدارة اتصالات الشات الفورية عبر Socket.io
 io.on("connection", (socket) => {
   console.log(`مستخدم متصل: ${socket.id}`);
 
-  // استقبال حدث الانضمام للغرفة
-  socket.on("joinRoom", ({ room, user }) => {
+  // استقبال حدث الانضمام مع التحقق من هوية المالك
+  socket.on("joinRoom", ({ room, user, isOwnerVerified }) => {
     socket.join(room);
     
-    // حفظ بيانات المستخدم الحالي في المصفوفة
+    // تحديد الرتبة بناءً على التحقق الأمني من جهة العميل
+    let userRank = "عضو";
+    if (isOwnerVerified === true) {
+      userRank = "👑 مالك التطبيق";
+    }
+
     activeUsers.push({
       id: socket.id,
       name: user.name,
       gender: user.gender,
-      room: room
+      room: room,
+      rank: userRank
     });
 
-    // بث رسالة ترحيبية لكل المتواجدين في الغرفة عدا المستخدم نفسه
+    // بث رسالة النظام للغرفة
     socket.to(room).emit("message", {
       user: "النظام",
-      text: `انضم ${user.name} للغرفة ${user.gender} - أهلاً وسهلاً!`,
+      text: `انضم [${userRank}] ${user.name} للغرفة ${user.gender} - أهلاً وسهلاً!`,
       time: new Date().toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }),
     });
 
-    // إرسال قائمة الأعضاء المحدثة لجميع من في الغرفة فوراً
+    // تحديث قائمة الأعضاء
     const roomUsers = activeUsers.filter(u => u.room === room);
     io.to(room).emit("roomUsersList", roomUsers);
   });
 
-  // استقبال الرسائل وإعادة بثها لجميع المتواجدين في الغرفة
   socket.on("chatMessage", ({ room, user, message }) => {
+    const foundUser = activeUsers.find(u => u.id === socket.id);
+    const displayRank = foundUser ? `[${foundUser.rank}] ` : "";
+
     io.to(room).emit("message", {
-      user: user.name,
+      user: displayRank + user.name,
       text: message,
       time: new Date().toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }),
       senderId: socket.id
     });
   });
 
-  // عند قطع الاتصال أو خروج المستخدم
+  // حماية أمر الطرد: المالك فقط من يمكنه التنفيذ
+  socket.on("kickUser", ({ userId }) => {
+    const ownerAccount = activeUsers.find(u => u.id === socket.id && u.rank.includes("مالك"));
+    
+    if (ownerAccount) {
+      const userToKick = activeUsers.find(u => u.id === userId);
+      if (userToKick) {
+        io.to(userId).emit("youAreKicked", "🚫 تم طردك فورياً من المحادثة بواسطة مالك التطبيق!");
+        
+        io.to(userToKick.room).emit("message", {
+          user: "النظام",
+          text: `🚨 قام مالك التطبيق بطرد العضو (${userToKick.name}) من الدردشة.`,
+          time: new Date().toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }),
+        });
+
+        activeUsers = activeUsers.filter(u => u.id !== userId);
+        io.to(userToKick.room).emit("roomUsersList", activeUsers.filter(u => u.room === userToKick.room));
+      }
+    } else {
+      // محاولة اختراق أو استدعاء كود غير مصرح به
+      socket.emit("message", { user: "النظام", text: "❌ خطأ أمني: لا تملك صلاحيات المالك الحصري!", time: "" });
+    }
+  });
+
   socket.on("disconnect", () => {
     const user = activeUsers.find(u => u.id === socket.id);
-    
     if (user) {
-      // حذفه من القائمة النشطة
       activeUsers = activeUsers.filter(u => u.id !== socket.id);
-      
-      // إرسال رسالة مغادرة للغرفة
       io.to(user.room).emit("message", {
         user: "النظام",
         text: `غادر ${user.name} المحادثة.`,
         time: new Date().toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }),
       });
-
-      // تحديث قائمة الأعضاء للغرفة بعد الخروج
-      const roomUsers = activeUsers.filter(u => u.room === user.room);
-      io.to(user.room).emit("roomUsersList", roomUsers);
+      io.to(user.room).emit("roomUsersList", activeUsers.filter(u => u.room === user.room));
     }
-    console.log(`المستخدم فصل: ${socket.id}`);
   });
 });
 
-// 4. إعداد المنفذ (PORT) ليتوافق مع خوادم Render تلقائياً
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`الخادم يعمل بنجاح على المنفذ ${PORT}`);
+  console.log(`الخادم يعمل بأمان`);
 });
