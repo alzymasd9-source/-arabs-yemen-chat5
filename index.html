@@ -5,413 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>شات اليمن العربي</title>
   <style>
-    /* 1. تعريف متغيرات الألوان للوضع الفاتح والمظلم */
-    :root {
-      --bg-body: #f9f9f9;
-      --bg-card: #ffffff;
-      --text-main: #222222;
-      --text-sub: #666666;
-      --chat-bg: #f4f7f6;
-      --msg-other: #ffffff;
-      --msg-my: #dcf8c6;
-      --border-color: #cccccc;
-      --input-bar: #dddddd;
-      --bottom-bar-bg: #fafafa;
-      --header-bg: #000000;
-    }
-
-    [data-theme="dark"] {
-      --bg-body: #121212;
-      --bg-card: #1e1e1e;
-      --text-main: #e0e0e0;
-      --text-sub: #a0a0a0;
-      --chat-bg: #0b141a;
-      --msg-other: #202c33;
-      --msg-my: #005c4b;
-      --border-color: #2a3942;
-      --input-bar: #202c33;
-      --bottom-bar-bg: #101d25;
-      --header-bg: #1f2c34;
-    }
-
-    /* 2. التنسيقات الأساسية */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      direction: rtl;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-    button, input, select {
-      font-family: inherit;
-      font-size: 1rem;
-    }
-    button {
-      cursor: pointer;
-    }
-    main {
-      width: 100%;
-      max-width: 420px;
-      padding: 1rem;
-    }
-
-    /* 3. الصفحة الرئيسية */
-    #home {
-      text-align: center;
-      padding: 2rem 1rem;
-    }
-    #home h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.2rem;
-      user-select: none;
-    }
-    #home p.subtitle {
-      margin-top: 0;
-      margin-bottom: 2rem;
-      font-size: 1.2rem;
-      color: var(--text-sub);
-      font-weight: 600;
-      user-select: none;
-    }
-    .btn-primary {
-      background-color: #0078d7;
-      border: none;
-      color: white;
-      padding: 0.7rem 1.2rem;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-      margin: 0.5rem 0;
-      width: 100%;
-    }
-    .btn-primary:hover, .btn-primary:focus {
-      background-color: #005ea1;
-      outline: none;
-    }
-    .form-container {
-      margin-top: 1rem;
-      background: var(--bg-card);
-      padding: 1rem 1.2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 600;
-    }
-    input[type="text"], select {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
-      font-size: 1rem;
-      background-color: var(--bg-card);
-      color: var(--text-main);
-    }
-    input[type="text"]:focus, select:focus {
-      border-color: #0078d7;
-      outline: none;
-    }
-
-    /* 4. صفحة الغرف */
-    #rooms-page {
-      display: none;
-      padding: 1rem;
-      max-width: 420px;
-      width: 100%;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-      user-select: none;
-    }
-    .room-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .room-list li {
-      background: #0078d7;
-      color: white;
-      margin-bottom: 0.8rem;
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    .room-list li:hover {
-      background-color: #005ea1;
-    }
-
-    /* 5. صفحة الدردشة والمحادثة */
-    #chat-page {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-      max-width: 420px;
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-    }
-    header.chat-header {
-      background-color: var(--header-bg);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 0.5rem 1rem;
-      gap: 0.8rem;
-      font-size: 1.3rem;
-      position: relative;
-      user-select: none;
-    }
-    header.chat-header button {
-      background: none;
-      border: none;
-      color: inherit;
-      font-size: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.2rem;
-      border-radius: 4px;
-    }
-    header.chat-header .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      margin-right: auto;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-    }
-
-    /* القائمة الجانبية للأعضاء */
-    #sidebar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 100vh;
-      width: 250px;
-      background: #222;
-      color: white;
-      padding: 1rem;
-      box-shadow: -3px 0 10px rgba(0,0,0,0.4);
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 1005;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    #sidebar.open {
-      transform: translateX(0);
-    }
-    #sidebar button.close-sidebar {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      align-self: flex-start;
-      cursor: pointer;
-      margin-bottom: 1rem;
-    }
-    #sidebar nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      flex-grow: 1;
-      overflow-y: auto;
-    }
-    #sidebar nav ul li {
-      padding: 0.7rem 0.5rem;
-      border-bottom: 1px solid #444;
-      user-select: none;
-      font-size: 0.95rem;
-    }
-
-    /* منطقة الرسائل */
-    #chat-messages {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      background: var(--chat-bg);
-      color: var(--text-main);
-    }
-    .message {
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-    .message-header {
-      display: flex;
-      gap: 0.6rem;
-      align-items: center;
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-    .message-header span.username {
-      color: #0078d7;
-    }
-    .message-content {
-      padding: 0.5rem 0.8rem;
-      background-color: var(--msg-other);
-      color: var(--text-main);
-      border-radius: 6px;
-      max-width: 90%;
-      word-wrap: break-word;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      align-self: flex-start;
-    }
-    .message.my-message {
-      align-items: flex-end;
-    }
-    .message.my-message .message-content {
-      background-color: var(--msg-my);
-      align-self: flex-end;
-    }
-    .message-time {
-      font-size: 0.75rem;
-      color: var(--text-sub);
-      margin-top: 2px;
-    }
-
-    /* شريط الإدخال ومحدد الإيموجي */
-    #chat-input-bar {
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 0.8rem;
-      background-color: var(--input-bar);
-      gap: 0.5rem;
-    }
-    #chat-input-bar button {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--text-main);
-      padding: 0.2rem 0.4rem;
-    }
-    #chat-input-bar input[type="text"] {
-      flex-grow: 1;
-      padding: 0.5rem 0.7rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      outline: none;
-      background-color: var(--bg-card);
-      color: var(--text-main);
-    }
-
-    /* صندوق الإيموجي المنبثق */
-    #emoji-picker {
-      position: absolute;
-      bottom: 60px;
-      right: 10px;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      width: 280px;
-      max-height: 200px;
-      display: none;
-      flex-direction: column;
-      z-index: 1001;
-    }
-    .emoji-tabs {
-      display: flex;
-      justify-content: space-around;
-      padding: 5px;
-      border-bottom: 1px solid var(--border-color);
-      background-color: var(--input-bar);
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-    }
-    .emoji-tabs span {
-      cursor: pointer;
-      font-size: 1.2rem;
-      user-select: none;
-    }
-    .emoji-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      padding: 10px;
-      overflow-y: auto;
-    }
-    .emoji-grid span {
-      font-size: 1.5rem;
-      cursor: pointer;
-      text-align: center;
-      user-select: none;
-    }
-
-    /* الشريط السفلي للتنقل */
-    #bottom-bar {
-      background-color: var(--bottom-bar-bg);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0.5rem 0;
-      width: 100%;
-    }
-    #bottom-bar button {
-      background: none;
-      border: none;
-      color: var(--text-sub);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 0.9rem;
-      gap: 0.2rem;
-    }
-    #bottom-bar button span.icon {
-      font-size: 1.4rem;
-    }
-    #bottom-bar button:hover {
-      color: #0078d7;
-    }
+    /* الحفاظ على متغيرات الألوان والتنسيقات المتوافقة مع الوضعين الفاتح والمظلم */
+    :root { --bg-body: #f9f9f9; --bg-card: #ffffff; --text-main: #222222; --text-sub: #666666; --chat-bg: #f4f7f6; --msg-other: #ffffff; --msg-my: #dcf8c6; --border-color: #cccccc; --input-bar: #dddddd; --bottom-bar-bg: #fafafa; --header-bg: #000000; }
+    [data-theme="dark"] { --bg-body: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0; --text-sub: #a0a0a0; --chat-bg: #0b141a; --msg-other: #202c33; --msg-my: #005c4b; --border-color: #2a3942; --input-bar: #202c33; --bottom-bar-bg: #101d25; --header-bg: #1f2c34; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; direction: rtl; transition: background 0.3s ease, color 0.3s ease; }
+    button, input, select { font-family: inherit; font-size: 1rem; }
+    button { cursor: pointer; }
+    main { width: 100%; max-width: 420px; padding: 1rem; }
+    #home { text-align: center; padding: 2rem 1rem; }
+    #home h1 { font-size: 2.5rem; margin-bottom: 0.2rem; user-select: none; }
+    #home p.subtitle { margin-top: 0; margin-bottom: 2rem; font-size: 1.2rem; color: var(--text-sub); font-weight: 600; user-select: none; }
+    .btn-primary { background-color: #0078d7; border: none; color: white; padding: 0.7rem 1.2rem; border-radius: 5px; transition: background-color 0.3s ease; margin: 0.5rem 0; width: 100%; }
+    .btn-primary:hover { background-color: #005ea1; }
+    .form-container { margin-top: 1rem; background: var(--bg-card); padding: 1rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+    input[type="text"], select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 5px; font-size: 1rem; background-color: var(--bg-card); color: var(--text-main); }
+    #rooms-page { display: none; padding: 1rem; max-width: 420px; width: 100%; }
+    h2 { text-align: center; margin-bottom: 1rem; user-select: none; }
+    .room-list { list-style: none; padding: 0; margin: 0; }
+    .room-list li { background: #0078d7; color: white; margin-bottom: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; cursor: pointer; user-select: none; transition: background-color 0.3s ease; }
+    .room-list li:hover { background-color: #005ea1; }
+    #chat-page { display: none; flex-direction: column; height: 100vh; max-width: 420px; width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); }
+    header.chat-header { background-color: var(--header-bg); color: white; display: flex; align-items: center; justify-content: flex-start; padding: 0.5rem 1rem; gap: 0.8rem; font-size: 1.3rem; position: relative; user-select: none; }
+    header.chat-header button { background: none; border: none; color: inherit; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; padding: 0.2rem; border-radius: 4px; }
+    header.chat-header .user-avatar { width: 36px; height: 36px; border-radius: 50%; margin-right: auto; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    #sidebar { position: fixed; top: 0; right: 0; height: 100vh; width: 250px; background: #222; color: white; padding: 1rem; box-shadow: -3px 0 10px rgba(0,0,0,0.4); transform: translateX(100%); transition: transform 0.3s ease; z-index: 1005; display: flex; flex-direction: column; gap: 1rem; }
+    #sidebar.open { transform: translateX(0); }
+    #sidebar button.close-sidebar { background: none; border: none; color: white; font-size: 1.5rem; align-self: flex-start; cursor: pointer; margin-bottom: 1rem; }
+    #sidebar nav ul { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+    #sidebar nav ul li { padding: 0.7rem 0.5rem; border-bottom: 1px solid #444; user-select: none; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
+    .kick-btn { background-color: #d32f2f; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; cursor: pointer; }
+    #chat-messages { flex-grow: 1; overflow-y: auto; padding: 1rem; background: var(--chat-bg); color: var(--text-main); }
+    .message { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.2rem; }
+    .message-header { display: flex; gap: 0.6rem; align-items: center; font-weight: 700; font-size: 0.95rem; }
+    .message-header span.username { color: #0078d7; }
+    .message-content { padding: 0.5rem 0.8rem; background-color: var(--msg-other); color: var(--text-main); border-radius: 6px; max-width: 90%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); align-self: flex-start; }
+    .message.my-message { align-items: flex-end; }
+    .message.my-message .message-content { background-color: var(--msg-my); align-self: flex-end; }
+    .message-time { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+    #chat-input-bar { display: flex; align-items: center; padding: 0.5rem 0.8rem; background-color: var(--input-bar); gap: 0.5rem; }
+    #chat-input-bar button { background: none; border: none; font-size: 1.5rem; color: var(--text-main); padding: 0.2rem 0.4rem; }
+    #chat-input-bar input[type="text"] { flex-grow: 1; padding: 0.5rem 0.7rem; font-size: 1rem; border-radius: 6px; border: 1px solid var(--border-color); outline: none; background-color: var(--bg-card); color: var(--text-main); }
+    #emoji-picker { position: absolute; bottom: 60px; right: 10px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); width: 280px; max-height: 200px; display: none; flex-direction: column; z-index: 1001; }
+    .emoji-tabs { display: flex; justify-content: space-around; padding: 5px; border-bottom: 1px solid var(--border-color); background-color: var(--input-bar); border-top-left-radius: 8px; border-top-right-radius: 8px; }
+    .emoji-tabs span { cursor: pointer; font-size: 1.2rem; user-select: none; }
+    .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 10px; overflow-y: auto; }
+    .emoji-grid span { font-size: 1.5rem; cursor: pointer; text-align: center; user-select: none; }
+    #bottom-bar { background-color: var(--bottom-bar-bg); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-around; padding: 0.5rem 0; width: 100%; }
+    #bottom-bar button { background: none; border: none; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; font-size: 0.9rem; gap: 0.2rem; }
+    #bottom-bar button span.icon { font-size: 1.4rem; }
+    #bottom-bar button:hover { color: #0078d7; }
   </style>
 </head>
 <body>
 
-  <!-- 1. الصفحة الرئيسية (تسجيل الدخول) -->
   <main id="home-page">
     <div id="home">
       <h1>🇾🇪</h1>
       <p class="subtitle">شات اليمن العربي</p>
-      
       <div class="form-container">
         <label for="username-input">اسم المستخدم:</label>
         <input type="text" id="username-input" placeholder="اكتب اسمك المستعار هنا..." required />
-        
         <label for="gender-select">الجنس:</label>
         <select id="gender-select">
           <option value="🚹">ذكر 🚹</option>
           <option value="🚺">أنثى 🚺</option>
         </select>
-        
         <button class="btn-primary" id="enter-btn">دخول الدردشة</button>
       </div>
     </div>
   </main>
 
-  <!-- 2. صفحة غرف الدردشة -->
   <div id="rooms-page">
     <h2>اختر غرفة دردشة</h2>
     <ul class="room-list">
       <li onclick="joinRoom('غرفة صنعاء العامة')">🇾🇪 غرفة صنعاء العامة</li>
       <li onclick="joinRoom('ملتقى شباب عدن')">🌊 ملتقى شباب عدن</li>
+      <li onclick="joinRoom('شات تعز العز')">⛰️ شات تعز العز</li>
+      <li onclick="joinRoom('مغتربي اليمن')">✈️ مغتربي اليمن في الخارج</li>
+    </ul>
+  </div>
+
+  <div id="chat-page">
+    <header class="chat-header">
+      <button onclick="leaveChat()">➡️</button>
+      <span id="current-room-title">اسم الغرفة</span>
+      <div class="user-avatar" id="header-avatar">🚹</div>
+      <button onclick="toggleDarkMode()" id="theme-btn">🌙</button>
+      <button onclick="toggleSidebar()">☰</button>
+    </header>
+
+    <div id="sidebar">
+      <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
+      <h3 style="margin:0; padding-bottom:0.5rem; border-bottom:1px solid #444;">المتواجدون الآن</h3>
+      <nav><ul id="users-list"><li>🔄 جاري التحميل...</li></ul></nav>
+    </div>
+
+    <div id="chat-messages"></div>
+
+    <div id="chat-input-bar" style="position: relative;">
+      <button onclick="toggleEmojiPicker(event)">😊</button>
+      <input type="text" id="message-field" placeholder="اكتب رسالتك هنا..." onfocus="hideEmojiPicker()" />
+      <button onclick="sendMessage()">🚀</button>
+      <div id="emoji-picker">
+        <div class="emoji-tabs"><span onclick="loadEmojiCategory('faces')">😀</span><span onclick="loadEmojiCategory('hearts')">❤️</span><span onclick="loadEmojiCategory('flags')">🇾🇪</span></div>
+        <div class="emoji-grid" id="emoji-container"></div>
+      </div>
+    </div>
+
+    <div id="bottom-bar">
+      <button onclick="showPage('rooms-page')"><span class="icon">💬</span>الغرف</button>
+      <button onclick="alert('شات اليمن العربي - نظام المالك الحصري')"><span class="icon">ℹ️</span>حول</button>
+      <button onclick="leaveChat()"><span class="icon">🚪</span>خروج</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let currentUser = { name: "", gender: "" };
+    let currentRoom = "";
+    let isCurrentOwner = false;
+
+    const emojiLibrary = {
