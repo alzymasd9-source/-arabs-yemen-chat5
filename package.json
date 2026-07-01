@@ -1,13 +1,19 @@
 {
-  "name": "yemen-chat",
+  "name": "chat-yemen-arabic",
   "version": "1.0.0",
-  "description": "Arabic Web Chat Room",
-  "main": "index.js",
+  "description": "واجهة شات اليمن العربي مع سيرفر Node.js و Socket.IO",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.19.2",
-    "socket.io": "^4.7.5"
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
+
