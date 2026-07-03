@@ -1,188 +1,112 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>شات اليمن العربي</title>
-  <style>
-    /* الحفاظ على كافة التنسيقات (Styles) السابقة كما هي دون تغيير لتوفير المساحة */
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; color: #222; min-height: 100vh; display: flex; flex-direction: column; align-items: center; direction: rtl; }
-    button, input, select { font-family: inherit; font-size: 1rem; }
-    button { cursor: pointer; }
-    main { width: 100%; max-width: 420px; padding: 1rem; }
-    #home { text-align: center; padding: 2rem 1rem; }
-    #home h1 { font-size: 2.5rem; margin-bottom: 0.2rem; user-select: none; }
-    #home p.subtitle { margin-top: 0; margin-bottom: 2rem; font-size: 1.2rem; color: #444; font-weight: 600; user-select: none; }
-    .btn-primary { background-color: #0078d7; border: none; color: white; padding: 0.7rem 1.2rem; border-radius: 5px; transition: background-color 0.3s ease; margin: 0.5rem 0; width: 100%; }
-    .btn-primary:hover, .btn-primary:focus { background-color: #005ea1; outline: none; }
-    .form-container { margin-top: 1rem; background: #fff; padding: 1rem 1.2rem; border-radius: 8px; box-shadow: 0 0 10px rgb(0 0 0 / 0.1); }
-    label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
-    input[type="text"], select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
-    input[type="text"]:focus, select:focus { border-color: #0078d7; outline: none; box-shadow: 0 0 5px #0078d7; }
-    #rooms-page { display: none; padding: 1rem; max-width: 420px; width: 100%; }
-    h2 { text-align: center; margin-bottom: 1rem; user-select: none; }
-    .room-list { list-style: none; padding: 0; margin: 0; }
-    .room-list li { background: #0078d7; color: white; margin-bottom: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; cursor: pointer; user-select: none; transition: background-color 0.3s ease; }
-    .room-list li:hover { background-color: #005ea1; }
-    #chat-page { display: none; flex-direction: column; height: 100vh; max-width: 420px; width: 100%; background: white; border: 1px solid #ccc; }
-    header.chat-header { background-color: #000; color: white; display: flex; align-items: center; justify-content: flex-start; padding: 0.5rem 1rem; gap: 0.8rem; font-size: 1.3rem; position: relative; user-select: none; }
-    header.chat-header button { background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; padding: 0.2rem; border-radius: 4px; }
-    header.chat-header .user-avatar { width: 36px; height: 36px; border-radius: 50%; margin-right: auto; object-fit: cover; border: 2px solid #0078d7; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    #sidebar { position: fixed; top: 0; right: 0; height: 100vh; width: 250px; background: #222; color: white; padding: 1rem; box-shadow: -3px 0 10px rgb(0 0 0 / 0.4); transform: translateX(100%); transition: transform 0.3s ease; z-index: 1000; display: flex; flex-direction: column; gap: 1rem; }
-    #sidebar.open { transform: translateX(0); }
-    #sidebar button.close-sidebar { background: none; border: none; color: white; font-size: 1.5rem; align-self: flex-start; cursor: pointer; margin-bottom: 1rem; }
-    #sidebar nav ul { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
-    #sidebar nav ul li { padding: 0.7rem 0.5rem; border-bottom: 1px solid #444; user-select: none; font-size: 0.95rem; }
-    #chat-messages { flex-grow: 1; overflow-y: auto; padding: 1rem; background: #f4f7f6; color: #222; }
-    .message { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.2rem; }
-    .message-header { display: flex; gap: 0.6rem; align-items: center; font-weight: 700; font-size: 0.95rem; }
-    .message-header span.username { color: #0078d7; }
-    .message-content { padding: 0.5rem 0.8rem; background-color: #fff; border-radius: 6px; max-width: 90%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); align-self: flex-start; }
-    .message.my-message { align-items: flex-end; }
-    .message.my-message .message-content { background-color: #dcf8c6; align-self: flex-end; }
-    .message-time { font-size: 0.75rem; color: #666; user-select: none; margin-top: 2px; }
-    #chat-input-bar { display: flex; align-items: center; padding: 0.5rem 0.8rem; background-color: #ddd; gap: 0.5rem; }
-    #chat-input-bar button { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 4px; color: #222; }
-    #chat-input-bar input[type="text"] { flex-grow: 1; padding: 0.5rem 0.7rem; font-size: 1rem; border-radius: 6px; border: 1px solid #bbb; outline: none; }
-    #bottom-bar { background-color: #fafafa; border-top: 1px solid #ccc; display: flex; align-items: center; justify-content: space-around; padding: 0.5rem 0; font-size: 0.9rem; color: #555; width: 100%; }
-    #bottom-bar button { background: none; border: none; color: #555; display: flex; flex-direction: column; align-items: center; font-size: 0.9rem; gap: 0.2rem; }
-    #bottom-bar button span.icon { font-size: 1.4rem; }
-    #bottom-bar button:hover { color: #0078d7; }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات اليمن | شات اليمن العربي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&family=Cairo&family=Amiri&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--main:#0f414e;--green:#74b20e;--chat-bg:#e5ddd5;--msg-me:#dcf8c6;--msg-other:#fff;--user-font:'Tajawal';--user-color:#000}
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--user-font),sans-serif;color:var(--user-color)}
+body{background:#ededed}button{cursor:pointer;border:none}.hide{display:none!important}
+.header{background:var(--main);padding:10px;text-align:center}.header>a{color:#fff;font-size:28px;font-weight:700;text-decoration:none}
+.main{background:#00242e url(https://i.imgur.com/8KmCThn.jpg) no-repeat center fixed;background-size:cover;min-height:80vh;padding:20px}
+.container{max-width:1050px;margin:auto;text-align:center}
+.room{margin:60px auto;max-width:500px;background:rgba(255,255,255,.9);border-radius:15px;padding:20px}
+.btn{display:inline-block;margin:10px 5px;color:#fff;background:var(--main);padding:12px 25px;border-radius:10px;font-size:17px;font-weight:700}
+#guest_btn{background:var(--green)}.login{display:none;background:rgba(249,249,249,.95);width:360px;max-width:95%;border-radius:15px;margin:20px auto;padding:20px}
+.login input{width:100%;padding:12px;text-align:center;font-size:18px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px}
+.gendiv{display:flex;justify-content:center;gap:30px;margin:15px}.male{color:#06f}.female{color:#e13}
+.error{display:none;margin:10px auto;padding:10px;background:#fff0f0;color:red;border-radius:8px;border:1px solid red}
+#chat_app{display:none;height:100vh;max-width:1200px;margin:auto;background:#fff}
+.chat-layout{display:flex;height:100%}.sidebar{width:320px;border-left:1px solid #ddd;display:flex;flex-direction:column;background:#f5f6f6}
+.sidebar-header{background:var(--main);color:#fff;padding:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.settings-btn{background:rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:13px}
+.room-tabs{display:flex;background:#e9edef}.room-tab{flex:1;padding:10px;text-align:center;font-size:14px;cursor:pointer;border-bottom:2px solid transparent}
+.room-tab.active{background:#fff;border-color:var(--green);font-weight:700}
+.users-list{flex:1;overflow-y:auto}.user-item{padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;cursor:pointer}
+.user-item:hover,.user-item.pm-active{background:#e0e0e0}.user-item.muted{opacity:.5}
+.user-avatar{width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.admin-tag{font-size:10px;background:gold;color:#000;padding:2px 5px;border-radius:4px;margin-right:5px}
+.pm-badge{background:red;color:#fff;font-size:11px;padding:2px 6px;border-radius:10px}
+.admin-btns{display:flex;gap:5px;margin-right:auto}.admin-btns i{font-size:16px;color:#888;padding:5px}.admin-btns i:hover{color:red}
+.chat-area{flex:1;display:flex;flex-direction:column;background:var(--chat-bg)}
+.chat-header{background:var(--main);color:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
+.chat-header h4{font-size:17px;color:#fff}.logout-btn{background:rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:6px;font-size:14px}
+.messages{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:75%;padding:8px 12px;border-radius:8px;line-height:1.6;word-wrap:break-word}
+.msg.me{background:var(--msg-me);align-self:flex-start}.msg.other{background:var(--msg-other);align-self:flex-end;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.msg.pm{border:2px dashed var(--green)}.msg.name{font-size:13px;font-weight:700;margin-bottom:4px}
+.msg audio{width:220px;max-width:100%;margin-top:5px}.msg img.chat-img{max-width:200px;max-height:200px;border-radius:8px;margin-top:5px;cursor:pointer}
+.msg.time{font-size:11px;color:#667781;text-align:left;margin-top:3px}
+.chat-input{background:#f0f0f0;padding:10px;display:flex;gap:8px;align-items:center;position:relative}
+.chat-input input{flex:1;padding:12px 15px;border-radius:20px;border:none;outline:none;font-size:16px}
+.chat-input input:disabled{background:#ddd}.chat-input button{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;font-size:18px;flex-shrink:0}
+.chat-input button:disabled{background:#aaa;cursor:not-allowed}.icon-btn{background:#fff!important;color:#555!important}
+.recording{background:red!important;animation:pulse 1s infinite}@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.popup{position:absolute;bottom:60px;background:#fff;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,.2);padding:10px;z-index:5}
+.emoji-box{left:10px;width:280px;height:200px;overflow-y:auto}.emoji-box span{font-size:24px;padding:5px;cursor:pointer}
+.settings-box{left:10px;width:260px;max-height:300px;overflow-y:auto}
+.color-picker span{width:25px;height:25px;display:inline-block;border-radius:50%;margin:5px;cursor:pointer;border:2px solid #ccc}
+.font-picker select{width:100%;padding:8px;border-radius:5px;margin-top:5px}
+@media(max-width:768px){.sidebar{display:none;position:absolute;z-index:10;height:100%;width:85%}.sidebar.active{display:flex}.msg{max-width:85%}}
+</style>
 </head>
 <body>
+<div id="login_page"><div class="header"><a href="/">شات اليمن العربي</a><b>أكبر تجمع يمني</b></div>
+<div class="main"><div class="container"><div class="error" id="error"></div>
+<div class="login" id="guest_box"><form id="guest_form"><input type="text" id="guest_username" maxlength="20" placeholder="الاسم المستعار" required>
+<div class="gendiv"><div><input id="male" type="radio" name="gender" value="1" checked><label for="male" class="male"><span>ذكر</span></label></div>
+<div><input id="female" type="radio" name="gender" value="2"><label for="female" class="female"><span>أنثى</span></label></div></div>
+<input type="submit" class="btn" value="دخول كزائر"></form></div>
+<div id="roomid" class="room"><h3>أهلاً بك في شات اليمن</h3><button class="btn" id="guest_btn"><i class="fa fa-user"></i> دخول الزوار</button></div></div></div></div>
 
-  <!-- 1. الصفحة الرئيسية (التسجيل الدخول) -->
-  <main id="home-page">
-    <div id="home">
-      <h1>🇾🇪</h1>
-      <p class="subtitle">شات اليمن العربي</p>
-      
-      <div class="form-container">
-        <label for="username-input">اسم المستخدم:</label>
-        <input type="text" id="username-input" placeholder="اكتب اسمك المستعار هنا..." required />
-        
-        <label for="gender-select">الجنس:</label>
-        <select id="gender-select">
-          <option value="🚹">ذكر 🚹</option>
-          <option value="🚺">أنثى 🚺</option>
-        </select>
-        
-        <button class="btn-primary" id="enter-btn">دخول الدردشة</button>
-      </div>
-    </div>
-  </main>
+<div id="chat_app"><div class="chat-layout"><div class="sidebar" id="sidebar"><div class="sidebar-header">
+المتصلون <span id="online_count">1</span><div><button class="settings-btn" id="settings_btn"><i class="fa fa-gear"></i></button>
+<button class="settings-btn hide" id="bans_btn"><i class="fa fa-gavel"></i></button></div></div>
+<div class="room-tabs"><div class="room-tab active" data-room="عام">عام</div><div class="room-tab" data-room="تعارف">تعارف</div><div class="room-tab" data-room="اليمن">اليمن</div><div class="room-tab" data-room="فلة">فلة</div></div>
+<div class="users-list" id="users_list"></div></div>
+<div class="chat-area"><div class="chat-header"><button class="logout-btn" id="show_users_btn"><i class="fa fa-users"></i></button><h4 id="room_title">الدردشة العامة</h4><button class="logout-btn" id="logout_btn">خروج <i class="fa fa-sign-out-alt"></i></button></div>
+<div class="messages" id="messages_box"></div>
+<form class="chat-input" id="chat_form"><button type="button" class="icon-btn" id="emoji_btn"><i class="fa fa-smile"></i></button>
+<button type="button" class="icon-btn" id="img_btn"><i class="fa fa-paperclip"></i></button><button type="button" class="icon-btn" id="mic_btn"><i class="fa fa-microphone"></i></button>
+<input type="file" id="img_input" accept="image/*" class="hide"><input type="text" id="msg_input" placeholder="اكتب رسالتك..."><button type="submit"><i class="fa fa-paper-plane"></i></button>
+<div class="popup emoji-box hide" id="emoji_box"></div>
+<div class="popup settings-box hide" id="settings_box"><h4>الإعدادات</h4><label>لون الخط:</label><div class="color-picker"><span style="background:#000" data-color="#000"></span><span style="background:#e91e63" data-color="#e91e63"></span><span style="background:#2196f3" data-color="#2196f3"></span><span style="background:#4caf50" data-color="#4caf50"></span></div>
+<label>نوع الخط:</label><div class="font-picker"><select id="font_select"><option>Tajawal</option><option>Cairo</option><option>Amiri</option></select></div></div></form></div></div></div>
 
-  <!-- 2. صفحة غرف الدردشة -->
-  <div id="rooms-page">
-    <h2>اختر غرفة دردشة</h2>
-    <ul class="room-list">
-      <li onclick="joinRoom('غرفة صنعاء العامة')">🇾🇪 غرفة صنعاء العامة</li>
-      <li onclick="joinRoom('ملتقى شباب عدن')">🌊 ملتقى شباب عدن</li>
-      <li onclick="joinRoom('شات تعز العز')">⛰️ شات تعز العز</li>
-      <li onclick="joinRoom('مغتربي اليمن')">✈️ مغتربي اليمن في الخارج</li>
-    </ul>
-  </div>
-
-  <!-- 3. صفحة الشات والمحادثة -->
-  <div id="chat-page">
-    <header class="chat-header">
-      <button onclick="leaveChat()">➡️</button>
-      <span id="current-room-title">اسم الغرفة</span>
-      <div class="user-avatar" id="header-avatar">🚹</div>
-      <button onclick="toggleSidebar()">☰</button>
-    </header>
-
-    <div id="sidebar">
-      <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
-      <h3 style="margin:0; padding-bottom:0.5rem; border-bottom:1px solid #444;">المتواجدون الآن</h3>
-      <nav>
-        <ul id="users-list">
-          <li>🔄 جاري تحميل المتصلين...</li>
-        </ul>
-      </nav>
-    </div>
-
-    <div id="chat-messages"></div>
-
-    <div id="chat-input-bar">
-      <button>😊</button>
-      <input type="text" id="message-field" placeholder="اكتب رسالتك هنا..." />
-      <button onclick="sendMessage()">🚀</button>
-    </div>
-
-    <div id="bottom-bar">
-      <button onclick="showPage('rooms-page')"><span class="icon">💬</span>الغرف</button>
-      <button onclick="alert('شات اليمن العربي - متصل كلياً')"><span class="icon">ℹ️</span>حول</button>
-      <button onclick="leaveChat()"><span class="icon">🚪</span>خروج</button>
-    </div>
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    let currentUser = { name: "", gender: "" };
-    let currentRoom = "";
-
-    function showPage(pageId) {
-      document.getElementById('home-page').style.display = 'none';
-      document.getElementById('rooms-page').style.display = 'none';
-      document.getElementById('chat-page').style.display = 'none';
-
-      if (pageId === 'chat-page') {
-        document.getElementById(pageId).style.display = 'flex';
-      } else {
-        document.getElementById(pageId).style.display = 'block';
-      }
-    }
-
-    document.getElementById('enter-btn').addEventListener('click', function() {
-      const nameInput = document.getElementById('username-input').value.trim();
-      if (!nameInput) {
-        alert("الرجاء إدخال اسم المستخدم أولاً!");
-        return;
-      }
-      currentUser.name = nameInput;
-      currentUser.gender = document.getElementById('gender-select').value;
-      
-      document.getElementById('header-avatar').innerText = currentUser.gender;
-      showPage('rooms-page');
-    });
-
-    function joinRoom(roomName) {
-      currentRoom = roomName;
-      document.getElementById('current-room-title').innerText = roomName;
-      showPage('chat-page');
-
-      const chatMessages = document.getElementById('chat-messages');
-      chatMessages.innerHTML = `<div style="text-align:center; color:#888; font-size:0.9rem; margin:1rem 0;">لقد دخلت ${roomName}</div>`;
-      
-      socket.emit("joinRoom", { room: currentRoom, user: currentUser });
-    }
-
-    function sendMessage() {
-      const inputField = document.getElementById('message-field');
-      const text = inputField.value.trim();
-      if (!text) return;
-
-      socket.emit("chatMessage", {
-        room: currentRoom,
-        user: currentUser,
-        message: text
-      });
-
-      inputField.value = "";
-    }
-
-    // استقبال الرسائل
-    socket.on("message", (msg) => {
-      const chatMessages = document.getElementById('chat-messages');
-      const msgDiv = document.createElement('div');
-      
-      if (msg.user === currentUser.name) {
-        msgDiv.className = 'message my-message';
-      } else {
-        msgDiv.className = 'message';
-      }
-
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket=io(),$=(id)=>document.getElementById(id);let currentUser=null,currentRoom='عام',pmWith=null,isAdmin=false,myId=null,mediaRecorder,audioChunks=[],localMuted=JSON.parse(localStorage.getItem('mutedUsers')||'[]');
+const EMOJIS=['😂','❤️','😍','😎','😢','😡','👍','👎','🔥','💯','🙏','😜','🤔','😱','🥰','😇','🤣','😭','💔','🎉','🌹','🌙','🇾🇪'];
+$('guest_btn').onclick=()=>{$('roomid').style.display="none";$('guest_box').style.display="block";}
+$('guest_form').onsubmit=e=>{e.preventDefault();const u=$('guest_username').value.trim(),g=document.querySelector('input[name="gender"]:checked').value;if(!u)return err("اكتب اسمك");currentUser={name:u,gender:g==1?'male':'female'};socket.emit('join',currentUser);}
+socket.on('you are',d=>{myId=d.id;isAdmin=d.isAdmin;$('login_page').style.display='none';$('chat_app').style.display='block';if(isAdmin)$('bans_btn').classList.remove('hide');});
+socket.on('users list',u=>{$('users_list').innerHTML='';u.forEach(x=>addUser(x,x.id===myId));});
+socket.on('user joined',u=>{addUser(u);addMsg('sys',`${u.name} دخل`);});
+socket.on('user left',n=>{addMsg('sys',`${n} خرج`);$(`user_${n}`)?.remove();$('online_count').innerText=$('users_list').children.length;});
+socket.on('message',d=>addMsg('usr',d.content,d.user,d.type));socket.on('pm message',d=>{if(pmWith?.id===d.user.id||d.user.id===myId)addMsg('usr',d.content,d.user,d.type,true);else $(`pm_${d.user.id}`)?.classList.remove('hide');});
+socket.on('system',m=>addMsg('sys',m));socket.on('chat history',m=>{$('messages_box').innerHTML='';m.forEach(x=>addMsg('usr',x.content,x.user,x.type));});
+socket.on('you muted',v=>{$('msg_input').disabled=v;$('chat_form button[type="submit"]').disabled=v;v?err("تم كتمك"):clearerr();});
+socket.on('kicked',m=>{alert(m);location.reload();});socket.on('banned',m=>{alert(m);location.reload();});
+function send(t,c){socket.emit('message',{type:t,content:c,pm:pmWith?.id||null});addMsg('usr',c,currentUser,t,pmWith!==null);}
+$('chat_form').onsubmit=e=>{e.preventDefault();const m=$('msg_input').value.trim();if(m){send('text',m);$('msg_input').value='';}};
+$('mic_btn').onclick=async()=>{if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('mic_btn').classList.remove('recording');return;}const s=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(s);audioChunks=[];mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{const b=new Blob(audioChunks,{type:'audio/webm'});const f=new FormData();f.append('audio',b,'v.webm');fetch('/upload-audio',{method:'POST',body:f}).then(r=>r.json()).then(d=>send('audio',d.url));s.getTracks().forEach(t=>t.stop());};mediaRecorder.start();$('mic_btn').classList.add('recording');};
+$('img_btn').onclick=()=>$('img_input').click();$('img_input').onchange=e=>{const f=e.target.files[0];if(!f)return;const d=new FormData();d.append('image',f);fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>send('img',x.url));};
+$('emoji_btn').onclick=()=>$('emoji_box').classList.toggle('hide');EMOJIS.forEach(e=>{const s=document.createElement('span');s.innerText=e;s.onclick=()=>{$('msg_input').value+=e;$('msg_input').focus();};$('emoji_box').appendChild(s);});
+$('settings_btn').onclick=()=>$('settings_box').classList.toggle('hide');
+document.querySelectorAll('.color-picker span').forEach(s=>s.onclick=()=>{document.documentElement.style.setProperty('--user-color',s.dataset.color);localStorage.setItem('c',s.dataset.color);socket.emit('save settings',{font:localStorage.getItem('f'),color:s.dataset.color});});
+$('font_select').onchange=e=>{document.documentElement.style.setProperty('--user-font',e.target.value);localStorage.setItem('f',e.target.value);socket.emit('save settings',{font:e.target.value,color:localStorage.getItem('c')});};
+if(localStorage.getItem('c'))document.documentElement.style.setProperty('--user-color',localStorage.getItem('c'));
+if(localStorage.getItem('f'))document.documentElement.style.setProperty('--user-font',localStorage.getItem('f'));
+function toggleMute(id){if(localMuted.includes(id)){localMuted=localMuted.filter(x=>x!==id);$(`user_${id}`).classList.remove('muted');}else{localMuted.push(id);$(`user_${id}`).classList.add('muted');}localStorage.setItem('mutedUsers',JSON.stringify(localMuted));}
+function addUser(u,me=false){if($(`user_${u.id}`))return;const d=document.createElement('div');d.className='user-item '+(localMuted.includes(u.id)?'muted':'');d.id=`user_${u.id}`;d.innerHTML=`<div class="user-avatar">${u.name[0]}</div><div class="user-name"><span class="${u.gender}">${u.name} ${me?'(أنت)':''}</span>${u.isAdmin?'<span class="admin-tag">مشرف</span>':''}</div><div class="admin-btns">${!me?`<i class="fa fa-volume-mute" title="كتم عندي" onclick="event.stopPropagation();toggleMute('${u.id}')"></i>`:'')}${isAdmin&&!me?`<i class="fa fa-ban" title="كتم عام" onclick="event.stopPropagation();socket.emit('mute user','${u.id}')"></i><i class="fa fa-sign-out" title="طرد" onclick="event.stopPropagation();socket.emit('kick user','${u.id}')"></i><i class="fa fa-gavel" title="بان 24س" onclick="event.stopPropagation();if(confirm('تبند ${u.name}؟'))socket.emit('ban user',{targetId:'${u.id}',hours:24})"></i><i class="fa fa-lock" title="بان دائم" onclick="event.stopPropagation();if(confirm('تبند ${u.name} دائم؟'))socket.emit('ban user',{targetId:'${u.id}',hours:null})"></i>`:'')}<span class="pm-badge hide" id="pm_${u.id}">!</span>`;d.onclick=e=>{if(!e.target.closest('.admin-btns'))openPM(u);};$('users_list').appendChild(d);$('online_count').innerText=$('users_list').children.length;}
+function openPM(u){if(u.id===myId)return;pmWith=u;document.querySelectorAll('.user-item').forEach(x=>x.classList.remove('pm-active'));$(`user_${u.id}`).classList.add('pm-active');$(`pm_${u.id}`).classList.add('hide');$('room_title').innerText=`خاص مع: ${u.name}`;$('messages_box').innerHTML='';addMsg('sys',`خاص مع ${u.name}`);}
+function addMsg(t,c,u= currentUser,ty='text',pm=false){if(t==='usr'&&localMuted.includes(u.id))return;const b=$('messages_box');if(t==='sys')return b.innerHTML+=`<div style="text-align:center;color:#555;font-size:13px;margin:5px 0;">${c}</div>`;const d=document.createElement('div');d.className=`msg ${u.id===myId?'me':'other'} ${pm?'pm':''}`;let i=u.id!==myId?`<div class="name ${u.gender}">${u.name}</div>`:'';i+=ty==='img'?`<img src="${c}" class="chat-img" onclick="window.open(this.src)">`:ty==='audio'?`<audio src="${c}" controls></audio>`:`<div>${c}</div>`;i+=`<div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;d.innerHTML=i;b.appendChild(d);b.scrollTop=b.scrollHeight;}
+function err(t){$('error').style.display="block";$('error').innerText=t;}function clearerr(){$('error').style.display="none";}
+document.querySelectorAll('.room-tab').forEach(t=>t.onclick=()=>{currentRoom=t.dataset.room;pmWith=null;document.querySelectorAll('.room-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');$('room_title').innerText=`غرفة: ${currentRoom}`;$('messages_box').innerHTML='';socket.emit('joinRoom',currentRoom);});
+$('logout_btn').onclick=()=>location.reload();$('show_users_btn').onclick=()=>$('sidebar').classList.toggle('active');
+$('bans_btn').onclick=()=>socket.emit('get bans');socket.on('bans list',b=>{let h='<h4>المحظورين</h4>';for(let i in b){const x=b[i];h+=`<div style="border-bottom:1px solid #eee;padding:5px 0;">${i}<br>${x.reason}<br>${x.expire?new Date(x.expire).toLocaleString('ar-EG'):'دائم'}<button onclick="socket.emit('unban ip','${i}')" style="background:red;color:#fff;padding:3px 8px;border-radius:5px;margin-top:5px;">فك</button></div>`;}$('settings_box').innerHTML=h;});
+</script>
+</body>
+</html>
