@@ -67,7 +67,7 @@ button{cursor:pointer;border:none;background:none}
 
 <div class="popup-overlay hide" id="guest_popup"><div class="popup-box">
   <h3>دخول كزائر</h3><input type="text" id="guest_name" placeholder="اكتب اسمك هنا" maxlength="20">
-  <div class="gender-select"><button class="gender-btn male active" data-g="male">ذكر</button><button class="gender-btn female" data-g="female">انثى</button><button class="gender-btn other" data-g="other">آخر</button></div>
+  <div class="gender-select"><button type="button" class="gender-btn male active" data-g="male">ذكر</button><button type="button" class="gender-btn female" data-g="female">انثى</button><button type="button" class="gender-btn other" data-g="other">آخر</button></div>
   <button class="btn-main" id="guest_enter">دخول</button>
 </div></div>
 
@@ -78,16 +78,16 @@ button{cursor:pointer;border:none;background:none}
 
 <div class="popup-overlay hide" id="register_popup"><div class="popup-box">
   <h3>انشاء حساب</h3><input type="text" id="reg_user" placeholder="اسم المستخدم"><input type="password" id="reg_pass" placeholder="الباسورد"><input type="email" id="reg_email" placeholder="البريد الالكتروني">
-  <div class="gender-select"><button class="gender-btn male active" data-g="male">ذكر</button><button class="gender-btn female" data-g="female">انثى</button><button class="gender-btn other" data-g="other">آخر</button></div>
+  <div class="gender-select"><button type="button" class="gender-btn male active" data-g="male">ذكر</button><button type="button" class="gender-btn female" data-g="female">انثى</button><button type="button" class="gender-btn other" data-g="other">آخر</button></div>
   <button class="btn-main" id="reg_submit">حفظ</button>
 </div></div>
 
 <div id="rooms_page" class="hide"><h3 class="rooms-title">اختر غرفتك</h3>
   <div class="rooms-grid">
-    <div class="room-card"><div>🌎</div><h4>الغرفة العامة</h4><button data-room="عام">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇾🇪</div><h4>غرفة اليمن</h4><button data-room="اليمن">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇩🇿</div><h4>غرفة الجزائر</h4><button data-room="الجزائر">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇪🇬</div><h4>غرفة مصر</h4><button data-room="مصر">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🌎</div><h4>الغرفة العامة</h4><button type="button" data-room="عام">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🇾🇪</div><h4>غرفة اليمن</h4><button type="button" data-room="اليمن">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🇩🇿</div><h4>غرفة الجزائر</h4><button type="button" data-room="الجزائر">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🇪🇬</div><h4>غرفة مصر</h4><button type="button" data-room="مصر">اضغط هنا للدخول</button></div>
   </div>
 </div>
 
@@ -102,7 +102,7 @@ button{cursor:pointer;border:none;background:none}
     <i class="fa fa-paper-plane send" id="send_btn"></i><i class="fa fa-microphone" id="mic_btn"></i>
     <input type="file" id="img_input" accept="image/*" class="hide"><i class="fa fa-paperclip" id="img_btn"></i>
     <input type="text" id="msg_input" placeholder="اكتب هنا..."><i class="fa fa-smile"></i><i class="fa fa-plus" id="plus_btn"></i>
-    <div class="add-menu hide" id="add_menu"><button id="draw_btn"><i class="fa fa-paintbrush"></i> الرسم</button><button><i class="fa fa-palette"></i> الألوان A</button><button id="yt_btn"><i class="fa fa-youtube"></i> يوتيوب</button></div>
+    <div class="add-menu hide" id="add_menu"><button type="button" id="draw_btn"><i class="fa fa-paintbrush"></i> الرسم</button><button type="button"><i class="fa fa-palette"></i> الألوان A</button><button type="button" id="yt_btn"><i class="fa fa-youtube"></i> يوتيوب</button></div>
   </div>
   <div class="bottombar"><i class="fa fa-volume-high"></i><i class="fa fa-play"></i><div class="room-name" id="room_name">الغرفة العامة</div><i class="fa fa-gear"></i><i class="fa fa-house" id="home_btn"></i><i class="fa fa-user" id="profile_btn"></i></div>
 </div>
@@ -118,23 +118,26 @@ button{cursor:pointer;border:none;background:none}
 <div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column"><h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1"></div><div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><i class="fa fa-paper-plane send" id="pm_send"></i></div></div></div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script defer>
-document.addEventListener('DOMContentLoaded', () => {
+<script>
 const socket = io(window.location.origin, { transports: ["websocket", "polling"] });
 const $ = id => document.getElementById(id);
 let myGender = 'male', myName = 'زائر', myAge = Math.floor(Math.random() * 80) + 20, myId = null, isAdmin=false, isVip=false, myCredits=0, pmWith=null, mediaRecorder, audioChunks=[];
 
-// ===== 1. اختيار الجنس مصلح =====
+console.log('JS Loaded'); // للتأكد ان السكربت اشتغل
+
+// ===== 1. اختيار الجنس =====
 document.querySelectorAll('.gender-btn').forEach(b => {
-  b.onclick = () => {
+  b.onclick = (e) => {
+    e.preventDefault();
     b.closest('.gender-select').querySelectorAll('.gender-btn').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     myGender = b.dataset.g;
+    console.log('Gender:', myGender);
   }
 });
 
 // ===== 2. فتح البوب اب =====
-$('guest_btn').onclick = () => $('guest_popup').classList.remove('hide');
+$('guest_btn').onclick = () => {console.log('guest click'); $('guest_popup').classList.remove('hide');}
 $('login_btn').onclick = () => $('login_popup').classList.remove('hide');
 $('register_btn').onclick = () => $('register_popup').classList.remove('hide');
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
@@ -216,7 +219,6 @@ function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع
 $('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
 function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg '+type; d.innerHTML=`<div class="name">${name}</div><div>${text}</div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=$('pm_box').scrollHeight; }
 
-});
 </script>
 </body>
 </html>
