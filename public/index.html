@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--main:#0a2a33;--green:#1dd1a1;--blue:#3498db;--pink:#ff7675;--bg:#0e1c22;--male:#3498db;--female:#ff7675;--other:#fff}
+:root{--main:#0a2a33;--green:#1dd1a1;--gold:#ffd700;--blue:#3498db;--pink:#ff7675;--bg:#0e1c22;--male:#3498db;--female:#ff7675;--other:#fff}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
 body{background:var(--bg);color:#fff;overflow:hidden}
 button{cursor:pointer;border:none;background:none}
@@ -21,24 +21,23 @@ button{cursor:pointer;border:none;background:none}
 .gender-select{display:flex;justify-content:center;gap:10px;margin:10px 0}
 .gender-select button{padding:8px 15px;border-radius:8px;background:#0e1c22;border:2px solid transparent}
 .gender-select button.active{border-color:var(--green)}
-.gender-select.male.active{background:var(--male)}.gender-select.female.active{background:var(--female)}.gender-select.other.active{background:var(--other);color:#000}
 #rooms_page{width:100vw;height:100vh;padding:20px;overflow-y:auto}
 .rooms-title{font-size:24px;font-weight:700;text-align:center;margin:20px 0}
 .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;max-width:600px;margin:auto}
 .room-card{background:#1f3a44;border-radius:15px;padding:15px;text-align:center}
-.room-card.flag{font-size:40px;margin-bottom:5px}
 .room-card button{width:100%;padding:8px;border-radius:8px;background:var(--green);color:#000;font-weight:700;margin-top:5px}
 #chat_page{width:100vw;height:100vh;display:flex;flex-direction:column;background:#0e1c22}
 .topbar{background:var(--main);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
 .topbar i{font-size:22px;color:#fff}
-.topbar.title{font-weight:700;font-size:18px;position:absolute;left:50%;transform:translateX(-50%)}
-.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:3px solid var(--male);cursor:pointer}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:3px solid var(--male);cursor:pointer;position:relative}
 .avatar.male{border-color:var(--male)}.avatar.female{border-color:var(--female)}.avatar.other{border-color:var(--other)}
+.avatar.vip::after{content:'💎';position:absolute;bottom:-5px;right:-5px;font-size:14px}
 .messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px}
 .msg{max-width:80%;padding:8px 12px;border-radius:12px;line-height:1.6}
 .msg.me{background:var(--green);color:#000;align-self:flex-start;border-radius:12px 12px 0 12px}
 .msg.other{background:#1f3a44;align-self:flex-end;border-radius:12px 12px 12px 0}
 .msg.name{font-size:12px;font-weight:700;margin-bottom:3px;cursor:pointer}
+.msg.name.vip{color:var(--gold)}
 .msg.time{font-size:10px;opacity:.7;text-align:left;margin-top:3px}
 .inputbar{background:#1f3a44;padding:8px 10px;display:flex;align-items:center;gap:8px}
 .inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:none;background:#0e1c22;color:#fff;outline:none}
@@ -50,6 +49,8 @@ button{cursor:pointer;border:none;background:none}
 .sidebar.active{right:0}
 .user-item{display:flex;align-items:center;gap:10px;padding:8px;background:#0e1c22;border-radius:8px}
 .admin-btns i{margin-right:5px;color:#ff7675;cursor:pointer}
+.store-item{background:#0e1c22;padding:12px;border-radius:10px;margin:10px 0;display:flex;justify-content:space-between;align-items:center}
+.credits-badge{background:var(--gold);color:#000;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -80,17 +81,17 @@ button{cursor:pointer;border:none;background:none}
 
 <div id="rooms_page" class="hide"><h3 class="rooms-title">اختر غرفتك</h3>
   <div class="rooms-grid">
-    <div class="room-card"><div class="flag">🌎</div><h4>الغرفة العامة</h4><button data-room="عام">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div class="flag">🇾🇪</div><h4>غرفة اليمن</h4><button data-room="اليمن">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div class="flag">🇩🇿</div><h4>غرفة الجزائر</h4><button data-room="الجزائر">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div class="flag">🇪🇬</div><h4>غرفة مصر</h4><button data-room="مصر">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🌎</div><h4>الغرفة العامة</h4><button data-room="عام">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🇾🇪</div><h4>غرفة اليمن</h4><button data-room="اليمن">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🇩🇿</div><h4>غرفة الجزائر</h4><button data-room="الجزائر">اضغط هنا للدخول</button></div>
+    <div class="room-card"><div>🇪🇬</div><h4>غرفة مصر</h4><button data-room="مصر">اضغط هنا للدخول</button></div>
   </div>
 </div>
 
 <div id="chat_page" class="hide">
   <div class="topbar">
     <div><i class="fa fa-bars" id="menu_btn"></i><i class="fa fa-store" id="store_btn"></i><i class="fa fa-envelope" id="pm_btn"></i><i class="fa fa-users" id="users_btn"></i><i class="fa fa-heart"></i></div>
-    <div class="title">شات اليمن المطور</div>
+    <div style="font-weight:700">شات اليمن المطور</div>
     <div><div class="avatar male" id="my_avatar">؟</div></div>
   </div>
   <div class="messages" id="messages_box"></div>
@@ -105,6 +106,11 @@ button{cursor:pointer;border:none;background:none}
 
 <div class="sidebar" id="sidebar"><a id="rooms_list_btn"><i class="fa fa-door-open"></i> الغرف</a><a id="bans_list_btn" class="hide"><i class="fa fa-gavel"></i> المحظورين</a><a id="logout_btn"><i class="fa fa-right-from-bracket"></i> تسجيل الخروج</a></div>
 
+<div class="popup-overlay hide" id="store_popup"><div class="popup-box">
+  <h3>🛒 المتجر <span class="credits-badge" id="my_credits">0 💎</span></h3>
+  <div class="store-item"><div>عضوية مميزة شهر 💎</div><button class="btn-main" id="buy_vip_btn" style="width:auto;padding:8px 15px">شراء 500</button></div>
+</div></div>
+
 <div class="popup-overlay hide" id="users_popup"><div class="popup-box" style="width:400px;max-height:80vh;overflow-y:auto"><h3>المتصلون</h3><div id="users_list"></div></div></div>
 <div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column"><h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1"></div><div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><i class="fa fa-paper-plane send" id="pm_send"></i></div></div></div>
 
@@ -113,7 +119,7 @@ button{cursor:pointer;border:none;background:none}
 document.addEventListener('DOMContentLoaded', () => {
 const socket = io(window.location.origin, { transports: ["websocket", "polling"] });
 const $ = id => document.getElementById(id);
-let myGender = 'male', myName = 'زائر', myAge = Math.floor(Math.random() * 80) + 20, myId = null, isAdmin=false, pmWith=null, mediaRecorder, audioChunks=[];
+let myGender = 'male', myName = 'زائر', myAge = Math.floor(Math.random() * 80) + 20, myId = null, isAdmin=false, isVip=false, myCredits=0, pmWith=null, mediaRecorder, audioChunks=[];
 
 // ===== التنقل =====
 $('guest_btn').onclick = () => $('guest_popup').classList.remove('hide');
@@ -122,10 +128,8 @@ $('register_btn').onclick = () => $('register_popup').classList.remove('hide');
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
 document.querySelectorAll('.gender-select button').forEach(b => b.onclick = () => { document.querySelectorAll('.gender-select button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); myGender = b.dataset.g; });
 
-// ===== تسجيل =====
-$('reg_submit').onclick = () => socket.emit('register',{name:$('reg_user').value,pass:$('reg_pass').value,email:$('reg_email').value,gender:myGender,age:myAge},r=>{alert(r.msg||'تم التسجيل');if(r.ok)$('register_popup').classList.add('hide');});
-
-// ===== دخول =====
+// ===== تسجيل ودخول =====
+$('reg_submit').onclick = () => socket.emit('register',{name:$('reg_user').value,pass:$('reg_pass').value,email:$('reg_email').value,gender:myGender,age:myAge},r=>{alert(r.msg||'تم التسجيل +100 نقطة هدية');if(r.ok)$('register_popup').classList.add('hide');});
 $('login_submit').onclick = () => socket.emit('login',{name:$('login_user').value,pass:$('login_pass').value},enter);
 $('guest_enter').onclick = () => {myName=$('guest_name').value.trim()||'زائر'+Math.floor(Math.random()*999);socket.emit('joinGuest',{name:myName,gender:myGender,age:myAge},enter);}
 
@@ -133,9 +137,9 @@ function enter(r){
   if(!r.ok) return alert(r.msg);
   $('guest_popup').classList.add('hide');$('login_popup').classList.add('hide');$('register_popup').classList.add('hide');
   $('start_page').classList.add('hide');$('rooms_page').classList.remove('hide');
-  myId=r.user.id; isAdmin=r.user.isAdmin; myName=r.user.name; myGender=r.user.gender; myAge=r.user.age;
+  myId=r.user.id; isAdmin=r.user.isAdmin; isVip=r.user.isVip; myName=r.user.name; myGender=r.user.gender; myAge=r.user.age; myCredits=r.user.credits||0;
   updateAvatar(); if(isAdmin)$('bans_list_btn').classList.remove('hide');
-  r.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type));
+  r.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));
 }
 
 // ===== دخول غرفة =====
@@ -146,18 +150,22 @@ $('home_btn').onclick = () => { $('chat_page').classList.add('hide');$('rooms_pa
 $('rooms_list_btn').onclick = () => { $('sidebar').classList.remove('active'); $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
 
 // ===== سوكت استقبال =====
-socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; d.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type));});
+socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; myCredits=d.credits||0; d.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));});
 socket.on('user joined', u=>addMsg('النظام',`${u.name} دخل`,'other'));
 socket.on('user left', n=>addMsg('النظام',`${n} خرج`,'other'));
-socket.on('message', d=>addMsg(d.user.name,d.content, d.user.id===myId?'me':'other',d.type));
+socket.on('message', d=>addMsg(d.user.name,d.content, d.user.id===myId?'me':'other',d.type,d.user));
 socket.on('pm message', d=>{ if(pmWith){ addPM(d.user.name,d.content,d.user.id===myId?'me':'other'); } else alert(`رسالة خاصة من ${d.user.name}`); });
 socket.on('system', m=>addMsg('النظام',m,'other'));
 socket.on('you muted', v=>{$('msg_input').disabled=v; alert(v?'تم كتمك':'تم فك كتمك');});
 socket.on('kicked', m=>{alert(m);location.reload();}); socket.on('banned', m=>{alert(m);location.reload();});
+socket.on('credits update', c=>{myCredits=c;});
+socket.on('store data', d=>{$('my_credits').innerText=d.credits+' 💎';});
+socket.on('vip bought', d=>{isVip=true; myCredits=d.credits; updateAvatar(); alert('تم شراء العضوية المميزة شهر 💎');});
 socket.on('bans list', b=>{let h='';for(let i in b){h+=`<div style="padding:5px;border-bottom:1px solid #333">${i} - ${b[i].reason} <button onclick="socket.emit('unban ip','${i}')">فك</button></div>`;}$('users_list').innerHTML=h;});
+socket.on('users list', u=>{ $('users_list').innerHTML=''; u.forEach(x=>{ const d=document.createElement('div'); d.className='user-item'; d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div><div style="margin-right:auto" class="admin-btns">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})"></i>`:'')}<i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')"></i></div>`; $('users_list').appendChild(d); }); });
 
 // ===== ارسال =====
-function send(type,content){ socket.emit('message',{type,content,pm:pmWith?.id||null}); if(!pmWith) addMsg(myName,content,'me',type); }
+function send(type,content){ socket.emit('message',{type,content,pm:pmWith?.id||null}); if(!pmWith) addMsg(myName,content,'me',type,{gender:myGender,isVip}); }
 $('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();}
 $('img_btn').onclick=()=>$('img_input').click();
@@ -165,28 +173,26 @@ $('img_input').onchange=e=>{const f=e.target.files[0]; if(!f)return; const d=new
 $('mic_btn').onclick=async()=>{ if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('mic_btn').style.color='#aaa';return;} const s=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRecorder=new MediaRecorder(s); audioChunks=[]; mediaRecorder.ondataavailable=e=>audioChunks.push(e.data); mediaRecorder.onstop=()=>{const b=new Blob(audioChunks,{type:'audio/webm'}); const f=new FormData(); f.append('audio',b); fetch('/upload-audio',{method:'POST',body:f}).then(r=>r.json()).then(d=>send('audio',d.url)); s.getTracks().forEach(t=>t.stop());}; mediaRecorder.start();$('mic_btn').style.color='red';};
 
 // ===== واجهة =====
-function addMsg(name,text,type='other',t='text'){
+function addMsg(name,text,type='other',t='text',u={}){
   const d=document.createElement('div'); d.className='msg '+type;
   let c = t==='img'?`<img src="${text}" style="max-width:150px;border-radius:8px">`:t==='audio'?`<audio src="${text}" controls style="width:200px"></audio>`:`<div>${text}</div>`;
-  d.innerHTML=`<div class="name ${myGender}" onclick="openProfile('${name}')">${name}</div>${c}<div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  d.innerHTML=`<div class="name ${u.gender||myGender} ${u.isVip?'vip':''}">${name} ${u.isVip?'💎':''} ${u.isAdmin?'👑':''}</div>${c}<div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;
   $('messages_box').appendChild(d); $('messages_box').scrollTop=$('messages_box').scrollHeight;
 }
-function updateAvatar(){ const av=$('my_avatar'); av.className='avatar '+myGender; av.innerText=myName.charAt(0); }
+function updateAvatar(){ const av=$('my_avatar'); av.className='avatar '+myGender+(isVip?' vip':''); av.innerText=myName.charAt(0); }
 $('menu_btn').onclick=()=>$('sidebar').classList.toggle('active');
-$('store_btn').onclick=()=>alert('المتجر: اشتري عضوية مميزة 💎');
-$('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالعمر: ${myAge}\nالجنس: ${myGender}\nالرصيد: 0 💎`);
+$('store_btn').onclick=()=>{ socket.emit('get store'); $('store_popup').classList.remove('hide'); }
+$('buy_vip_btn').onclick=()=>socket.emit('buy vip');
+$('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالعمر: ${myAge}\nالجنس: ${myGender}\nالرصيد: ${myCredits} 💎\nالعضوية: ${isVip?'مميزة 💎':'عادي'}`);
 $('plus_btn').onclick=()=>$('add_menu').classList.toggle('hide');
 $('logout_btn').onclick=()=>location.reload();
 $('bans_list_btn').onclick=()=>socket.emit('get bans');
 
 // ===== خاص ومستخدمين =====
-$('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); $('users_list').innerHTML=''; for(let id in socket.sockets){} socket.emit('get users'); }
-socket.on('users list', u=>{ $('users_list').innerHTML=''; u.forEach(x=>{ const d=document.createElement('div'); d.className='user-item'; d.innerHTML=`<div class="avatar ${x.gender}">${x.name[0]}</div><div>${x.name}</div><div style="margin-right:auto" class="admin-btns">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})"></i>`:'')}<i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')"></i></div>`; $('users_list').appendChild(d); }); });
-
+$('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
 function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
 $('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
 function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg '+type; d.innerHTML=`<div class="name">${name}</div><div>${text}</div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=$('pm_box').scrollHeight; }
-function openProfile(name){ alert('ملف '+name); }
 
 });
 </script>
