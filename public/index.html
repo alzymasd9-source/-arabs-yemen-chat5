@@ -19,8 +19,11 @@ button{cursor:pointer;border:none;background:none}
 .popup-box{background:#1f3a44;width:340px;max-width:95%;border-radius:15px;padding:20px;text-align:center}
 .popup-box input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #2e4f5b;background:#0e1c22;color:#fff;outline:none;text-align:center;font-size:16px}
 .gender-select{display:flex;justify-content:center;gap:10px;margin:10px 0}
-.gender-select button{padding:8px 15px;border-radius:8px;background:#0e1c22;border:2px solid transparent}
-.gender-select button.active{border-color:var(--green)}
+.gender-btn{padding:8px 15px;border-radius:8px;background:#0e1c22;border:2px solid #2e4f5b;color:#fff}
+.gender-btn.active{border-color:var(--green)}
+.gender-btn.male.active{background:var(--male)}
+.gender-btn.female.active{background:var(--female)}
+.gender-btn.other.active{background:var(--other);color:#000}
 #rooms_page{width:100vw;height:100vh;padding:20px;overflow-y:auto}
 .rooms-title{font-size:24px;font-weight:700;text-align:center;margin:20px 0}
 .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;max-width:600px;margin:auto}
@@ -42,7 +45,7 @@ button{cursor:pointer;border:none;background:none}
 .inputbar{background:#1f3a44;padding:8px 10px;display:flex;align-items:center;gap:8px}
 .inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:none;background:#0e1c22;color:#fff;outline:none}
 .inputbar i{font-size:22px;color:#aaa;padding:8px}
-.inputbar.send{color:var(--green)!important}
+.inputbar .send{color:var(--green)!important}
 .add-menu{position:absolute;bottom:60px;right:10px;background:#1f3a44;border-radius:12px;padding:10px;display:grid;gap:10px;z-index:5}
 .bottombar{background:var(--main);height:55px;display:flex;align-items:center;justify-content:space-around;padding:0 5px;border-top:1px solid #1f3a44}
 .sidebar{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#1f3a44;z-index:30;transition:.3s;padding:20px;display:flex;flex-direction:column;gap:15px}
@@ -64,7 +67,7 @@ button{cursor:pointer;border:none;background:none}
 
 <div class="popup-overlay hide" id="guest_popup"><div class="popup-box">
   <h3>دخول كزائر</h3><input type="text" id="guest_name" placeholder="اكتب اسمك هنا" maxlength="20">
-  <div class="gender-select"><button class="male active" data-g="male">ذكر</button><button class="female" data-g="female">انثى</button><button class="other" data-g="other">آخر</button></div>
+  <div class="gender-select"><button class="gender-btn male active" data-g="male">ذكر</button><button class="gender-btn female" data-g="female">انثى</button><button class="gender-btn other" data-g="other">آخر</button></div>
   <button class="btn-main" id="guest_enter">دخول</button>
 </div></div>
 
@@ -75,7 +78,7 @@ button{cursor:pointer;border:none;background:none}
 
 <div class="popup-overlay hide" id="register_popup"><div class="popup-box">
   <h3>انشاء حساب</h3><input type="text" id="reg_user" placeholder="اسم المستخدم"><input type="password" id="reg_pass" placeholder="الباسورد"><input type="email" id="reg_email" placeholder="البريد الالكتروني">
-  <div class="gender-select"><button class="male active" data-g="male">ذكر</button><button class="female" data-g="female">انثى</button><button class="other" data-g="other">آخر</button></div>
+  <div class="gender-select"><button class="gender-btn male active" data-g="male">ذكر</button><button class="gender-btn female" data-g="female">انثى</button><button class="gender-btn other" data-g="other">آخر</button></div>
   <button class="btn-main" id="reg_submit">حفظ</button>
 </div></div>
 
@@ -121,17 +124,36 @@ const socket = io(window.location.origin, { transports: ["websocket", "polling"]
 const $ = id => document.getElementById(id);
 let myGender = 'male', myName = 'زائر', myAge = Math.floor(Math.random() * 80) + 20, myId = null, isAdmin=false, isVip=false, myCredits=0, pmWith=null, mediaRecorder, audioChunks=[];
 
-// ===== التنقل =====
+// ===== 1. اختيار الجنس مصلح =====
+document.querySelectorAll('.gender-btn').forEach(b => {
+  b.onclick = () => {
+    b.closest('.gender-select').querySelectorAll('.gender-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    myGender = b.dataset.g;
+  }
+});
+
+// ===== 2. فتح البوب اب =====
 $('guest_btn').onclick = () => $('guest_popup').classList.remove('hide');
 $('login_btn').onclick = () => $('login_popup').classList.remove('hide');
 $('register_btn').onclick = () => $('register_popup').classList.remove('hide');
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
-document.querySelectorAll('.gender-select button').forEach(b => b.onclick = () => { document.querySelectorAll('.gender-select button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); myGender = b.dataset.g; });
 
-// ===== تسجيل ودخول =====
-$('reg_submit').onclick = () => socket.emit('register',{name:$('reg_user').value,pass:$('reg_pass').value,email:$('reg_email').value,gender:myGender,age:myAge},r=>{alert(r.msg||'تم التسجيل +100 نقطة هدية');if(r.ok)$('register_popup').classList.add('hide');});
-$('login_submit').onclick = () => socket.emit('login',{name:$('login_user').value,pass:$('login_pass').value},enter);
-$('guest_enter').onclick = () => {myName=$('guest_name').value.trim()||'زائر'+Math.floor(Math.random()*999);socket.emit('joinGuest',{name:myName,gender:myGender,age:myAge},enter);}
+// ===== 3. تسجيل ودخول =====
+$('reg_submit').onclick = () => {
+  const n=$('reg_user').value.trim(), p=$('reg_pass').value, e=$('reg_email').value;
+  if(!n||!p) return alert('اكتب اسم وباسورد');
+  socket.emit('register',{name:n,pass:p,email:e,gender:myGender,age:myAge},r=>{alert(r.msg||'تم التسجيل +100 نقطة هدية');if(r.ok)$('register_popup').classList.add('hide');});
+};
+$('login_submit').onclick = () => {
+  const n=$('login_user').value.trim(), p=$('login_pass').value;
+  if(!n||!p) return alert('اكتب اسم وباسورد');
+  socket.emit('login',{name:n,pass:p},enter);
+};
+$('guest_enter').onclick = () => {
+  myName=$('guest_name').value.trim()||'زائر'+Math.floor(Math.random()*999);
+  socket.emit('joinGuest',{name:myName,gender:myGender,age:myAge},enter);
+}
 
 function enter(r){
   if(!r.ok) return alert(r.msg);
@@ -142,14 +164,14 @@ function enter(r){
   r.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));
 }
 
-// ===== دخول غرفة =====
+// ===== 4. دخول غرفة =====
 document.querySelectorAll('.room-card button').forEach(b => b.onclick = () => {
   const room=b.dataset.room; $('rooms_page').classList.add('hide');$('chat_page').classList.remove('hide');$('room_name').innerText=room; socket.emit('joinRoom',room);
 });
 $('home_btn').onclick = () => { $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
 $('rooms_list_btn').onclick = () => { $('sidebar').classList.remove('active'); $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
 
-// ===== سوكت استقبال =====
+// ===== 5. سوكت استقبال =====
 socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; myCredits=d.credits||0; d.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));});
 socket.on('user joined', u=>addMsg('النظام',`${u.name} دخل`,'other'));
 socket.on('user left', n=>addMsg('النظام',`${n} خرج`,'other'));
@@ -164,7 +186,7 @@ socket.on('vip bought', d=>{isVip=true; myCredits=d.credits; updateAvatar(); ale
 socket.on('bans list', b=>{let h='';for(let i in b){h+=`<div style="padding:5px;border-bottom:1px solid #333">${i} - ${b[i].reason} <button onclick="socket.emit('unban ip','${i}')">فك</button></div>`;}$('users_list').innerHTML=h;});
 socket.on('users list', u=>{ $('users_list').innerHTML=''; u.forEach(x=>{ const d=document.createElement('div'); d.className='user-item'; d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div><div style="margin-right:auto" class="admin-btns">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})"></i>`:'')}<i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')"></i></div>`; $('users_list').appendChild(d); }); });
 
-// ===== ارسال =====
+// ===== 6. ارسال =====
 function send(type,content){ socket.emit('message',{type,content,pm:pmWith?.id||null}); if(!pmWith) addMsg(myName,content,'me',type,{gender:myGender,isVip}); }
 $('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();}
@@ -172,7 +194,7 @@ $('img_btn').onclick=()=>$('img_input').click();
 $('img_input').onchange=e=>{const f=e.target.files[0]; if(!f)return; const d=new FormData(); d.append('image',f); fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>send('img',x.url));};
 $('mic_btn').onclick=async()=>{ if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('mic_btn').style.color='#aaa';return;} const s=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRecorder=new MediaRecorder(s); audioChunks=[]; mediaRecorder.ondataavailable=e=>audioChunks.push(e.data); mediaRecorder.onstop=()=>{const b=new Blob(audioChunks,{type:'audio/webm'}); const f=new FormData(); f.append('audio',b); fetch('/upload-audio',{method:'POST',body:f}).then(r=>r.json()).then(d=>send('audio',d.url)); s.getTracks().forEach(t=>t.stop());}; mediaRecorder.start();$('mic_btn').style.color='red';};
 
-// ===== واجهة =====
+// ===== 7. واجهة =====
 function addMsg(name,text,type='other',t='text',u={}){
   const d=document.createElement('div'); d.className='msg '+type;
   let c = t==='img'?`<img src="${text}" style="max-width:150px;border-radius:8px">`:t==='audio'?`<audio src="${text}" controls style="width:200px"></audio>`:`<div>${text}</div>`;
@@ -188,7 +210,7 @@ $('plus_btn').onclick=()=>$('add_menu').classList.toggle('hide');
 $('logout_btn').onclick=()=>location.reload();
 $('bans_list_btn').onclick=()=>socket.emit('get bans');
 
-// ===== خاص ومستخدمين =====
+// ===== 8. خاص ومستخدمين =====
 $('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
 function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
 $('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
