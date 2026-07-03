@@ -1,6 +1,7 @@
 {
   "name": "chat-yemen-server",
   "version": "1.0.0",
+  "description": "شات اليمن العربي كامل",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
   "dependencies": {
