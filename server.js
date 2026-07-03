@@ -19,7 +19,7 @@ const DATA_DIR = './data'; if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 const BANS_FILE = path.join(DATA_DIR, 'bans.json');
 const MESSAGES_FILE = path.join(DATA_DIR, 'messages.json');
 const MUTED_FILE = path.join(DATA_DIR, 'muted.json');
-const USERS_FILE = path.join(DATA_DIR, 'users.json'); // للأعضاء المسجلين
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const MAX_MESSAGES = 100;
 
 const loadJSON = (file, d = {}) => fs.existsSync(file)? JSON.parse(fs.readFileSync(file, 'utf8')) : d;
@@ -28,16 +28,19 @@ const saveJSON = (file, data) => fs.writeFileSync(file, JSON.stringify(data, nul
 let bannedIPs = loadJSON(BANS_FILE);
 let chatHistory = loadJSON(MESSAGES_FILE, { 'عام': [], 'اليمن': [], 'الجزائر': [], 'مصر': [] });
 let globalMuted = loadJSON(MUTED_FILE, []);
-let registeredUsers = loadJSON(USERS_FILE, {}); // {username: {pass, email, gender, age}}
+let registeredUsers = loadJSON(USERS_FILE, {}); // {username: {pass,email,gender,age,credits,vipExpire}}
 
-let users = {}; // المتصلين الان {socketId: {id, name, gender, age, room, isAdmin, ip, credits:0}}
+let users = {};
 let rooms = { 'عام': [], 'اليمن': [], 'الجزائر': [], 'مصر': [] };
 const ADMINS = ['admin', 'مدير'];
+const VIP_PRICE = 500; // سعر العضوية المميزة شهر
+const MSG_CREDITS = 1; // نقطة لكل رسالة
 
 const getIP = socket => socket.handshake.headers['x-forwarded-for']?.split(',')[0].trim() || socket.handshake.address;
 const saveBans = () => saveJSON(BANS_FILE, bannedIPs);
 const saveMuted = () => saveJSON(MUTED_FILE, globalMuted);
-const saveMessage = (room, msg) => { chatHistory[room].push(msg); if (chatHistory[room].length > MAX_MESSAGES) chatHistory[room].shift(); saveJSON(MESSAGES_FILE, chatHistory); };
+const saveMessage = (room, msg) => { chatHistory.push(msg); if (chatHistory.length > MAX_MESSAGES) chatHistory.shift(); saveJSON(MESSAGES_FILE, chatHistory); };
+const saveUsers = () => saveJSON(USERS_FILE, registeredUsers);
 
 const imgStorage = multer.diskStorage({ destination: './uploads/', filename: (req, f, cb) => cb(null, 'img_' + Date.now() + path.extname(f.originalname)) });
 const audioStorage = multer.diskStorage({ destination: './uploads/', filename: (req, f, cb) => cb(null, 'audio_' + Date.now() + '.webm') });
@@ -50,36 +53,33 @@ io.on('connection', (socket) => {
     return socket.emit('banned', `انت محظور: ${bannedIPs[ip].reason}`) && socket.disconnect(true);
   } else if (bannedIPs[ip]) { delete bannedIPs[ip]; saveBans(); }
 
-  // ===== 1. تسجيل حساب جديد =====
   socket.on('register', (data, cb) => {
     if(registeredUsers[data.name]) return cb({ok:false, msg:'الاسم مستخدم'});
-    registeredUsers[data.name] = {pass:data.pass, email:data.email, gender:data.gender, age:data.age};
-    saveJSON(USERS_FILE, registeredUsers);
+    registeredUsers[data.name] = {pass:data.pass, email:data.email, gender:data.gender, age:data.age, credits:100, vipExpire:0}; // 100 نقطة هدية
+    saveUsers();
     cb({ok:true});
   });
 
-  // ===== 2. دخول عضو =====
   socket.on('login', (data, cb) => {
     const u = registeredUsers[data.name];
     if(!u || u.pass!== data.pass) return cb({ok:false, msg:'خطأ في البيانات'});
-    joinUser(socket, {name:data.name, gender:u.gender, age:u.age}, ip, cb);
+    joinUser(socket, {name:data.name, gender:u.gender, age:u.age, credits:u.credits, vipExpire:u.vipExpire}, ip, cb);
   });
 
-  // ===== 3. دخول زائر =====
   socket.on('joinGuest', (data, cb) => {
-    joinUser(socket, data, ip, cb);
+    joinUser(socket, {...data, credits:0, vipExpire:0}, ip, cb);
   });
 
   function joinUser(socket, data, ip, cb){
     const isAdmin = ADMINS.includes(data.name.toLowerCase());
-    users[socket.id] = {...data, id:socket.id, room:'عام', isAdmin, ip, credits:0};
+    const isVip = data.vipExpire > Date.now();
+    users[socket.id] = {...data, id:socket.id, room:'عام', isAdmin, ip, isVip};
     socket.join('عام'); rooms['عام'].push(socket.id);
     io.to('عام').emit('user joined', users[socket.id]);
     socket.emit('you are', {...users[socket.id], chatHistory: chatHistory['عام'] || []});
     cb({ok:true, user:users[socket.id]});
   }
 
-  // ===== 4. تبديل غرفة =====
   socket.on('joinRoom', (r) => {
     const user = users[socket.id]; if (!user) return;
     socket.leave(user.room); rooms[user.room] = rooms[user.room].filter(id => id!== socket.id);
@@ -89,18 +89,40 @@ io.on('connection', (socket) => {
     socket.emit('chat history', chatHistory[r] || []);
   });
 
-  // ===== 5. رسالة + صورة + صوت =====
   socket.on('message', (d) => {
     const user = users[socket.id]; if (!user || globalMuted.includes(socket.id)) return;
-    const msg = {id: Date.now(), type: d.type, content: d.content, user: {name: user.name, gender: user.gender, id: user.id, age:user.age}, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'})};
+
+    // اضافة نقاط لكل رسالة للأعضاء فقط
+    if(user.credits!== undefined &&!user.isAdmin){
+      user.credits += MSG_CREDITS;
+      if(registeredUsers[user.name]){ registeredUsers[user.name].credits = user.credits; saveUsers(); }
+      socket.emit('credits update', user.credits);
+    }
+
+    const msg = {id: Date.now(), type: d.type, content: d.content, user: {name: user.name, gender: user.gender, id: user.id, age:user.age, isVip:user.isVip, isAdmin:user.isAdmin}, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'})};
     if (d.pm) {
       const t = io.sockets.sockets.get(d.pm);
       if (t) { t.emit('pm message', msg); socket.emit('pm message', msg); }
     } else { saveMessage(user.room, msg); io.to(user.room).emit('message', msg); }
   });
 
-  // ===== 6. صلاحيات المشرف =====
-  socket.on('mute user', (id) => { if(users[socket.id]?.isAdmin &&!globalMuted.includes(id)){ globalMuted.push(id); saveMuted(); io.to(id).emit('you muted', true); io.to(users[socket.id].room).emit('system', `${users[id].name} تم كتمه`); } });
+  // ===== المتجر =====
+  socket.on('buy vip', () => {
+    const user = users[socket.id]; if(!user || user.credits < VIP_PRICE) return socket.emit('system','رصيدك لا يكفي');
+    user.credits -= VIP_PRICE;
+    user.isVip = true;
+    user.vipExpire = Date.now() + 30*24*3600*1000; // شهر
+    if(registeredUsers[user.name]){ registeredUsers[user.name].credits=user.credits; registeredUsers[user.name].vipExpire=user.vipExpire; saveUsers(); }
+    socket.emit('vip bought', {credits:user.credits, expire:user.vipExpire});
+    io.to(user.room).emit('system', `💎 ${user.name} اشترى العضوية المميزة`);
+  });
+
+  socket.on('get store', () => {
+    socket.emit('store data', {credits:users[socket.id]?.credits||0, vipPrice:VIP_PRICE});
+  });
+
+  // ===== صلاحيات المشرف =====
+  socket.on('mute user', (id) => { if(users[socket.id]?.isAdmin &&!globalMuted.includes(id)){ globalMuted.push(id); saveMuted(); io.to(id).emit('you muted', true); } });
   socket.on('unmute user', (id) => { if(users[socket.id]?.isAdmin){ globalMuted = globalMuted.filter(x => x!== id); saveMuted(); io.to(id).emit('you muted', false); } });
   socket.on('kick user', (id) => { if(users[socket.id]?.isAdmin){ io.to(id).emit('kicked', 'تم طردك'); io.sockets.sockets.get(id)?.disconnect(true); } });
   socket.on('ban user', (d) => {
@@ -110,10 +132,10 @@ io.on('connection', (socket) => {
     saveBans();
     io.to(d.targetId).emit('banned', `تم حظرك: ${bannedIPs[t.ip].reason}`);
     io.sockets.sockets.get(d.targetId)?.disconnect(true);
-    io.to(users[socket.id].room).emit('system', `${t.name} تم حظره ${d.hours? d.hours+' ساعة':'دائم'}`);
   });
   socket.on('unban ip', (ip) => { if(users[socket.id]?.isAdmin){ delete bannedIPs[ip]; saveBans(); } });
   socket.on('get bans', () => { if(users[socket.id]?.isAdmin) socket.emit('bans list', bannedIPs); });
+  socket.on('get users', () => { socket.emit('users list', Object.values(users)); });
 
   socket.on('disconnect', () => { const u=users[socket.id]; if(u){ rooms[u.room]=rooms[u.room].filter(x=>x!==socket.id); io.to(u.room).emit('user left', u.name); delete users[socket.id]; } });
 });
