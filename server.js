@@ -95,13 +95,16 @@ io.on('connection', (socket) => {
 
   socket.on('message', (d) => {
     const user = users[socket.id]; if (!user || globalMuted.includes(socket.id)) return;
-    if(user.credits!== undefined &&!user.isAdmin && d.type==='text'){
+    if(user.credits!== undefined &&!user.isAdmin && d.type==='text' &&!d.pm){
       user.credits += MSG_CREDITS;
       if(registeredUsers[user.name]){ registeredUsers[user.name].credits = user.credits; saveUsers(); }
       socket.emit('credits update', user.credits);
     }
     const msg = {id: Date.now(), type: d.type || 'text', content: d.content, user: {name: user.name, gender: user.gender, id: user.id, age:user.age, isVip:user.isVip, isAdmin:user.isAdmin}, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'})};
-    saveMessage(user.room, msg); io.to(user.room).emit('message', msg);
+    if (d.pm) {
+      const t = io.sockets.sockets.get(d.pm);
+      if (t) { t.emit('pm message', msg); socket.emit('pm message', msg); }
+    } else { saveMessage(user.room, msg); io.to(user.room).emit('message', msg); }
   });
 
   socket.on('buy vip', () => {
