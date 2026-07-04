@@ -1,224 +1,234 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>شات اليمن المطور</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات اليمن | شات اليمن العربي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&family=Cairo&family=Amiri&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--main:#0a2a33;--green:#1dd1a1;--gold:#ffd700;--blue:#3498db;--pink:#ff7675;--bg:#0e1c22;--male:#3498db;--female:#ff7675;--other:#fff}
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
-body{background:var(--bg);color:#fff;overflow:hidden}
-button{cursor:pointer;border:none;background:none}
-.hide{display:none!important}
-#start_page{width:100vw;height:100vh;background:linear-gradient(180deg,#0a2a33 0%,#0e1c22 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;text-align:center}
-.logo{font-size:42px;font-weight:900;color:#fff}.logo span{font-size:18px;font-weight:400;color:#aaa;display:block;margin-top:5px}
-.btn-main{width:280px;padding:14px;border-radius:12px;background:var(--green);color:#000;font-size:18px;font-weight:700}
-.btn-sec{width:280px;padding:14px;border-radius:12px;background:#1f3a44;color:#fff;font-size:18px;font-weight:700;border:1px solid #2e4f5b}
-.popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:20;display:flex;align-items:center;justify-content:center}
-.popup-box{background:#1f3a44;width:340px;max-width:95%;border-radius:15px;padding:20px;text-align:center}
-.popup-box input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #2e4f5b;background:#0e1c22;color:#fff;outline:none;text-align:center;font-size:16px}
-.gender-select{display:flex;justify-content:center;gap:10px;margin:10px 0}
-.gender-btn{padding:8px 15px;border-radius:8px;background:#0e1c22;border:2px solid #2e4f5b;color:#fff}
-.gender-btn.active{border-color:var(--green)}
-.gender-btn.male.active{background:var(--male)}
-.gender-btn.female.active{background:var(--female)}
-.gender-btn.other.active{background:var(--other);color:#000}
-#rooms_page{width:100vw;height:100vh;padding:20px;overflow-y:auto}
-.rooms-title{font-size:24px;font-weight:700;text-align:center;margin:20px 0}
-.rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;max-width:600px;margin:auto}
-.room-card{background:#1f3a44;border-radius:15px;padding:15px;text-align:center}
-.room-card button{width:100%;padding:8px;border-radius:8px;background:var(--green);color:#000;font-weight:700;margin-top:5px}
-#chat_page{width:100vw;height:100vh;display:flex;flex-direction:column;background:#0e1c22}
-.topbar{background:var(--main);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
-.topbar i{font-size:22px;color:#fff}
-.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:3px solid var(--male);cursor:pointer;position:relative}
-.avatar.male{border-color:var(--male)}.avatar.female{border-color:var(--female)}.avatar.other{border-color:var(--other)}
-.avatar.vip::after{content:'💎';position:absolute;bottom:-5px;right:-5px;font-size:14px}
-.messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:80%;padding:8px 12px;border-radius:12px;line-height:1.6}
-.msg.me{background:var(--green);color:#000;align-self:flex-start;border-radius:12px 12px 0 12px}
-.msg.other{background:#1f3a44;align-self:flex-end;border-radius:12px 12px 12px 0}
-.msg.name{font-size:12px;font-weight:700;margin-bottom:3px;cursor:pointer}
-.msg.name.vip{color:var(--gold)}
-.msg.time{font-size:10px;opacity:.7;text-align:left;margin-top:3px}
-.inputbar{background:#1f3a44;padding:8px 10px;display:flex;align-items:center;gap:8px}
-.inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:none;background:#0e1c22;color:#fff;outline:none}
-.inputbar i{font-size:22px;color:#aaa;padding:8px}
-.inputbar .send{color:var(--green)!important}
-.add-menu{position:absolute;bottom:60px;right:10px;background:#1f3a44;border-radius:12px;padding:10px;display:grid;gap:10px;z-index:5}
-.bottombar{background:var(--main);height:55px;display:flex;align-items:center;justify-content:space-around;padding:0 5px;border-top:1px solid #1f3a44}
-.sidebar{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#1f3a44;z-index:30;transition:.3s;padding:20px;display:flex;flex-direction:column;gap:15px}
-.sidebar.active{right:0}
-.user-item{display:flex;align-items:center;gap:10px;padding:8px;background:#0e1c22;border-radius:8px}
-.admin-btns i{margin-right:5px;color:#ff7675;cursor:pointer}
-.store-item{background:#0e1c22;padding:12px;border-radius:10px;margin:10px 0;display:flex;justify-content:space-between;align-items:center}
-.credits-badge{background:var(--gold);color:#000;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:700}
+:root{--main:#0f414e;--green:#74b20e;--chat-bg:#e5ddd5;--msg-me:#dcf8c6;--msg-other:#fff;--user-font:'Tajawal';--user-color:#000}
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--user-font),sans-serif;color:var(--user-color)}
+body{background:#ededed}button{cursor:pointer;border:none}.hide{display:none!important}
+.header{background:var(--main);padding:10px;text-align:center}.header>a{color:#fff;font-size:28px;font-weight:700;text-decoration:none}.header>b{display:block;color:#ccc;font-size:14px;font-weight:400}
+.main{background:#00242e url(https://i.imgur.com/8KmCThn.jpg) no-repeat center fixed;background-size:cover;min-height:80vh;padding:20px}
+.container{max-width:1050px;margin:auto;text-align:center}
+.room{margin:60px auto;max-width:500px;background:rgba(255,255,255,.9);border-radius:15px;padding:20px}
+.btn{display:inline-block;margin:10px 5px;color:#fff;background:var(--main);padding:12px 25px;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer}
+#guest_btn{background:var(--green)}.login{display:none;background:rgba(249,249,249,.95);width:360px;max-width:95%;border-radius:15px;margin:20px auto;padding:20px;box-shadow:0 5px 20px rgba(0,0,0,.1)}
+.login input{width:100%;padding:12px;text-align:center;font-size:18px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px}
+.gendiv{display:flex;justify-content:center;gap:30px;margin:15px}.male{color:#06f}.female{color:#e13}
+.error{display:none;margin:10px auto;padding:10px;background:#fff0f0;color:red;border-radius:8px;border:1px solid red;max-width:360px}
+#chat_app{display:none;height:100vh;max-width:1200px;margin:auto;background:#fff}
+.chat-layout{display:flex;height:100%}.sidebar{width:320px;border-left:1px solid #ddd;display:flex;flex-direction:column;background:#f5f6f6}
+.sidebar-header{background:var(--main);color:#fff;padding:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.settings-btn{background:rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:13px;margin-right:5px}
+.room-tabs{display:flex;background:#e9edef}.room-tab{flex:1;padding:10px;text-align:center;font-size:14px;cursor:pointer;border-bottom:2px solid transparent}
+.room-tab.active{background:#fff;border-color:var(--green);font-weight:700}
+.users-list{flex:1;overflow-y:auto}.user-item{padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;cursor:pointer}
+.user-item:hover,.user-item.pm-active{background:#e0e0e0}.user-item.muted{opacity:.5}
+.user-avatar{width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.admin-tag{font-size:10px;background:gold;color:#000;padding:2px 5px;border-radius:4px;margin-right:5px}
+.pm-badge{background:red;color:#fff;font-size:11px;padding:2px 6px;border-radius:10px;margin-right:auto}
+.admin-btns{display:flex;gap:5px;margin-right:auto}.admin-btns i{font-size:16px;color:#888;padding:5px;cursor:pointer}.admin-btns i:hover{color:red}
+.chat-area{flex:1;display:flex;flex-direction:column;background:var(--chat-bg)}
+.chat-header{background:var(--main);color:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
+.chat-header h4{font-size:17px;color:#fff}.logout-btn{background:rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:6px;font-size:14px}
+.messages{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:75%;padding:8px 12px;border-radius:8px;line-height:1.6;word-wrap:break-word}
+.msg.me{background:var(--msg-me);align-self:flex-start}.msg.other{background:var(--msg-other);align-self:flex-end;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.msg.pm{border:2px dashed var(--green)}.msg.name{font-size:13px;font-weight:700;margin-bottom:4px}
+.msg audio{width:220px;max-width:100%;margin-top:5px}.msg img.chat-img{max-width:200px;max-height:200px;border-radius:8px;margin-top:5px;cursor:pointer}
+.msg.time{font-size:11px;color:#667781;text-align:left;margin-top:3px}
+.chat-input{background:#f0f0f0;padding:10px;display:flex;gap:8px;align-items:center;position:relative}
+.chat-input input{flex:1;padding:12px 15px;border-radius:20px;border:none;outline:none;font-size:16px}
+.chat-input input:disabled{background:#ddd}.chat-input button{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;font-size:18px;flex-shrink:0}
+.chat-input button:disabled{background:#aaa;cursor:not-allowed}.icon-btn{background:#fff!important;color:#555!important}
+.recording{background:red!important;animation:pulse 1s infinite}@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.popup{position:absolute;bottom:60px;background:#fff;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,.2);padding:10px;z-index:5}
+.emoji-box{left:10px;width:280px;height:200px;overflow-y:auto}.emoji-box span{font-size:24px;padding:5px;cursor:pointer}
+.settings-box{left:10px;width:260px;max-height:300px;overflow-y:auto;text-align:right}
+.color-picker span{width:25px;height:25px;display:inline-block;border-radius:50%;margin:5px;cursor:pointer;border:2px solid #ccc}
+.font-picker select{width:100%;padding:8px;border-radius:5px;margin-top:5px}
+@media(max-width:768px){.sidebar{display:none;position:absolute;z-index:10;height:100%;width:85%;box-shadow:2px 0 10px rgba(0,0,0,.2)}.sidebar.active{display:flex}.msg{max-width:85%}}
 </style>
 </head>
 <body>
-
-<div id="start_page">
-  <div class="logo">شات اليمن المطور<span>أكبر تجمع عربي</span></div>
-  <button class="btn-main" id="guest_btn"><i class="fa fa-user"></i> دخول الزوار</button>
-  <button class="btn-sec" id="login_btn"><i class="fa fa-right-to-bracket"></i> دخول الأعضاء</button>
-  <button class="btn-sec" id="register_btn"><i class="fa fa-user-plus"></i> تسجيل</button>
-</div>
-
-<div class="popup-overlay hide" id="guest_popup"><div class="popup-box">
-  <h3>دخول كزائر</h3><input type="text" id="guest_name" placeholder="اكتب اسمك هنا" maxlength="20">
-  <div class="gender-select"><button type="button" class="gender-btn male active" data-g="male">ذكر</button><button type="button" class="gender-btn female" data-g="female">انثى</button><button type="button" class="gender-btn other" data-g="other">آخر</button></div>
-  <button class="btn-main" id="guest_enter">دخول</button>
-</div></div>
-
-<div class="popup-overlay hide" id="login_popup"><div class="popup-box">
-  <h3>دخول الأعضاء</h3><input type="text" id="login_user" placeholder="اسم المستخدم"><input type="password" id="login_pass" placeholder="الباسورد">
-  <button class="btn-main" id="login_submit">دخول</button>
-</div></div>
-
-<div class="popup-overlay hide" id="register_popup"><div class="popup-box">
-  <h3>انشاء حساب</h3><input type="text" id="reg_user" placeholder="اسم المستخدم"><input type="password" id="reg_pass" placeholder="الباسورد"><input type="email" id="reg_email" placeholder="البريد الالكتروني">
-  <div class="gender-select"><button type="button" class="gender-btn male active" data-g="male">ذكر</button><button type="button" class="gender-btn female" data-g="female">انثى</button><button type="button" class="gender-btn other" data-g="other">آخر</button></div>
-  <button class="btn-main" id="reg_submit">حفظ</button>
-</div></div>
-
-<div id="rooms_page" class="hide"><h3 class="rooms-title">اختر غرفتك</h3>
-  <div class="rooms-grid">
-    <div class="room-card"><div>🌎</div><h4>الغرفة العامة</h4><button type="button" data-room="عام">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇾🇪</div><h4>غرفة اليمن</h4><button type="button" data-room="اليمن">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇩🇿</div><h4>غرفة الجزائر</h4><button type="button" data-room="الجزائر">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇪🇬</div><h4>غرفة مصر</h4><button type="button" data-room="مصر">اضغط هنا للدخول</button></div>
+<div id="login_page">
+  <div class="header"><a href="/">شات اليمن العربي</a><b>أكبر تجمع يمني</b></div>
+  <div class="main">
+    <div class="container">
+      <div class="error" id="error"></div>
+      <div class="login" id="guest_box">
+        <form id="guest_form">
+          <input type="text" id="guest_username" maxlength="20" placeholder="الاسم المستعار" required>
+          <div class="gendiv">
+            <div><input id="male" type="radio" name="gender" value="1" checked><label for="male" class="male"><span>ذكر</span></label></div>
+            <div><input id="female" type="radio" name="gender" value="2"><label for="female" class="female"><span>أنثى</span></label></div>
+          </div>
+          <input type="submit" class="btn" value="دخول كزائر">
+        </form>
+      </div>
+      <div id="roomid" class="room">
+        <h3>أهلاً بك في شات اليمن</h3>
+        <button class="btn" id="guest_btn"><i class="fa fa-user"></i> دخول الزوار</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<div id="chat_page" class="hide">
-  <div class="topbar">
-    <div><i class="fa fa-bars" id="menu_btn"></i><i class="fa fa-store" id="store_btn"></i><i class="fa fa-envelope" id="pm_btn"></i><i class="fa fa-users" id="users_btn"></i><i class="fa fa-heart"></i></div>
-    <div style="font-weight:700">شات اليمن المطور</div>
-    <div><div class="avatar male" id="my_avatar">؟</div></div>
+<div id="chat_app">
+  <div class="chat-layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">المتصلون <span id="online_count">1</span>
+        <div><button class="settings-btn" id="settings_btn"><i class="fa fa-gear"></i></button><button class="settings-btn hide" id="bans_btn"><i class="fa fa-gavel"></i></button></div>
+      </div>
+      <div class="room-tabs">
+        <div class="room-tab active" data-room="عام">عام</div>
+        <div class="room-tab" data-room="تعارف">تعارف</div>
+        <div class="room-tab" data-room="اليمن">اليمن</div>
+        <div class="room-tab" data-room="فلة">فلة</div>
+      </div>
+      <div class="users-list" id="users_list"></div>
+    </div>
+    <div class="chat-area">
+      <div class="chat-header">
+        <button class="logout-btn" id="show_users_btn"><i class="fa fa-users"></i></button>
+        <h4 id="room_title">الدردشة العامة</h4>
+        <button class="logout-btn" id="logout_btn">خروج <i class="fa fa-sign-out-alt"></i></button>
+      </div>
+      <div class="messages" id="messages_box"></div>
+      <form class="chat-input" id="chat_form">
+        <button type="button" class="icon-btn" id="emoji_btn"><i class="fa fa-smile"></i></button>
+        <button type="button" class="icon-btn" id="img_btn"><i class="fa fa-paperclip"></i></button>
+        <button type="button" class="icon-btn" id="mic_btn"><i class="fa fa-microphone"></i></button>
+        <input type="file" id="img_input" accept="image/*" class="hide">
+        <input type="text" id="msg_input" placeholder="اكتب رسالتك...">
+        <button type="submit"><i class="fa fa-paper-plane"></i></button>
+        <div class="popup emoji-box hide" id="emoji_box"></div>
+        <div class="popup settings-box hide" id="settings_box">
+          <h4>الإعدادات</h4><label>لون الخط:</label>
+          <div class="color-picker"><span style="background:#000" data-color="#000"></span><span style="background:#e91e63" data-color="#e91e63"></span><span style="background:#2196f3" data-color="#2196f3"></span><span style="background:#4caf50" data-color="#4caf50"></span></div>
+          <label>نوع الخط:</label><div class="font-picker"><select id="font_select"><option>Tajawal</option><option>Cairo</option><option>Amiri</option></select></div>
+        </div>
+      </form>
+    </div>
   </div>
-  <div class="messages" id="messages_box"></div>
-  <div class="inputbar">
-    <i class="fa fa-paper-plane send" id="send_btn"></i><i class="fa fa-microphone" id="mic_btn"></i>
-    <input type="file" id="img_input" accept="image/*" class="hide"><i class="fa fa-paperclip" id="img_btn"></i>
-    <input type="text" id="msg_input" placeholder="اكتب هنا..."><i class="fa fa-smile"></i><i class="fa fa-plus" id="plus_btn"></i>
-    <div class="add-menu hide" id="add_menu"><button type="button" id="draw_btn"><i class="fa fa-paintbrush"></i> الرسم</button><button type="button"><i class="fa fa-palette"></i> الألوان A</button><button type="button" id="yt_btn"><i class="fa fa-youtube"></i> يوتيوب</button></div>
-  </div>
-  <div class="bottombar"><i class="fa fa-volume-high"></i><i class="fa fa-play"></i><div class="room-name" id="room_name">الغرفة العامة</div><i class="fa fa-gear"></i><i class="fa fa-house" id="home_btn"></i><i class="fa fa-user" id="profile_btn"></i></div>
 </div>
-
-<div class="sidebar" id="sidebar"><a id="rooms_list_btn"><i class="fa fa-door-open"></i> الغرف</a><a id="bans_list_btn" class="hide"><i class="fa fa-gavel"></i> المحظورين</a><a id="logout_btn"><i class="fa fa-right-from-bracket"></i> تسجيل الخروج</a></div>
-
-<div class="popup-overlay hide" id="store_popup"><div class="popup-box">
-  <h3>🛒 المتجر <span class="credits-badge" id="my_credits">0 💎</span></h3>
-  <div class="store-item"><div>عضوية مميزة شهر 💎</div><button class="btn-main" id="buy_vip_btn" style="width:auto;padding:8px 15px">شراء 500</button></div>
-</div></div>
-
-<div class="popup-overlay hide" id="users_popup"><div class="popup-box" style="width:400px;max-height:80vh;overflow-y:auto"><h3>المتصلون</h3><div id="users_list"></div></div></div>
-<div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column"><h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1"></div><div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><i class="fa fa-paper-plane send" id="pm_send"></i></div></div></div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script>
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+
 const socket = io(window.location.origin, { transports: ["websocket", "polling"] });
 const $ = id => document.getElementById(id);
-let myGender = 'male', myName = 'زائر', myAge = Math.floor(Math.random() * 80) + 20, myId = null, isAdmin=false, isVip=false, myCredits=0, pmWith=null, mediaRecorder, audioChunks=[];
 
-console.log('JS Loaded'); // للتأكد ان السكربت اشتغل
+let currentUser = null, currentRoom = 'عام', pmWith = null, isAdmin = false, myId = null, mediaRecorder, audioChunks = [];
+let localMuted = JSON.parse(localStorage.getItem('mutedUsers') || '[]');
+const EMOJIS = ['😂','❤️','😍','😎','😢','😡','👍','👎','🔥','💯','🙏','😜','🤔','😱','🥰','😇','🤣','😭','💔','🎉','🌹','🌙','🇾🇪'];
 
-// ===== 1. اختيار الجنس =====
-document.querySelectorAll('.gender-btn').forEach(b => {
-  b.onclick = (e) => {
+// ========== 1. زر دخول الزوار ==========
+$('guest_btn').onclick = () => {
+    $('roomid').style.display = "none";
+    $('guest_box').style.display = "block";
+    clearerr();
+}
+
+// ========== 2. فورم الدخول ==========
+$('guest_form').onsubmit = e => {
     e.preventDefault();
-    b.closest('.gender-select').querySelectorAll('.gender-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    myGender = b.dataset.g;
-    console.log('Gender:', myGender);
-  }
-});
+    const u = $('guest_username').value.trim();
+    const g = document.querySelector('input[name="gender"]:checked').value;
+    if(!u) return err("اكتب اسمك");
+    currentUser = {name: u, gender: g == 1? 'male' : 'female'};
+    socket.emit('join', currentUser);
+}
 
-// ===== 2. فتح البوب اب =====
-$('guest_btn').onclick = () => {console.log('guest click'); $('guest_popup').classList.remove('hide');}
-$('login_btn').onclick = () => $('login_popup').classList.remove('hide');
-$('register_btn').onclick = () => $('register_popup').classList.remove('hide');
-document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
+// ========== 3. استقبال السيرفر ==========
+socket.on('you are', d => { myId = d.id; isAdmin = d.isAdmin; $('login_page').style.display = 'none'; $('chat_app').style.display = 'block'; if(isAdmin) $('bans_btn').classList.remove('hide'); });
+socket.on('users list', u => { $('users_list').innerHTML = ''; u.forEach(x => addUser(x, x.id === myId)); });
+socket.on('user joined', u => { addUser(u); addMsg('sys', `${u.name} دخل الشات`); });
+socket.on('user left', n => { addMsg('sys', `${n} خرج`); $(`user_${n}`)?.remove(); $('online_count').innerText = $('users_list').children.length; });
+socket.on('message', d => addMsg('usr', d.content, d.user, d.type));
+socket.on('pm message', d => { if(pmWith?.id === d.user.id || d.user.id === myId) addMsg('usr', d.content, d.user, d.type, true); else $(`pm_${d.user.id}`)?.classList.remove('hide'); });
+socket.on('system', m => addMsg('sys', m));
+socket.on('chat history', m => { $('messages_box').innerHTML = ''; m.forEach(x => addMsg('usr', x.content, x.user, x.type)); });
+socket.on('you muted', v => { $('msg_input').disabled = v; $('chat_form button[type="submit"]').disabled = v; v? err("تم كتمك من مشرف") : clearerr(); });
+socket.on('kicked', m => { alert(m); location.reload(); });
+socket.on('banned', m => { alert(m); location.reload(); });
 
-// ===== 3. تسجيل ودخول =====
-$('reg_submit').onclick = () => {
-  const n=$('reg_user').value.trim(), p=$('reg_pass').value, e=$('reg_email').value;
-  if(!n||!p) return alert('اكتب اسم وباسورد');
-  socket.emit('register',{name:n,pass:p,email:e,gender:myGender,age:myAge},r=>{alert(r.msg||'تم التسجيل +100 نقطة هدية');if(r.ok)$('register_popup').classList.add('hide');});
+// ========== 4. ارسال رسالة ==========
+function send(type, content) {
+    socket.emit('message', {type: type, content: content, pm: pmWith?.id || null});
+    addMsg('usr', content, currentUser, type, pmWith!== null);
+}
+$('chat_form').onsubmit = e => { e.preventDefault(); const m = $('msg_input').value.trim(); if(m){ send('text', m); $('msg_input').value = ''; } };
+
+// ========== 5. صوت وصورة ==========
+$('mic_btn').onclick = async () => {
+    if(mediaRecorder?.state === 'recording'){ mediaRecorder.stop(); $('mic_btn').classList.remove('recording'); return; }
+    try {
+        const s = await navigator.mediaDevices.getUserMedia({audio: true});
+        mediaRecorder = new MediaRecorder(s); audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+            const b = new Blob(audioChunks, {type: 'audio/webm'});
+            const f = new FormData(); f.append('audio', b, 'v.webm');
+            fetch('/upload-audio', {method: 'POST', body: f}).then(r => r.json()).then(d => send('audio', d.url));
+            s.getTracks().forEach(t => t.stop());
+        };
+        mediaRecorder.start(); $('mic_btn').classList.add('recording');
+    } catch(e) { err("ارفض المتصفح استخدام المايك"); }
 };
-$('login_submit').onclick = () => {
-  const n=$('login_user').value.trim(), p=$('login_pass').value;
-  if(!n||!p) return alert('اكتب اسم وباسورد');
-  socket.emit('login',{name:n,pass:p},enter);
-};
-$('guest_enter').onclick = () => {
-  myName=$('guest_name').value.trim()||'زائر'+Math.floor(Math.random()*999);
-  socket.emit('joinGuest',{name:myName,gender:myGender,age:myAge},enter);
+$('img_btn').onclick = () => $('img_input').click();
+$('img_input').onchange = e => { const f = e.target.files[0]; if(!f) return; const d = new FormData(); d.append('image', f); fetch('/upload', {method: 'POST', body: d}).then(r => r.json()).then(x => send('img', x.url)); };
+
+// ========== 6. ايموجي واعدادات ==========
+$('emoji_btn').onclick = () => $('emoji_box').classList.toggle('hide');
+EMOJIS.forEach(e => { const s = document.createElement('span'); s.innerText = e; s.onclick = () => { $('msg_input').value += e; $('msg_input').focus(); }; $('emoji_box').appendChild(s); });
+$('settings_btn').onclick = () => $('settings_box').classList.toggle('hide');
+document.querySelectorAll('.color-picker span').forEach(s => s.onclick = () => { document.documentElement.style.setProperty('--user-color', s.dataset.color); localStorage.setItem('c', s.dataset.color); socket.emit('save settings', {font: localStorage.getItem('f'), color: s.dataset.color}); });
+$('font_select').onchange = e => { document.documentElement.style.setProperty('--user-font', e.target.value); localStorage.setItem('f', e.target.value); socket.emit('save settings', {font: e.target.value, color: localStorage.getItem('c')}); };
+if(localStorage.getItem('c')) document.documentElement.style.setProperty('--user-color', localStorage.getItem('c'));
+if(localStorage.getItem('f')) document.documentElement.style.setProperty('--user-font', localStorage.getItem('f'));
+
+// ========== 7. دوال المساعدة ==========
+function toggleMute(id){ if(localMuted.includes(id)){ localMuted = localMuted.filter(x => x!== id); $(`user_${id}`).classList.remove('muted'); } else { localMuted.push(id); $(`user_${id}`).classList.add('muted'); } localStorage.setItem('mutedUsers', JSON.stringify(localMuted)); }
+
+function addUser(u, me=false){
+    if($(`user_${u.id}`)) return;
+    const d = document.createElement('div');
+    d.className = 'user-item ' + (localMuted.includes(u.id)? 'muted' : '');
+    d.id = `user_${u.id}`;
+    d.innerHTML = `<div class="user-avatar">${u.name.charAt(0)}</div><div class="user-name"><span class="${u.gender}">${u.name} ${me? '(أنت)' : ''}</span>${u.isAdmin? '<span class="admin-tag">مشرف</span>' : ''}</div><div class="admin-btns">${!me? `<i class="fa fa-volume-mute" title="كتم عندي" onclick="event.stopPropagation();toggleMute('${u.id}')"></i>` : ''}${isAdmin &&!me? `<i class="fa fa-ban" title="كتم عام" onclick="event.stopPropagation();socket.emit('mute user','${u.id}')"></i><i class="fa fa-sign-out" title="طرد" onclick="event.stopPropagation();socket.emit('kick user','${u.id}')"></i><i class="fa fa-gavel" title="بان 24س" onclick="event.stopPropagation();if(confirm('تبند ${u.name} 24 ساعة؟'))socket.emit('ban user',{targetId:'${u.id}',hours:24})"></i><i class="fa fa-lock" title="بان دائم" onclick="event.stopPropagation();if(confirm('تبند ${u.name} دائم؟'))socket.emit('ban user',{targetId:'${u.id}',hours:null})"></i>` : ''}</div><span class="pm-badge hide" id="pm_${u.id}">!</span>`;
+    d.onclick = e => { if(!e.target.closest('.admin-btns')) openPM(u); };
+    $('users_list').appendChild(d);
+    $('online_count').innerText = $('users_list').children.length;
 }
 
-function enter(r){
-  if(!r.ok) return alert(r.msg);
-  $('guest_popup').classList.add('hide');$('login_popup').classList.add('hide');$('register_popup').classList.add('hide');
-  $('start_page').classList.add('hide');$('rooms_page').classList.remove('hide');
-  myId=r.user.id; isAdmin=r.user.isAdmin; isVip=r.user.isVip; myName=r.user.name; myGender=r.user.gender; myAge=r.user.age; myCredits=r.user.credits||0;
-  updateAvatar(); if(isAdmin)$('bans_list_btn').classList.remove('hide');
-  r.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));
+function openPM(u){ if(u.id === myId) return; pmWith = u; document.querySelectorAll('.user-item').forEach(x => x.classList.remove('pm-active')); $(`user_${u.id}`).classList.add('pm-active'); $(`pm_${u.id}`).classList.add('hide'); $('room_title').innerText = `خاص مع: ${u.name}`; $('messages_box').innerHTML = ''; addMsg('sys', `بدأت محادثة خاصة مع ${u.name}`); }
+
+function addMsg(t, c, u = currentUser, ty = 'text', pm = false){
+    if(t === 'usr' && localMuted.includes(u.id)) return;
+    const b = $('messages_box');
+    if(t === 'sys') return b.innerHTML += `<div style="text-align:center;color:#555;font-size:13px;margin:5px 0;">${c}</div>`;
+    const d = document.createElement('div');
+    d.className = `msg ${u.id === myId? 'me' : 'other'} ${pm? 'pm' : ''}`;
+    let i = u.id!== myId? `<div class="name ${u.gender}">${u.name}</div>` : '';
+    i += ty === 'img'? `<img src="${c}" class="chat-img" onclick="window.open(this.src)">` : ty === 'audio'? `<audio src="${c}" controls></audio>` : `<div>${c}</div>`;
+    i += `<div class="time">${new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'})}</div>`;
+    d.innerHTML = i; b.appendChild(d); b.scrollTop = b.scrollHeight;
 }
 
-// ===== 4. دخول غرفة =====
-document.querySelectorAll('.room-card button').forEach(b => b.onclick = () => {
-  const room=b.dataset.room; $('rooms_page').classList.add('hide');$('chat_page').classList.remove('hide');$('room_name').innerText=room; socket.emit('joinRoom',room);
-});
-$('home_btn').onclick = () => { $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
-$('rooms_list_btn').onclick = () => { $('sidebar').classList.remove('active'); $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
+function err(t){ $('error').style.display = "block"; $('error').innerText = t; }
+function clearerr(){ $('error').style.display = "none"; }
 
-// ===== 5. سوكت استقبال =====
-socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; myCredits=d.credits||0; d.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));});
-socket.on('user joined', u=>addMsg('النظام',`${u.name} دخل`,'other'));
-socket.on('user left', n=>addMsg('النظام',`${n} خرج`,'other'));
-socket.on('message', d=>addMsg(d.user.name,d.content, d.user.id===myId?'me':'other',d.type,d.user));
-socket.on('pm message', d=>{ if(pmWith){ addPM(d.user.name,d.content,d.user.id===myId?'me':'other'); } else alert(`رسالة خاصة من ${d.user.name}`); });
-socket.on('system', m=>addMsg('النظام',m,'other'));
-socket.on('you muted', v=>{$('msg_input').disabled=v; alert(v?'تم كتمك':'تم فك كتمك');});
-socket.on('kicked', m=>{alert(m);location.reload();}); socket.on('banned', m=>{alert(m);location.reload();});
-socket.on('credits update', c=>{myCredits=c;});
-socket.on('store data', d=>{$('my_credits').innerText=d.credits+' 💎';});
-socket.on('vip bought', d=>{isVip=true; myCredits=d.credits; updateAvatar(); alert('تم شراء العضوية المميزة شهر 💎');});
-socket.on('bans list', b=>{let h='';for(let i in b){h+=`<div style="padding:5px;border-bottom:1px solid #333">${i} - ${b[i].reason} <button onclick="socket.emit('unban ip','${i}')">فك</button></div>`;}$('users_list').innerHTML=h;});
-socket.on('users list', u=>{ $('users_list').innerHTML=''; u.forEach(x=>{ const d=document.createElement('div'); d.className='user-item'; d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div><div style="margin-right:auto" class="admin-btns">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})"></i>`:'')}<i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')"></i></div>`; $('users_list').appendChild(d); }); });
+document.querySelectorAll('.room-tab').forEach(t => t.onclick = () => { currentRoom = t.dataset.room; pmWith = null; document.querySelectorAll('.room-tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); $('room_title').innerText = `غرفة: ${currentRoom}`; $('messages_box').innerHTML = ''; socket.emit('joinRoom', currentRoom); });
+$('logout_btn').onclick = () => location.reload();
+$('show_users_btn').onclick = () => $('sidebar').classList.toggle('active');
+$('bans_btn').onclick = () => socket.emit('get bans');
+socket.on('bans list', b => { let h = '<h4>المحظورين</h4>'; for(let i in b){ const x = b[i]; h += `<div style="border-bottom:1px solid #eee;padding:5px 0;">${i}<br>${x.reason}<br>${x.expire? new Date(x.expire).toLocaleString('ar-EG') : 'دائم'}<button onclick="socket.emit('unban ip','${i}')" style="background:red;color:#fff;padding:3px 8px;border-radius:5px;margin-top:5px;">فك</button></div>`; } $('settings_box').innerHTML = h; });
 
-// ===== 6. ارسال =====
-function send(type,content){ socket.emit('message',{type,content,pm:pmWith?.id||null}); if(!pmWith) addMsg(myName,content,'me',type,{gender:myGender,isVip}); }
-$('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
-$('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();}
-$('img_btn').onclick=()=>$('img_input').click();
-$('img_input').onchange=e=>{const f=e.target.files[0]; if(!f)return; const d=new FormData(); d.append('image',f); fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>send('img',x.url));};
-$('mic_btn').onclick=async()=>{ if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('mic_btn').style.color='#aaa';return;} const s=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRecorder=new MediaRecorder(s); audioChunks=[]; mediaRecorder.ondataavailable=e=>audioChunks.push(e.data); mediaRecorder.onstop=()=>{const b=new Blob(audioChunks,{type:'audio/webm'}); const f=new FormData(); f.append('audio',b); fetch('/upload-audio',{method:'POST',body:f}).then(r=>r.json()).then(d=>send('audio',d.url)); s.getTracks().forEach(t=>t.stop());}; mediaRecorder.start();$('mic_btn').style.color='red';};
-
-// ===== 7. واجهة =====
-function addMsg(name,text,type='other',t='text',u={}){
-  const d=document.createElement('div'); d.className='msg '+type;
-  let c = t==='img'?`<img src="${text}" style="max-width:150px;border-radius:8px">`:t==='audio'?`<audio src="${text}" controls style="width:200px"></audio>`:`<div>${text}</div>`;
-  d.innerHTML=`<div class="name ${u.gender||myGender} ${u.isVip?'vip':''}">${name} ${u.isVip?'💎':''} ${u.isAdmin?'👑':''}</div>${c}<div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;
-  $('messages_box').appendChild(d); $('messages_box').scrollTop=$('messages_box').scrollHeight;
-}
-function updateAvatar(){ const av=$('my_avatar'); av.className='avatar '+myGender+(isVip?' vip':''); av.innerText=myName.charAt(0); }
-$('menu_btn').onclick=()=>$('sidebar').classList.toggle('active');
-$('store_btn').onclick=()=>{ socket.emit('get store'); $('store_popup').classList.remove('hide'); }
-$('buy_vip_btn').onclick=()=>socket.emit('buy vip');
-$('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالعمر: ${myAge}\nالجنس: ${myGender}\nالرصيد: ${myCredits} 💎\nالعضوية: ${isVip?'مميزة 💎':'عادي'}`);
-$('plus_btn').onclick=()=>$('add_menu').classList.toggle('hide');
-$('logout_btn').onclick=()=>location.reload();
-$('bans_list_btn').onclick=()=>socket.emit('get bans');
-
-// ===== 8. خاص ومستخدمين =====
-$('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
-function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
-$('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
-function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg '+type; d.innerHTML=`<div class="name">${name}</div><div>${text}</div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=$('pm_box').scrollHeight; }
-
+}); // نهاية DOMContentLoaded
 </script>
 </body>
 </html>
