@@ -95,12 +95,17 @@ button{cursor:pointer;border:none;background:none}
   <div class="messages" id="messages_box"></div>
   <div class="inputbar">
     <i class="fa fa-paper-plane send" id="send_btn"></i>
+    <i class="fa fa-microphone" id="mic_btn"></i>
+    <input type="file" id="img_input" accept="image/*" class="hide"><i class="fa fa-paperclip" id="img_btn"></i>
     <input type="text" id="msg_input" placeholder="اكتب هنا...">
   </div>
   <div class="bottombar"><i class="fa fa-house" id="home_btn"></i><div class="room-name" id="room_name">الغرفة العامة</div><i class="fa fa-user" id="profile_btn"></i></div>
 </div>
 
-<div class="sidebar" id="sidebar"><a id="logout_btn"><i class="fa fa-right-from-bracket"></i> تسجيل الخروج</a></div>
+<div class="sidebar" id="sidebar">
+  <a id="bans_list_btn" class="hide"><i class="fa fa-gavel"></i> المحظورين</a>
+  <a id="logout_btn"><i class="fa fa-right-from-bracket"></i> تسجيل الخروج</a>
+</div>
 <div class="popup-overlay hide" id="store_popup"><div class="popup-box"><h3>🛒 المتجر <span class="credits-badge" id="my_credits">0 💎</span></h3><div class="store-item"><div>عضوية مميزة شهر 💎</div><button type="button" class="btn-main" id="buy_vip_btn" style="width:auto;padding:8px 15px">شراء 500</button></div></div></div>
 <div class="popup-overlay hide" id="users_popup"><div class="popup-box" style="width:400px;max-height:80vh;overflow-y:auto"><h3>المتصلون</h3><div id="users_list"></div></div></div>
 
@@ -109,6 +114,7 @@ button{cursor:pointer;border:none;background:none}
 window.onload = function(){
 const $ = id => document.getElementById(id);
 let myGender = 'male', myName = 'زائر', myAge = 25, myId = null, isAdmin=false, isVip=false, myCredits=0;
+let mediaRecorder, audioChunks=[];
 
 let socket = io({reconnectionAttempts: 3, timeout: 5000});
 socket.on('connect_error', ()=>{alert('ما قدرت اتصل بالسيرفر. تأكد انك مشغل node server.js');});
@@ -148,7 +154,7 @@ function enter(r){
   $('guest_popup').classList.add('hide');$('login_popup').classList.add('hide');$('register_popup').classList.add('hide');
   $('start_page').classList.add('hide');$('rooms_page').classList.remove('hide');
   myId=r.user.id; isAdmin=r.user.isAdmin; isVip=r.user.isVip; myName=r.user.name; myGender=r.user.gender; myAge=r.user.age; myCredits=r.user.credits||0;
-  updateAvatar();
+  updateAvatar(); if(isAdmin)$('bans_list_btn').classList.remove('hide');
   r.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));
 }
 
@@ -166,13 +172,33 @@ $('home_btn').onclick = () => { $('chat_page').classList.add('hide');$('rooms_pa
 $('menu_btn').onclick = () => { $('sidebar').classList.toggle('active'); }
 $('logout_btn').onclick = () => { location.reload(); }
 
-// ===== ارسال رسالة نصية فقط =====
-function send(content){
-  socket.emit('message',{content});
-  addMsg(myName,content,'me','text',{gender:myGender,isVip});
+// ===== ارسال نص + صورة + صوت =====
+function send(type,content){
+  socket.emit('message',{type,content});
+  if(type==='text') addMsg(myName,content,'me',type,{gender:myGender,isVip});
 }
-$('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send(m);$('msg_input').value='';}};
-$('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();}
+$('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
+$('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();};
+
+$('img_btn').onclick=()=>$('img_input').click();
+$('img_input').onchange=e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const d=new FormData(); d.append('image',f);
+  fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>{send('img',x.url);});
+};
+$('mic_btn').onclick=async()=>{
+  if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('mic_btn').style.color='#aaa';return;}
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});
+  mediaRecorder=new MediaRecorder(s); audioChunks=[];
+  mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+  mediaRecorder.onstop=()=>{
+    const b=new Blob(audioChunks,{type:'audio/webm'});
+    const f=new FormData(); f.append('audio',b);
+    fetch('/upload-audio',{method:'POST',body:f}).then(r=>r.json()).then(d=>{send('audio',d.url);});
+    s.getTracks().forEach(t=>t.stop());
+  };
+  mediaRecorder.start();$('mic_btn').style.color='red';
+};
 
 // ===== سوكت =====
 socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; myCredits=d.credits||0; d.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));});
@@ -183,12 +209,21 @@ socket.on('system', m=>addMsg('النظام',m,'other'));
 socket.on('credits update', c=>{myCredits=c;});
 socket.on('store data', d=>{$('my_credits').innerText=d.credits+' 💎';});
 socket.on('vip bought', d=>{isVip=true; myCredits=d.credits; updateAvatar(); alert('تم شراء العضوية المميزة شهر 💎');});
+socket.on('you muted', v=>{$('msg_input').disabled=v; alert(v?'تم كتمك':'تم فك كتمك');});
+socket.on('kicked', m=>{alert(m);location.reload();});
+socket.on('banned', m=>{alert(m);location.reload();});
+socket.on('bans list', b=>{
+  let h='';for(let i in b){h+=`<div style="padding:5px;border-bottom:1px solid #333">${i} - ${b[i].reason} <button type="button" onclick="socket.emit('unban ip','${i}')">فك</button></div>`;}
+  $('users_list').innerHTML=h;
+});
 socket.on('users list', u=>{
   $('users_list').innerHTML='';
   u.forEach(x=>{
     const d=document.createElement('div');
     d.className='user-item';
-    d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div>`;
+    d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div>
+    <div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div>
+    <div style="margin-right:auto">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')" style="color:#ff7675;cursor:pointer;margin:0 3px" title="كتم"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')" style="color:#ff7675;cursor:pointer;margin:0 3px" title="طرد"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})" style="color:#ff7675;cursor:pointer;margin:0 3px" title="بان 24 ساعة"></i>`:''}</div>`;
     $('users_list').appendChild(d);
   });
 });
@@ -198,6 +233,7 @@ $('store_btn').onclick=()=>{ socket.emit('get store'); $('store_popup').classLis
 $('buy_vip_btn').onclick=()=>socket.emit('buy vip');
 $('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالجنس: ${myGender}\nالرصيد: ${myCredits} 💎\nالعضوية: ${isVip?'مميزة 💎':'عادي'}`);
 $('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
+$('bans_list_btn').onclick=()=>socket.emit('get bans');
 
 // اغلاق البوب اب
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
@@ -205,7 +241,10 @@ document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e
 // ===== دوال =====
 function addMsg(name,text,type='other',t='text',u={}){
   const d=document.createElement('div'); d.className='msg '+type;
-  d.innerHTML=`<div class="name ${u.gender||myGender} ${u.isVip?'vip':''}">${name} ${u.isVip?'💎':''} ${u.isAdmin?'👑':''}</div><div>${text}</div><div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  let c = t==='img'?`<img src="${text}" style="max-width:150px;border-radius:8px">`
+        :t==='audio'?`<audio src="${text}" controls style="width:200px"></audio>`
+        :`<div>${text}</div>`;
+  d.innerHTML=`<div class="name ${u.gender||myGender} ${u.isVip?'vip':''}">${name} ${u.isVip?'💎':''} ${u.isAdmin?'👑':''}</div>${c}<div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;
   $('messages_box').appendChild(d); $('messages_box').scrollTop=99999;
 }
 function updateAvatar(){ const av=$('my_avatar'); av.className='avatar '+myGender+(isVip?' vip':''); av.innerText=myName.charAt(0); }
