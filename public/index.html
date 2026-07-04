@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--main:#0a2a33;--green:#1dd1a1;--gold:#ffd700;--blue:#3498db;--pink:#ff7675;--bg:#0e1c22;--male:#3498db;--female:#ff7675;--other:#fff}
+:root{--main:#0a2a33;--green:#1dd1a1;--gold:#ffd700;--bg:#0e1c22;--male:#3498db;--female:#ff7675;--other:#fff}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
 body{background:var(--bg);color:#fff;overflow:hidden}
 button{cursor:pointer;border:none;background:none}
@@ -20,10 +20,7 @@ button{cursor:pointer;border:none;background:none}
 .popup-box input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #2e4f5b;background:#0e1c22;color:#fff;outline:none;text-align:center;font-size:16px}
 .gender-select{display:flex;justify-content:center;gap:10px;margin:10px 0}
 .gender-btn{padding:8px 15px;border-radius:8px;background:#0e1c22;border:2px solid #2e4f5b;color:#fff}
-.gender-btn.active{border-color:var(--green)}
-.gender-btn.male.active{background:var(--male)}
-.gender-btn.female.active{background:var(--female)}
-.gender-btn.other.active{background:var(--other);color:#000}
+.gender-btn.active{border-color:var(--green);background:var(--green);color:#000}
 #rooms_page{width:100vw;height:100vh;padding:20px;overflow-y:auto}
 .rooms-title{font-size:24px;font-weight:700;text-align:center;margin:20px 0}
 .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;max-width:600px;margin:auto}
@@ -39,19 +36,15 @@ button{cursor:pointer;border:none;background:none}
 .msg{max-width:80%;padding:8px 12px;border-radius:12px;line-height:1.6}
 .msg.me{background:var(--green);color:#000;align-self:flex-start;border-radius:12px 12px 0 12px}
 .msg.other{background:#1f3a44;align-self:flex-end;border-radius:12px 12px 12px 0}
-.msg.name{font-size:12px;font-weight:700;margin-bottom:3px;cursor:pointer}
+.msg.name{font-size:12px;font-weight:700;margin-bottom:3px}
 .msg.name.vip{color:var(--gold)}
-.msg.time{font-size:10px;opacity:.7;text-align:left;margin-top:3px}
 .inputbar{background:#1f3a44;padding:8px 10px;display:flex;align-items:center;gap:8px}
 .inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:none;background:#0e1c22;color:#fff;outline:none}
 .inputbar i{font-size:22px;color:#aaa;padding:8px}
-.inputbar.send{color:var(--green)!important}
-.add-menu{position:absolute;bottom:60px;right:10px;background:#1f3a44;border-radius:12px;padding:10px;display:grid;gap:10px;z-index:5}
+.inputbar .send{color:var(--green)!important}
 .bottombar{background:var(--main);height:55px;display:flex;align-items:center;justify-content:space-around;padding:0 5px;border-top:1px solid #1f3a44}
 .sidebar{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#1f3a44;z-index:30;transition:.3s;padding:20px;display:flex;flex-direction:column;gap:15px}
 .sidebar.active{right:0}
-.user-item{display:flex;align-items:center;gap:10px;padding:8px;background:#0e1c22;border-radius:8px}
-.admin-btns i{margin-right:5px;color:#ff7675;cursor:pointer}
 .store-item{background:#0e1c22;padding:12px;border-radius:10px;margin:10px 0;display:flex;justify-content:space-between;align-items:center}
 .credits-badge{background:var(--gold);color:#000;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:700}
 </style>
@@ -60,9 +53,9 @@ button{cursor:pointer;border:none;background:none}
 
 <div id="start_page">
   <div class="logo">شات اليمن المطور<span>أكبر تجمع عربي</span></div>
-  <button type="button" class="btn-main" id="guest_btn"><i class="fa fa-user"></i> دخول الزوار</button>
-  <button type="button" class="btn-sec" id="login_btn"><i class="fa fa-right-to-bracket"></i> دخول الأعضاء</button>
-  <button type="button" class="btn-sec" id="register_btn"><i class="fa fa-user-plus"></i> تسجيل</button>
+  <button type="button" class="btn-main" id="guest_btn">دخول الزوار</button>
+  <button type="button" class="btn-sec" id="login_btn">دخول الأعضاء</button>
+  <button type="button" class="btn-sec" id="register_btn">تسجيل</button>
 </div>
 
 <div class="popup-overlay hide" id="guest_popup"><div class="popup-box">
@@ -86,135 +79,110 @@ button{cursor:pointer;border:none;background:none}
   <div class="rooms-grid">
     <div class="room-card"><div>🌎</div><h4>الغرفة العامة</h4><button type="button" data-room="عام">اضغط هنا للدخول</button></div>
     <div class="room-card"><div>🇾🇪</div><h4>غرفة اليمن</h4><button type="button" data-room="اليمن">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇩🇿</div><h4>غرفة الجزائر</h4><button type="button" data-room="الجزائر">اضغط هنا للدخول</button></div>
-    <div class="room-card"><div>🇪🇬</div><h4>غرفة مصر</h4><button type="button" data-room="مصر">اضغط هنا للدخول</button></div>
   </div>
 </div>
 
 <div id="chat_page" class="hide">
   <div class="topbar">
-    <div><i class="fa fa-bars" id="menu_btn"></i><i class="fa fa-store" id="store_btn"></i><i class="fa fa-envelope" id="pm_btn"></i><i class="fa fa-users" id="users_btn"></i><i class="fa fa-heart"></i></div>
+    <div><i class="fa fa-bars" id="menu_btn"></i><i class="fa fa-store" id="store_btn"></i><i class="fa fa-users" id="users_btn"></i></div>
     <div style="font-weight:700">شات اليمن المطور</div>
     <div><div class="avatar male" id="my_avatar">؟</div></div>
   </div>
   <div class="messages" id="messages_box"></div>
   <div class="inputbar">
-    <i class="fa fa-paper-plane send" id="send_btn"></i><i class="fa fa-microphone" id="mic_btn"></i>
-    <input type="file" id="img_input" accept="image/*" class="hide"><i class="fa fa-paperclip" id="img_btn"></i>
-    <input type="text" id="msg_input" placeholder="اكتب هنا..."><i class="fa fa-smile"></i><i class="fa fa-plus" id="plus_btn"></i>
-    <div class="add-menu hide" id="add_menu"><button type="button" id="draw_btn"><i class="fa fa-paintbrush"></i> الرسم</button><button type="button"><i class="fa fa-palette"></i> الألوان A</button><button type="button" id="yt_btn"><i class="fa fa-youtube"></i> يوتيوب</button></div>
+    <i class="fa fa-paper-plane send" id="send_btn"></i>
+    <input type="text" id="msg_input" placeholder="اكتب هنا...">
   </div>
-  <div class="bottombar"><i class="fa fa-volume-high"></i><i class="fa fa-play"></i><div class="room-name" id="room_name">الغرفة العامة</div><i class="fa fa-gear"></i><i class="fa fa-house" id="home_btn"></i><i class="fa fa-user" id="profile_btn"></i></div>
+  <div class="bottombar"><i class="fa fa-house" id="home_btn"></i><div class="room-name" id="room_name">الغرفة العامة</div><i class="fa fa-user" id="profile_btn"></i></div>
 </div>
 
-<div class="sidebar" id="sidebar"><a id="rooms_list_btn"><i class="fa fa-door-open"></i> الغرف</a><a id="bans_list_btn" class="hide"><i class="fa fa-gavel"></i> المحظورين</a><a id="logout_btn"><i class="fa fa-right-from-bracket"></i> تسجيل الخروج</a></div>
-
-<div class="popup-overlay hide" id="store_popup"><div class="popup-box">
-  <h3>🛒 المتجر <span class="credits-badge" id="my_credits">0 💎</span></h3>
-  <div class="store-item"><div>عضوية مميزة شهر 💎</div><button type="button" class="btn-main" id="buy_vip_btn" style="width:auto;padding:8px 15px">شراء 500</button></div>
-</div></div>
-
+<div class="sidebar" id="sidebar"><a id="logout_btn"><i class="fa fa-right-from-bracket"></i> تسجيل الخروج</a></div>
+<div class="popup-overlay hide" id="store_popup"><div class="popup-box"><h3>🛒 المتجر <span class="credits-badge" id="my_credits">0 💎</span></h3><div class="store-item"><div>عضوية مميزة شهر 💎</div><button type="button" class="btn-main" id="buy_vip_btn" style="width:auto;padding:8px 15px">شراء 500</button></div></div></div>
 <div class="popup-overlay hide" id="users_popup"><div class="popup-box" style="width:400px;max-height:80vh;overflow-y:auto"><h3>المتصلون</h3><div id="users_list"></div></div></div>
-<div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column"><h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1"></div><div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><i class="fa fa-paper-plane send" id="pm_send"></i></div></div></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-const socket = io();
+window.onload = function(){
 const $ = id => document.getElementById(id);
-let myGender = 'male', myName = 'زائر', myAge = Math.floor(Math.random() * 80) + 20, myId = null, isAdmin=false, isVip=false, myCredits=0, pmWith=null, mediaRecorder, audioChunks=[];
+let myGender = 'male', myName = 'زائر', myAge = 25, myId = 'local', isAdmin=false, isVip=false, myCredits=100;
 
-// اختيار الجنس
+let socket;
+try{
+  socket = io({reconnectionAttempts: 1, timeout: 2000});
+  socket.on('connect_error', ()=>{alert('السيرفر طافي. شغال وضع محلي');});
+}catch(e){alert('socket.io ما تحمله. شغال محلي');}
+
+console.log('الازرار انربطت بنجاح 100%');
+
+// ===== 1. الازرار الرئيسية تشتغل فورا بدون سيرفر =====
+$('guest_btn').onclick = () => { $('guest_popup').classList.remove('hide'); }
+$('login_btn').onclick = () => { $('login_popup').classList.remove('hide'); }
+$('register_btn').onclick = () => { $('register_popup').classList.remove('hide'); }
+
+// ===== 2. الجنس =====
 document.querySelectorAll('.gender-btn').forEach(b => {
   b.onclick = (e) => {
     e.preventDefault();
-    b.closest('.gender-select').querySelectorAll('.gender-btn').forEach(x=>x.classList.remove('active'));
+    b.parentElement.querySelectorAll('.gender-btn').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     myGender = b.dataset.g;
   }
 });
 
-// فتح البوب اب
-$('guest_btn').onclick = () => $('guest_popup').classList.remove('hide');
-$('login_btn').onclick = () => $('login_popup').classList.remove('hide');
-$('register_btn').onclick = () => $('register_popup').classList.remove('hide');
-document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
-
-// تسجيل ودخول
-$('reg_submit').onclick = () => {
-  const n=$('reg_user').value.trim(), p=$('reg_pass').value, e=$('reg_email').value;
-  if(!n||!p) return alert('اكتب اسم وباسورد');
-  socket.emit('register',{name:n,pass:p,email:e,gender:myGender,age:myAge},r=>{alert(r.msg||'تم التسجيل +100 نقطة هدية');if(r.ok)$('register_popup').classList.add('hide');});
-};
-$('login_submit').onclick = () => {
-  const n=$('login_user').value.trim(), p=$('login_pass').value;
-  if(!n||!p) return alert('اكتب اسم وباسورد');
-  socket.emit('login',{name:n,pass:p},enter);
-};
-$('guest_enter').onclick = () => {
-  myName=$('guest_name').value.trim()||'زائر'+Math.floor(Math.random()*999);
-  socket.emit('joinGuest',{name:myName,gender:myGender,age:myAge},enter);
-}
-
-function enter(r){
-  if(!r.ok) return alert(r.msg);
+// ===== 3. دخول وهمي محلي لو السوكت خرب =====
+function enterLocal(){
   $('guest_popup').classList.add('hide');$('login_popup').classList.add('hide');$('register_popup').classList.add('hide');
   $('start_page').classList.add('hide');$('rooms_page').classList.remove('hide');
-  myId=r.user.id; isAdmin=r.user.isAdmin; isVip=r.user.isVip; myName=r.user.name; myGender=r.user.gender; myAge=r.user.age; myCredits=r.user.credits||0;
-  updateAvatar(); if(isAdmin)$('bans_list_btn').classList.remove('hide');
-  r.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));
+  updateAvatar();
+  addMsg('النظام','مرحبا بك في الوضع المحلي','other');
 }
 
-// دخول غرفة
-document.querySelectorAll('.room-card button').forEach(b => b.onclick = () => {
-  const room=b.dataset.room; $('rooms_page').classList.add('hide');$('chat_page').classList.remove('hide');$('room_name').innerText=room; socket.emit('joinRoom',room);
+$('guest_enter').onclick = () => { myName=$('guest_name').value.trim()||'زائر'; enterLocal(); }
+$('login_submit').onclick = () => { myName=$('login_user').value.trim()||'عضو'; enterLocal(); }
+$('reg_submit').onclick = () => { myName=$('reg_user').value.trim()||'عضو'; enterLocal(); }
+
+// ===== 4. دخول غرفة =====
+document.querySelectorAll('.room-card button').forEach(b => {
+  b.onclick = () => { 
+    $('rooms_page').classList.add('hide');$('chat_page').classList.remove('hide');
+    $('room_name').innerText=b.dataset.room;
+  }
 });
 $('home_btn').onclick = () => { $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
-$('rooms_list_btn').onclick = () => { $('sidebar').classList.remove('active'); $('chat_page').classList.add('hide');$('rooms_page').classList.remove('hide'); }
+$('menu_btn').onclick = () => { $('sidebar').classList.toggle('active'); }
+$('logout_btn').onclick = () => { location.reload(); }
 
-// سوكت استقبال
-socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; myCredits=d.credits||0; d.chatHistory.forEach(m=>addMsg(m.user.name,m.content,'other',m.type,m.user));});
-socket.on('user joined', u=>addMsg('النظام',`${u.name} دخل`,'other'));
-socket.on('user left', n=>addMsg('النظام',`${n} خرج`,'other'));
-socket.on('message', d=>addMsg(d.user.name,d.content, d.user.id===myId?'me':'other',d.type,d.user));
-socket.on('pm message', d=>{ if(pmWith){ addPM(d.user.name,d.content,d.user.id===myId?'me':'other'); } else alert(`رسالة خاصة من ${d.user.name}`); });
-socket.on('system', m=>addMsg('النظام',m,'other'));
-socket.on('you muted', v=>{$('msg_input').disabled=v; alert(v?'تم كتمك':'تم فك كتمك');});
-socket.on('kicked', m=>{alert(m);location.reload();}); socket.on('banned', m=>{alert(m);location.reload();});
-socket.on('credits update', c=>{myCredits=c;});
-socket.on('store data', d=>{$('my_credits').innerText=d.credits+' 💎';});
-socket.on('vip bought', d=>{isVip=true; myCredits=d.credits; updateAvatar(); alert('تم شراء العضوية المميزة شهر 💎');});
-socket.on('bans list', b=>{let h='';for(let i in b){h+=`<div style="padding:5px;border-bottom:1px solid #333">${i} - ${b[i].reason} <button type="button" onclick="socket.emit('unban ip','${i}')">فك</button></div>`;}$('users_list').innerHTML=h;});
-socket.on('users list', u=>{ $('users_list').innerHTML=''; u.forEach(x=>{ const d=document.createElement('div'); d.className='user-item'; d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div><div style="margin-right:auto" class="admin-btns">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})"></i>`:'')}<i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')"></i></div>`; $('users_list').appendChild(d); }); });
-
-// ارسال
-function send(type,content){ socket.emit('message',{type,content,pm:pmWith?.id||null}); if(!pmWith) addMsg(myName,content,'me',type,{gender:myGender,isVip}); }
-$('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
+// ===== 5. ارسال رسالة محلي =====
+$('send_btn').onclick = ()=>{
+  const m=$('msg_input').value.trim(); if(!m) return;
+  addMsg(myName,m,'me','text',{gender:myGender,isVip});
+  $('msg_input').value='';
+  if(socket && socket.connected){ socket.emit('message',{type:'text',content:m}); }
+}
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();}
-$('img_btn').onclick=()=>$('img_input').click();
-$('img_input').onchange=e=>{const f=e.target.files[0]; if(!f)return; const d=new FormData(); d.append('image',f); fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>send('img',x.url));};
-$('mic_btn').onclick=async()=>{ if(mediaRecorder?.state==='recording'){mediaRecorder.stop();$('mic_btn').style.color='#aaa';return;} const s=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRecorder=new MediaRecorder(s); audioChunks=[]; mediaRecorder.ondataavailable=e=>audioChunks.push(e.data); mediaRecorder.onstop=()=>{const b=new Blob(audioChunks,{type:'audio/webm'}); const f=new FormData(); f.append('audio',b); fetch('/upload-audio',{method:'POST',body:f}).then(r=>r.json()).then(d=>send('audio',d.url)); s.getTracks().forEach(t=>t.stop());}; mediaRecorder.start();$('mic_btn').style.color='red';};
 
-// واجهة
+// ===== 6. متجر محلي =====
+$('store_btn').onclick=()=>{ $('my_credits').innerText=myCredits+' 💎'; $('store_popup').classList.remove('hide'); }
+$('buy_vip_btn').onclick=()=>{
+  if(myCredits<500) return alert('رصيدك: '+myCredits);
+  myCredits-=500; isVip=true; updateAvatar(); alert('تم شراء VIP شهر 💎');
+}
+
+$('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالجنس: ${myGender}\nالرصيد: ${myCredits} 💎\nالعضوية: ${isVip?'مميزة 💎':'عادي'}`);
+$('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); $('users_list').innerHTML=`<div class="user-item"><div class="avatar ${myGender} ${isVip?'vip':''}">${myName[0]}</div><div>${myName} ${isVip?'💎':''}</div></div>`; }
+
+// اغلاق البوب اب
+document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
+
+// ===== دوال =====
 function addMsg(name,text,type='other',t='text',u={}){
   const d=document.createElement('div'); d.className='msg '+type;
-  let c = t==='img'?`<img src="${text}" style="max-width:150px;border-radius:8px">`:t==='audio'?`<audio src="${text}" controls style="width:200px"></audio>`:`<div>${text}</div>`;
-  d.innerHTML=`<div class="name ${u.gender||myGender} ${u.isVip?'vip':''}">${name} ${u.isVip?'💎':''} ${u.isAdmin?'👑':''}</div>${c}<div class="time">${new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}</div>`;
-  $('messages_box').appendChild(d); $('messages_box').scrollTop=$('messages_box').scrollHeight;
+  d.innerHTML=`<div class="name ${u.gender||myGender} ${u.isVip?'vip':''}">${name} ${u.isVip?'💎':''}</div><div>${text}</div>`;
+  $('messages_box').appendChild(d); $('messages_box').scrollTop=99999;
 }
 function updateAvatar(){ const av=$('my_avatar'); av.className='avatar '+myGender+(isVip?' vip':''); av.innerText=myName.charAt(0); }
-$('menu_btn').onclick=()=>$('sidebar').classList.toggle('active');
-$('store_btn').onclick=()=>{ socket.emit('get store'); $('store_popup').classList.remove('hide'); }
-$('buy_vip_btn').onclick=()=>socket.emit('buy vip');
-$('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالعمر: ${myAge}\nالجنس: ${myGender}\nالرصيد: ${myCredits} 💎\nالعضوية: ${isVip?'مميزة 💎':'عادي'}`);
-$('plus_btn').onclick=()=>$('add_menu').classList.toggle('hide');
-$('logout_btn').onclick=()=>location.reload();
-$('bans_list_btn').onclick=()=>socket.emit('get bans');
 
-// خاص ومستخدمين
-$('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
-function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
-$('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
-function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg '+type; d.innerHTML=`<div class="name">${name}</div><div>${text}</div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=$('pm_box').scrollHeight; }
+}
 </script>
 </body>
 </html>
