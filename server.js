@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
-const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
@@ -12,8 +11,6 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(cors());
 app.use(express.static('public'));
-app.use('/uploads', express.static('uploads'));
-if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
 const DATA_DIR = './data'; if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 
 const BANS_FILE = path.join(DATA_DIR, 'bans.json');
@@ -45,11 +42,6 @@ const saveMessage = (room, msg) => {
   if (chatHistory[room].length > MAX_MESSAGES) chatHistory[room].shift();
   saveJSON(MESSAGES_FILE, chatHistory);
 };
-
-const imgStorage = multer.diskStorage({ destination: './uploads/', filename: (req, f, cb) => cb(null, 'img_' + Date.now() + path.extname(f.originalname)) });
-const audioStorage = multer.diskStorage({ destination: './uploads/', filename: (req, f, cb) => cb(null, 'audio_' + Date.now() + '.webm') });
-app.post('/upload', multer({ storage: imgStorage }).single('image'), (req, res) => res.json({ url: '/uploads/' + req.file.filename }));
-app.post('/upload-audio', multer({ storage: audioStorage }).single('audio'), (req, res) => res.json({ url: '/uploads/' + req.file.filename }));
 
 io.on('connection', (socket) => {
   const ip = socket.handshake.headers['x-forwarded-for']?.split(',')[0].trim() || socket.handshake.address;
@@ -100,11 +92,8 @@ io.on('connection', (socket) => {
       if(registeredUsers[user.name]){ registeredUsers[user.name].credits = user.credits; saveUsers(); }
       socket.emit('credits update', user.credits);
     }
-    const msg = {id: Date.now(), type: d.type, content: d.content, user: {name: user.name, gender: user.gender, id: user.id, age:user.age, isVip:user.isVip, isAdmin:user.isAdmin}, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'})};
-    if (d.pm) {
-      const t = io.sockets.sockets.get(d.pm);
-      if (t) { t.emit('pm message', msg); socket.emit('pm message', msg); }
-    } else { saveMessage(user.room, msg); io.to(user.room).emit('message', msg); }
+    const msg = {id: Date.now(), type: 'text', content: d.content, user: {name: user.name, gender: user.gender, id: user.id, age:user.age, isVip:user.isVip, isAdmin:user.isAdmin}, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'})};
+    saveMessage(user.room, msg); io.to(user.room).emit('message', msg);
   });
 
   socket.on('buy vip', () => {
@@ -119,20 +108,6 @@ io.on('connection', (socket) => {
 
   socket.on('get store', () => { socket.emit('store data', {credits:users[socket.id]?.credits||0, vipPrice:VIP_PRICE}); });
   socket.on('get users', () => { socket.emit('users list', Object.values(users)); });
-
-  socket.on('mute user', (id) => { if(users[socket.id]?.isAdmin &&!globalMuted.includes(id)){ globalMuted.push(id); saveMuted(); io.to(id).emit('you muted', true); } });
-  socket.on('unmute user', (id) => { if(users[socket.id]?.isAdmin){ globalMuted = globalMuted.filter(x => x!== id); saveMuted(); io.to(id).emit('you muted', false); } });
-  socket.on('kick user', (id) => { if(users[socket.id]?.isAdmin){ io.to(id).emit('kicked', 'تم طردك'); io.sockets.sockets.get(id)?.disconnect(true); } });
-  socket.on('ban user', (d) => {
-    if(!users[socket.id]?.isAdmin) return;
-    const t = users[d.targetId]; if(!t) return;
-    bannedIPs[t.ip] = {reason: d.reason||'مخالفة', expire: d.hours? Date.now()+d.hours*3600000:null, by: users[socket.id].name};
-    saveBans();
-    io.to(d.targetId).emit('banned', `تم حظرك: ${bannedIPs[t.ip].reason}`);
-    io.sockets.sockets.get(d.targetId)?.disconnect(true);
-  });
-  socket.on('unban ip', (ip) => { if(users[socket.id]?.isAdmin){ delete bannedIPs[ip]; saveBans(); } });
-  socket.on('get bans', () => { if(users[socket.id]?.isAdmin) socket.emit('bans list', bannedIPs); });
 
   socket.on('disconnect', () => { const u=users[socket.id]; if(u){ rooms[u.room]=rooms[u.room].filter(x=>x!==socket.id); io.to(u.room).emit('user left', u.name); delete users[socket.id]; } });
 });
