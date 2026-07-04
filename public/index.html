@@ -11,14 +11,9 @@
 body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 .hide{display:none!important}
 button{cursor:pointer;border:none;background:none}
-
 .topbar{background:var(--top);height:55px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;color:#fff}
-.topbar .left{display:flex;align-items:center;gap:15px;font-size:20px}
 .topbar .center{display:flex;align-items:center;gap:18px;font-size:20px}
-.topbar .right img{width:38px;height:38px;border-radius:50%;border:2px solid #00aaff;object-fit:cover}
-.mail-badge{position:relative}
-.mail-badge::after{content:'1';position:absolute;top:-5px;right:-8px;background:red;color:#fff;font-size:10px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-weight:700}
-
+.topbar .right img{width:38px;height:38px;border-radius:50%;border:2px solid #00aaff}
 .messages{flex:1;overflow-y:auto;padding:10px;background:var(--bg)}
 .msg-row{display:flex;gap:8px;margin:12px 0;align-items:flex-start}
 .msg-row.me{flex-direction:row-reverse}
@@ -26,25 +21,20 @@ button{cursor:pointer;border:none;background:none}
 .msg-body{max-width:70%}
 .msg-time{font-size:11px;color:#999;margin-bottom:3px}
 .msg-name{font-size:13px;font-weight:700;margin-bottom:3px;text-align:right}
-.msg-text{background:var(--other);padding:8px 12px;border-radius:15px;font-size:15px;line-height:1.6;display:inline-block}
+.msg-text{background:var(--other);padding:8px 12px;border-radius:15px;font-size:15px}
 .msg-row.me .msg-text{background:var(--me);color:#fff;border-radius:15px 0 15px 15px}
 .msg-row.other .msg-text{border-radius:0 15px 15px 15px}
 .vip-tag{color:#e91e63;font-size:12px}
-
 .inputbar{background:var(--chat);padding:8px 10px;display:flex;align-items:center;gap:8px;border-top:1px solid #ddd}
-.inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:1px solid #ddd;background:#f5f5f5;outline:none;font-size:15px}
+.inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:1px solid #ddd;background:#f5f5f5;outline:none}
 .inputbar i{font-size:22px;color:#666;padding:8px}
-.send-btn{background:var(--top);color:#fff;width:45px;height:45px;border-radius:50%;display:grid;place-items:center;font-size:18px}
-
+.send-btn{background:var(--top);color:#fff;width:45px;height:45px;border-radius:50%;display:grid;place-items:center}
 .footer{background:var(--top);height:55px;display:flex;align-items:center;justify-content:space-around;color:#fff;font-size:20px}
-.footer .station{font-size:14px;color:#00aaff}
-
 .popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:20;display:flex;align-items:center;justify-content:center}
 .popup-box{background:#fff;width:340px;max-width:95%;border-radius:15px;padding:20px;text-align:center;color:#000}
 .popup-box input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;color:#000;outline:none;text-align:center}
 .btn-main{width:100%;padding:12px;border-radius:10px;background:var(--me);color:#fff;font-weight:700;margin-top:5px}
 .user-item{display:flex;align-items:center;gap:10px;padding:10px;background:#f5f5f5;border-radius:8px;margin:5px 0}
-.user-item img{width:40px;height:40px;border-radius:50%}
 </style>
 </head>
 <body>
@@ -58,34 +48,20 @@ button{cursor:pointer;border:none;background:none}
 
 <div id="chat_page" class="hide" style="flex:1;display:flex;flex-direction:column;height:100vh">
   <div class="topbar">
-    <div class="left"><button type="button"><i class="fa fa-bars" id="menu_btn"></i></button></div>
     <div class="center">
-      <button type="button" id="store_btn"><i class="fa fa-store"></i><div style="font-size:10px">Store.</div></button>
-      <button type="button" class="mail-badge"><i class="fa fa-envelope"></i></button>
-      <button type="button"><i class="fa fa-user-plus"></i></button>
-      <button type="button"><i class="fa fa-heart"></i></button>
-      <button type="button"><i class="fa fa-flag"></i></button>
+      <button type="button" id="store_btn"><i class="fa fa-store"></i></button>
+      <button type="button"><i class="fa fa-envelope"></i></button>
+      <button type="button"><i class="fa fa-users" id="users_btn"></i></button>
     </div>
     <div class="right"><img id="my_avatar_img" src="https://i.pravatar.cc/100"></div>
   </div>
-
   <div class="messages" id="messages_box"></div>
-
   <div class="inputbar">
-    <button type="button" id="img_btn"><i class="fa fa-plus"></i></button>
-    <input type="file" id="img_input" accept="image/*" class="hide">
-    <button type="button"><i class="fa fa-face-smile"></i></button>
     <input type="text" id="msg_input" placeholder="اكتب هنا...">
-    <button type="button" id="mic_btn"><i class="fa fa-microphone"></i></button>
     <button type="button" class="send-btn" id="send_btn"><i class="fa fa-paper-plane"></i></button>
   </div>
-
   <div class="footer">
-    <button type="button"><i class="fa fa-volume-high"></i></button>
-    <div class="station">محطة</div>
-    <button type="button"><i class="fa fa-gear"></i></button>
     <button type="button"><i class="fa fa-house" id="home_btn"></i></button>
-    <button type="button"><i class="fa fa-users" id="users_btn"></i></button>
   </div>
 </div>
 
@@ -108,26 +84,18 @@ button{cursor:pointer;border:none;background:none}
   <h3>المتصلون</h3><div id="users_list"></div>
 </div></div>
 
-<div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column">
-  <h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1;background:#f5f5f5"></div>
-  <div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><button type="button" class="send-btn" id="pm_send"><i class="fa fa-paper-plane"></i></button></div>
-</div></div>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
 window.onload = function(){
-console.log('الازرار انربطت');
 const $ = id => document.getElementById(id);
-let myName = 'زائر', myId = null, isAdmin=false, isVip=false, pmWith=null;
-let mediaRecorder, audioChunks=[];
-const colors = ['#e91e63','#00aaff','#ff9800','#9c27b0','#009688','#f44336','#3f51b5'];
+let myName = 'زائر', myId = null, isAdmin=false, isVip=false;
+const colors = ['#e91e63','#00aaff','#ff9800','#9c27b0','#009688','#f44336'];
 const getColor = name => colors[name.charCodeAt(0) % colors.length];
 
-// اهم تعديل حق Render
-let socket = io(); 
-socket.on('connect_error', ()=>{alert('تعذر الاتصال بالسيرفر');});
+// التعديل المهم حق Render + HTTPS
+let socket = io(window.location.origin, {transports: ['websocket', 'polling']}); 
+socket.on('connect_error', (err)=>{alert('خطأ اتصال: '+err.message); console.log(err);});
 
-// ===== دخول =====
 $('guest_btn').onclick = (e) => { e.preventDefault(); $('guest_popup').classList.remove('hide'); }
 $('login_btn').onclick = (e) => { e.preventDefault(); $('login_popup').classList.remove('hide'); }
 $('register_btn').onclick = (e) => { e.preventDefault(); $('register_popup').classList.remove('hide'); }
@@ -159,74 +127,36 @@ function enter(r){
   r.chatHistory.forEach(m=>addMsg(m));
 }
 
-// ===== ارسال =====
 function send(type,content){
-  socket.emit('message',{type,content,pm:pmWith?.id||null});
-  if(!pmWith && type==='text') addMsg({user:{name:myName,id:myId},content,type,time:new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})+' 16/05'});
-  if(pmWith && type==='text') addPM(myName,content,'me');
+  socket.emit('message',{type,content});
+  if(type==='text') addMsg({user:{name:myName,id:myId},content,type,time:new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})+' 16/05'});
 }
 $('send_btn').onclick = (e)=>{e.preventDefault(); const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();};
 
-// صور
-$('img_btn').onclick=()=>$('img_input').click();
-$('img_input').onchange=e=>{
-  const f=e.target.files[0]; if(!f)return;
-  const d=new FormData(); d.append('image',f);
-  fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>{send('img',x.url);});
-};
-
-// ===== اضافة رسالة =====
 function addMsg(m){
   const d=document.createElement('div');
   const isMe = m.user.id===myId;
   d.className='msg-row '+(isMe?'me':'other');
   const color = getColor(m.user.name);
-  let text = m.content;
-  if(m.type==='img') text = `<img src="${m.content}" style="max-width:150px;border-radius:10px">`;
-  if(m.type==='audio') text = `<audio src="${m.content}" controls style="width:180px"></audio>`;
-  
   d.innerHTML=`
     <img class="msg-avatar" src="https://i.pravatar.cc/100?u=${m.user.name}">
     <div class="msg-body">
       <div class="msg-time">${m.time||'17:15 16/05'}</div>
-      <div class="msg-name" style="color:${color}">${m.user.isAdmin?'\"*'+m.user.name+'*\"':m.user.name} ${m.user.isVip?'<span class="vip-tag">[ رتبة مميز ]</span>':''}</div>
-      <div class="msg-text">${text}</div>
+      <div class="msg-name" style="color:${color}">${m.user.isAdmin?'\"*'+m.user.name+'*\"':m.user.name} ${m.user.isVip?'<span class="vip-tag">[ مميز ]</span>':''}</div>
+      <div class="msg-text">${m.content}</div>
     </div>
   `;
   $('messages_box').appendChild(d); $('messages_box').scrollTop=99999;
 }
 
-// ===== سوكت =====
 socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; d.chatHistory.forEach(m=>addMsg(m));});
 socket.on('message', d=>{ if(d.user.id!==myId) addMsg(d); });
-socket.on('pm message', d=>{
-  if(pmWith && pmWith.id===d.user.id){ addPM(d.user.name,d.content,d.user.id===myId?'me':'other'); }
-  else if(d.user.id!==myId){ alert(`📩 رسالة خاصة من ${d.user.name}`); }
-});
 socket.on('system', m=>{ const d=document.createElement('div'); d.style.textAlign='center'; d.style.color='#e91e63'; d.style.margin='10px'; d.innerHTML=m; $('messages_box').appendChild(d); });
-
-socket.on('users list', u=>{
-  $('users_list').innerHTML='';
-  u.forEach(x=>{
-    const d=document.createElement('div');
-    d.className='user-item';
-    d.innerHTML=`<img src="https://i.pravatar.cc/100?u=${x.name}"><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div>
-    <div style="margin-right:auto"><button type="button" onclick="openPM('${x.id}','${x.name}')"><i class="fa fa-envelope" style="color:#00aaff;cursor:pointer;margin:0 5px"></i></button>
-    ${isAdmin&&x.id!==myId?`<button type="button" onclick="socket.emit('mute user','${x.id}')"><i class="fa fa-ban" style="color:red;cursor:pointer;margin:0 3px"></i></button>`:''}</div>`;
-    $('users_list').appendChild(d);
-  });
-});
 
 $('users_btn').onclick=(e)=>{ e.preventDefault(); $('users_popup').classList.remove('hide'); socket.emit('get users'); }
 $('home_btn').onclick=(e)=>{ e.preventDefault(); $('chat_page').classList.add('hide');$('start_page').classList.remove('hide'); }
-$('store_btn').onclick=(e)=>{ e.preventDefault(); alert('المتجر: 500 نقطة = VIP شهر 💎'); }
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
-
-// ===== خاص =====
-window.openPM = function(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
-$('pm_send').onclick=(e)=>{ e.preventDefault(); const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
-function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg-row '+type; d.innerHTML=`<div class="msg-body"><div class="msg-text">${text}</div></div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=99999; }
 
 }
 </script>
