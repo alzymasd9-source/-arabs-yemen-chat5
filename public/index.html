@@ -72,10 +72,11 @@ button{cursor:pointer;border:none;background:none}
   <div class="messages" id="messages_box"></div>
 
   <div class="inputbar">
-    <button type="button"><i class="fa fa-plus"></i></button>
+    <button type="button" id="img_btn"><i class="fa fa-plus"></i></button>
+    <input type="file" id="img_input" accept="image/*" class="hide">
     <button type="button"><i class="fa fa-face-smile"></i></button>
     <input type="text" id="msg_input" placeholder="اكتب هنا...">
-    <button type="button"><i class="fa fa-microphone" id="mic_btn"></i></button>
+    <button type="button" id="mic_btn"><i class="fa fa-microphone"></i></button>
     <button type="button" class="send-btn" id="send_btn"><i class="fa fa-paper-plane"></i></button>
   </div>
 
@@ -83,7 +84,7 @@ button{cursor:pointer;border:none;background:none}
     <button type="button"><i class="fa fa-volume-high"></i></button>
     <div class="station">محطة</div>
     <button type="button"><i class="fa fa-gear"></i></button>
-    <button type="button"><i class="fa fa-house"></i></button>
+    <button type="button"><i class="fa fa-house" id="home_btn"></i></button>
     <button type="button"><i class="fa fa-users" id="users_btn"></i></button>
   </div>
 </div>
@@ -122,8 +123,9 @@ let mediaRecorder, audioChunks=[];
 const colors = ['#e91e63','#00aaff','#ff9800','#9c27b0','#009688','#f44336','#3f51b5'];
 const getColor = name => colors[name.charCodeAt(0) % colors.length];
 
-let socket = io({reconnectionAttempts: 3, timeout: 5000});
-socket.on('connect_error', ()=>{alert('شغل السيرفر: node server.js');});
+// اهم تعديل حق Render
+let socket = io(); 
+socket.on('connect_error', ()=>{alert('تعذر الاتصال بالسيرفر');});
 
 // ===== دخول =====
 $('guest_btn').onclick = (e) => { e.preventDefault(); $('guest_popup').classList.remove('hide'); }
@@ -165,6 +167,14 @@ function send(type,content){
 }
 $('send_btn').onclick = (e)=>{e.preventDefault(); const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();};
+
+// صور
+$('img_btn').onclick=()=>$('img_input').click();
+$('img_input').onchange=e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const d=new FormData(); d.append('image',f);
+  fetch('/upload',{method:'POST',body:d}).then(r=>r.json()).then(x=>{send('img',x.url);});
+};
 
 // ===== اضافة رسالة =====
 function addMsg(m){
@@ -209,12 +219,13 @@ socket.on('users list', u=>{
 });
 
 $('users_btn').onclick=(e)=>{ e.preventDefault(); $('users_popup').classList.remove('hide'); socket.emit('get users'); }
-$('store_btn').onclick=(e)=>{ e.preventDefault(); alert('المتجر قريبا'); }
+$('home_btn').onclick=(e)=>{ e.preventDefault(); $('chat_page').classList.add('hide');$('start_page').classList.remove('hide'); }
+$('store_btn').onclick=(e)=>{ e.preventDefault(); alert('المتجر: 500 نقطة = VIP شهر 💎'); }
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
 
 // ===== خاص =====
 window.openPM = function(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
-$('pm_send').onclick=(e)=>{ e.preventDefault(); const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; }
+$('pm_send').onclick=(e)=>{ e.preventDefault(); const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
 function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg-row '+type; d.innerHTML=`<div class="msg-body"><div class="msg-text">${text}</div></div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=99999; }
 
 }
