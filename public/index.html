@@ -12,7 +12,6 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direc
 .hide{display:none!important}
 button{cursor:pointer;border:none;background:none}
 
-/* ===== شريط فوق ===== */
 .topbar{background:var(--top);height:55px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;color:#fff}
 .topbar .left{display:flex;align-items:center;gap:15px;font-size:20px}
 .topbar .center{display:flex;align-items:center;gap:18px;font-size:20px}
@@ -20,7 +19,6 @@ button{cursor:pointer;border:none;background:none}
 .mail-badge{position:relative}
 .mail-badge::after{content:'1';position:absolute;top:-5px;right:-8px;background:red;color:#fff;font-size:10px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-weight:700}
 
-/* ===== الشات ===== */
 .messages{flex:1;overflow-y:auto;padding:10px;background:var(--bg)}
 .msg-row{display:flex;gap:8px;margin:12px 0;align-items:flex-start}
 .msg-row.me{flex-direction:row-reverse}
@@ -31,21 +29,16 @@ button{cursor:pointer;border:none;background:none}
 .msg-text{background:var(--other);padding:8px 12px;border-radius:15px;font-size:15px;line-height:1.6;display:inline-block}
 .msg-row.me .msg-text{background:var(--me);color:#fff;border-radius:15px 0 15px 15px}
 .msg-row.other .msg-text{border-radius:0 15px 15px 15px}
-.msg-badge{background:var(--me);color:#fff;padding:2px 10px;border-radius:20px;font-size:13px;font-weight:700;margin:0 5px}
-.system{color:#e91e63;font-weight:700}
 .vip-tag{color:#e91e63;font-size:12px}
 
-/* ===== شريط الكتابة ===== */
 .inputbar{background:var(--chat);padding:8px 10px;display:flex;align-items:center;gap:8px;border-top:1px solid #ddd}
 .inputbar input{flex:1;padding:12px 15px;border-radius:25px;border:1px solid #ddd;background:#f5f5f5;outline:none;font-size:15px}
 .inputbar i{font-size:22px;color:#666;padding:8px}
 .send-btn{background:var(--top);color:#fff;width:45px;height:45px;border-radius:50%;display:grid;place-items:center;font-size:18px}
 
-/* ===== فوتر ===== */
 .footer{background:var(--top);height:55px;display:flex;align-items:center;justify-content:space-around;color:#fff;font-size:20px}
 .footer .station{font-size:14px;color:#00aaff}
 
-/* ===== بوب اب ===== */
 .popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:20;display:flex;align-items:center;justify-content:center}
 .popup-box{background:#fff;width:340px;max-width:95%;border-radius:15px;padding:20px;text-align:center;color:#000}
 .popup-box input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;color:#000;outline:none;text-align:center}
@@ -56,7 +49,6 @@ button{cursor:pointer;border:none;background:none}
 </head>
 <body>
 
-<!-- ===== صفحة البداية ===== -->
 <div id="start_page" style="width:100vw;height:100vh;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;color:#fff;text-align:center">
   <h1 style="font-size:32px">شات فلة</h1>
   <button type="button" class="btn-main" id="guest_btn" style="width:280px">دخول كزائر</button>
@@ -64,44 +56,38 @@ button{cursor:pointer;border:none;background:none}
   <button type="button" class="btn-main" id="register_btn" style="width:280px;background:#333">تسجيل</button>
 </div>
 
-<!-- ===== الشات ===== -->
 <div id="chat_page" class="hide" style="flex:1;display:flex;flex-direction:column;height:100vh">
-  <!-- شريط فوق -->
   <div class="topbar">
-    <div class="left"><i class="fa fa-bars" id="menu_btn"></i></div>
+    <div class="left"><button type="button"><i class="fa fa-bars" id="menu_btn"></i></button></div>
     <div class="center">
-      <div><i class="fa fa-store"></i><div style="font-size:10px">Store.</div></div>
-      <div class="mail-badge"><i class="fa fa-envelope"></i></div>
-      <i class="fa fa-user-plus"></i>
-      <i class="fa fa-heart"></i>
-      <i class="fa fa-flag"></i>
+      <button type="button" id="store_btn"><i class="fa fa-store"></i><div style="font-size:10px">Store.</div></button>
+      <button type="button" class="mail-badge"><i class="fa fa-envelope"></i></button>
+      <button type="button"><i class="fa fa-user-plus"></i></button>
+      <button type="button"><i class="fa fa-heart"></i></button>
+      <button type="button"><i class="fa fa-flag"></i></button>
     </div>
     <div class="right"><img id="my_avatar_img" src="https://i.pravatar.cc/100"></div>
   </div>
 
-  <!-- الرسائل -->
   <div class="messages" id="messages_box"></div>
 
-  <!-- شريط الكتابة -->
   <div class="inputbar">
-    <i class="fa fa-plus"></i>
-    <i class="fa fa-face-smile"></i>
+    <button type="button"><i class="fa fa-plus"></i></button>
+    <button type="button"><i class="fa fa-face-smile"></i></button>
     <input type="text" id="msg_input" placeholder="اكتب هنا...">
-    <i class="fa fa-microphone" id="mic_btn"></i>
-    <div class="send-btn" id="send_btn"><i class="fa fa-paper-plane"></i></div>
+    <button type="button"><i class="fa fa-microphone" id="mic_btn"></i></button>
+    <button type="button" class="send-btn" id="send_btn"><i class="fa fa-paper-plane"></i></button>
   </div>
 
-  <!-- فوتر -->
   <div class="footer">
-    <i class="fa fa-volume-high"></i>
+    <button type="button"><i class="fa fa-volume-high"></i></button>
     <div class="station">محطة</div>
-    <i class="fa fa-gear"></i>
-    <i class="fa fa-house"></i>
-    <i class="fa fa-users" id="users_btn"></i>
+    <button type="button"><i class="fa fa-gear"></i></button>
+    <button type="button"><i class="fa fa-house"></i></button>
+    <button type="button"><i class="fa fa-users" id="users_btn"></i></button>
   </div>
 </div>
 
-<!-- ===== البوب ابات ===== -->
 <div class="popup-overlay hide" id="guest_popup"><div class="popup-box">
   <h3>دخول كزائر</h3><input type="text" id="guest_name" placeholder="اكتب اسمك هنا">
   <button type="button" class="btn-main" id="guest_enter">دخول</button>
@@ -123,12 +109,13 @@ button{cursor:pointer;border:none;background:none}
 
 <div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column">
   <h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1;background:#f5f5f5"></div>
-  <div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><div class="send-btn" id="pm_send"><i class="fa fa-paper-plane"></i></div></div>
+  <div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><button type="button" class="send-btn" id="pm_send"><i class="fa fa-paper-plane"></i></button></div>
 </div></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 window.onload = function(){
+console.log('الازرار انربطت');
 const $ = id => document.getElementById(id);
 let myName = 'زائر', myId = null, isAdmin=false, isVip=false, pmWith=null;
 let mediaRecorder, audioChunks=[];
@@ -139,20 +126,23 @@ let socket = io({reconnectionAttempts: 3, timeout: 5000});
 socket.on('connect_error', ()=>{alert('شغل السيرفر: node server.js');});
 
 // ===== دخول =====
-$('guest_btn').onclick = () => { $('guest_popup').classList.remove('hide'); }
-$('login_btn').onclick = () => { $('login_popup').classList.remove('hide'); }
-$('register_btn').onclick = () => { $('register_popup').classList.remove('hide'); }
+$('guest_btn').onclick = (e) => { e.preventDefault(); $('guest_popup').classList.remove('hide'); }
+$('login_btn').onclick = (e) => { e.preventDefault(); $('login_popup').classList.remove('hide'); }
+$('register_btn').onclick = (e) => { e.preventDefault(); $('register_popup').classList.remove('hide'); }
 
-$('guest_enter').onclick = () => {
+$('guest_enter').onclick = (e) => {
+  e.preventDefault();
   myName=$('guest_name').value.trim()||'زائر'+Math.floor(Math.random()*999);
   socket.emit('joinGuest',{name:myName},enter);
 }
-$('login_submit').onclick = () => {
+$('login_submit').onclick = (e) => {
+  e.preventDefault();
   const n=$('login_user').value.trim(), p=$('login_pass').value;
   if(!n||!p) return alert('اكتب اسم وباسورد');
   socket.emit('login',{name:n,pass:p},enter);
 }
-$('reg_submit').onclick = () => {
+$('reg_submit').onclick = (e) => {
+  e.preventDefault();
   const n=$('reg_user').value.trim(), p=$('reg_pass').value, e=$('reg_email').value;
   if(!n||!p) return alert('اكتب اسم وباسورد');
   socket.emit('register',{name:n,pass:p,email:e},r=>{alert(r.msg||'تم التسجيل +100 نقطة');if(r.ok)$('register_popup').classList.add('hide');});
@@ -170,13 +160,13 @@ function enter(r){
 // ===== ارسال =====
 function send(type,content){
   socket.emit('message',{type,content,pm:pmWith?.id||null});
-  if(!pmWith && type==='text') addMsg({user:{name:myName,id:myId},content,type});
+  if(!pmWith && type==='text') addMsg({user:{name:myName,id:myId},content,type,time:new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})+' 16/05'});
   if(pmWith && type==='text') addPM(myName,content,'me');
 }
-$('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
+$('send_btn').onclick = (e)=>{e.preventDefault(); const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();};
 
-// ===== اضافة رسالة بالتصميم الجديد =====
+// ===== اضافة رسالة =====
 function addMsg(m){
   const d=document.createElement('div');
   const isMe = m.user.id===myId;
@@ -190,7 +180,7 @@ function addMsg(m){
     <img class="msg-avatar" src="https://i.pravatar.cc/100?u=${m.user.name}">
     <div class="msg-body">
       <div class="msg-time">${m.time||'17:15 16/05'}</div>
-      <div class="msg-name" style="color:${color}">${m.user.isAdmin?'\"*${m.user.name}*\"':m.user.name} ${m.user.isVip?'<span class="vip-tag">[ رتبة مميز ]</span>':''}</div>
+      <div class="msg-name" style="color:${color}">${m.user.isAdmin?'\"*'+m.user.name+'*\"':m.user.name} ${m.user.isVip?'<span class="vip-tag">[ رتبة مميز ]</span>':''}</div>
       <div class="msg-text">${text}</div>
     </div>
   `;
@@ -212,18 +202,19 @@ socket.on('users list', u=>{
     const d=document.createElement('div');
     d.className='user-item';
     d.innerHTML=`<img src="https://i.pravatar.cc/100?u=${x.name}"><div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div>
-    <div style="margin-right:auto"><i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')" style="color:#00aaff;cursor:pointer;margin:0 5px"></i>
-    ${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')" style="color:red;cursor:pointer;margin:0 3px"></i>`:''}</div>`;
+    <div style="margin-right:auto"><button type="button" onclick="openPM('${x.id}','${x.name}')"><i class="fa fa-envelope" style="color:#00aaff;cursor:pointer;margin:0 5px"></i></button>
+    ${isAdmin&&x.id!==myId?`<button type="button" onclick="socket.emit('mute user','${x.id}')"><i class="fa fa-ban" style="color:red;cursor:pointer;margin:0 3px"></i></button>`:''}</div>`;
     $('users_list').appendChild(d);
   });
 });
 
-$('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
+$('users_btn').onclick=(e)=>{ e.preventDefault(); $('users_popup').classList.remove('hide'); socket.emit('get users'); }
+$('store_btn').onclick=(e)=>{ e.preventDefault(); alert('المتجر قريبا'); }
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
 
 // ===== خاص =====
-function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
-$('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; }
+window.openPM = function(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
+$('pm_send').onclick=(e)=>{ e.preventDefault(); const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; }
 function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg-row '+type; d.innerHTML=`<div class="msg-body"><div class="msg-text">${text}</div></div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=99999; }
 
 }
