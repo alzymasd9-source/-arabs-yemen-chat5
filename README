@@ -1,0 +1,120 @@
+# 🚀 دليل النشر — شات اليمن المطور
+
+## المتطلبات
+- Node.js 22+
+- حساب GitHub (مجاني)
+- حساب على منصة الاستضافة
+
+---
+
+## ✅ الخيار الأول: Render (الأنسب — مجاني بالكامل)
+
+**يدعم Express + SSR بالكامل بدون إعداد إضافي.**
+
+### الخطوات:
+
+1. **ارفع الكود على GitHub:**
+   ```bash
+   git init
+   git add .
+   git commit -m "شات اليمن المطور - النشر الأول"
+   git branch -M main
+   git remote add origin https://github.com/USERNAME/chat-yemen.git
+   git push -u origin main
+   ```
+
+2. **سجّل في [render.com](https://render.com) مجاناً**
+
+3. **اضغط "New +" → "Web Service"**
+
+4. **اربط حساب GitHub واختر الـ repo**
+
+5. **الإعدادات (تُملأ تلقائياً من render.yaml):**
+   - Build Command: `npm install && npm run build`
+   - Start Command: `node dist/server.bundle.mjs`
+   - Environment: `Node`
+   - Plan: `Free`
+
+6. **اضغط "Create Web Service"** — سيبدأ البناء تلقائياً
+
+7. **ستحصل على رابط مجاني:**
+   ```
+   https://chat-yemen.onrender.com
+   ```
+
+> ⚠️ **ملاحظة Render المجاني:** الخادم ينام بعد 15 دقيقة من عدم الاستخدام ويستيقظ عند أول زيارة (قد يأخذ 30-60 ثانية).
+
+---
+
+## ✅ الخيار الثاني: Vercel (سريع جداً)
+
+1. **ارفع الكود على GitHub** (نفس الخطوات أعلاه)
+
+2. **سجّل في [vercel.com](https://vercel.com)**
+
+3. **اضغط "Add New Project" → اختر الـ repo**
+
+4. **الإعدادات:**
+   - Framework Preset: `Other`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+
+5. **اضغط "Deploy"** — رابطك سيكون:
+   ```
+   https://chat-yemen.vercel.app
+   ```
+
+---
+
+## ✅ الخيار الثالث: Railway (أسهل إعداد)
+
+1. **سجّل في [railway.app](https://railway.app)**
+2. **اضغط "New Project" → "Deploy from GitHub repo"**
+3. **اختر الـ repo — Railway يكتشف الإعدادات تلقائياً**
+4. **أضف متغير البيئة:**
+   - `PORT` = `3000`
+5. **رابطك سيكون:**
+   ```
+   https://chat-yemen.up.railway.app
+   ```
+
+> Railway يعطي $5 رصيد مجاني شهرياً.
+
+---
+
+## 🔧 متغيرات البيئة المطلوبة
+
+أضف هذه في لوحة تحكم منصة الاستضافة:
+
+| المتغير | القيمة | الوصف |
+|---------|--------|-------|
+| `NODE_ENV` | `production` | وضع الإنتاج |
+| `PORT` | `10000` (Render) / `3000` (Railway) | منفذ الخادم |
+
+---
+
+## 🏗️ البناء المحلي للاختبار
+
+```bash
+# تثبيت الحزم
+npm install
+
+# بناء المشروع
+npm run build
+
+# تشغيل الخادم المبني
+node dist/server.bundle.mjs
+```
+
+ثم افتح: `http://localhost:3000`
+
+---
+
+## 📁 هيكل ملفات النشر
+
+```
+dist/
+├── client/          # ملفات الواجهة (HTML, CSS, JS)
+│   └── assets/      # ملفات مضغوطة مع hash
+└── server.bundle.mjs  # خادم Express مع SSR
+```
