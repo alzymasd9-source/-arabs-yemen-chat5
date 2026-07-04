@@ -108,12 +108,16 @@ button{cursor:pointer;border:none;background:none}
 </div>
 <div class="popup-overlay hide" id="store_popup"><div class="popup-box"><h3>🛒 المتجر <span class="credits-badge" id="my_credits">0 💎</span></h3><div class="store-item"><div>عضوية مميزة شهر 💎</div><button type="button" class="btn-main" id="buy_vip_btn" style="width:auto;padding:8px 15px">شراء 500</button></div></div></div>
 <div class="popup-overlay hide" id="users_popup"><div class="popup-box" style="width:400px;max-height:80vh;overflow-y:auto"><h3>المتصلون</h3><div id="users_list"></div></div></div>
+<div class="popup-overlay hide" id="pm_popup"><div class="popup-box" style="width:400px;height:70vh;display:flex;flex-direction:column">
+  <h3 id="pm_title">خاص</h3><div class="messages" id="pm_box" style="flex:1"></div>
+  <div class="inputbar"><input type="text" id="pm_input" placeholder="اكتب هنا..."><i class="fa fa-paper-plane send" id="pm_send"></i></div>
+</div></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 window.onload = function(){
 const $ = id => document.getElementById(id);
-let myGender = 'male', myName = 'زائر', myAge = 25, myId = null, isAdmin=false, isVip=false, myCredits=0;
+let myGender = 'male', myName = 'زائر', myAge = 25, myId = null, isAdmin=false, isVip=false, myCredits=0, pmWith=null;
 let mediaRecorder, audioChunks=[];
 
 let socket = io({reconnectionAttempts: 3, timeout: 5000});
@@ -172,10 +176,11 @@ $('home_btn').onclick = () => { $('chat_page').classList.add('hide');$('rooms_pa
 $('menu_btn').onclick = () => { $('sidebar').classList.toggle('active'); }
 $('logout_btn').onclick = () => { location.reload(); }
 
-// ===== ارسال نص + صورة + صوت =====
+// ===== ارسال نص + صورة + صوت + خاص =====
 function send(type,content){
-  socket.emit('message',{type,content});
-  if(type==='text') addMsg(myName,content,'me',type,{gender:myGender,isVip});
+  socket.emit('message',{type,content,pm:pmWith?.id||null});
+  if(!pmWith && type==='text') addMsg(myName,content,'me',type,{gender:myGender,isVip});
+  if(pmWith && type==='text') addPM(myName,content,'me');
 }
 $('send_btn').onclick = ()=>{const m=$('msg_input').value.trim(); if(m){send('text',m);$('msg_input').value='';}};
 $('msg_input').onkeypress=e=>{if(e.key==='Enter')$('send_btn').click();};
@@ -205,6 +210,10 @@ socket.on('you are', d=>{myId=d.id; isAdmin=d.isAdmin; isVip=d.isVip; myCredits=
 socket.on('user joined', u=>addMsg('النظام',`${u.name} دخل`,'other'));
 socket.on('user left', n=>addMsg('النظام',`${n} خرج`,'other'));
 socket.on('message', d=>{ if(d.user.id!==myId) addMsg(d.user.name,d.content,'other',d.type,d.user); });
+socket.on('pm message', d=>{
+  if(pmWith && pmWith.id===d.user.id){ addPM(d.user.name,d.content,d.user.id===myId?'me':'other'); }
+  else if(d.user.id!==myId){ alert(`📩 رسالة خاصة من ${d.user.name}`); }
+});
 socket.on('system', m=>addMsg('النظام',m,'other'));
 socket.on('credits update', c=>{myCredits=c;});
 socket.on('store data', d=>{$('my_credits').innerText=d.credits+' 💎';});
@@ -223,17 +232,24 @@ socket.on('users list', u=>{
     d.className='user-item';
     d.innerHTML=`<div class="avatar ${x.gender} ${x.isVip?'vip':''}">${x.name[0]}</div>
     <div>${x.name} ${x.isVip?'💎':''} ${x.isAdmin?'👑':''}</div>
-    <div style="margin-right:auto">${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')" style="color:#ff7675;cursor:pointer;margin:0 3px" title="كتم"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')" style="color:#ff7675;cursor:pointer;margin:0 3px" title="طرد"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})" style="color:#ff7675;cursor:pointer;margin:0 3px" title="بان 24 ساعة"></i>`:''}</div>`;
+    <div style="margin-right:auto">
+    <i class="fa fa-envelope" onclick="openPM('${x.id}','${x.name}')" style="color:#1dd1a1;cursor:pointer;margin:0 3px" title="خاص"></i>
+    ${isAdmin&&x.id!==myId?`<i class="fa fa-ban" onclick="socket.emit('mute user','${x.id}')" style="color:#ff7675;cursor:pointer;margin:0 3px" title="كتم"></i><i class="fa fa-sign-out" onclick="socket.emit('kick user','${x.id}')" style="color:#ff7675;cursor:pointer;margin:0 3px" title="طرد"></i><i class="fa fa-gavel" onclick="socket.emit('ban user',{targetId:'${x.id}',hours:24})" style="color:#ff7675;cursor:pointer;margin:0 3px" title="بان 24 ساعة"></i>`:''}</div>`;
     $('users_list').appendChild(d);
   });
 });
 
-// ===== متجر + ملف شخصي =====
+// ===== متجر + ملف شخصي + خاص =====
 $('store_btn').onclick=()=>{ socket.emit('get store'); $('store_popup').classList.remove('hide'); }
 $('buy_vip_btn').onclick=()=>socket.emit('buy vip');
 $('profile_btn').onclick=()=>alert(`ملفك:\nالاسم: ${myName}\nالجنس: ${myGender}\nالرصيد: ${myCredits} 💎\nالعضوية: ${isVip?'مميزة 💎':'عادي'}`);
 $('users_btn').onclick=()=>{ $('users_popup').classList.remove('hide'); socket.emit('get users'); }
 $('bans_list_btn').onclick=()=>socket.emit('get bans');
+
+function openPM(id,name){ pmWith={id,name}; $('pm_title').innerText='خاص مع '+name; $('pm_box').innerHTML=''; $('pm_popup').classList.remove('hide'); }
+$('pm_send').onclick=()=>{ const m=$('pm_input').value.trim(); if(m){ send('text',m); $('pm_input').value=''; } }
+$('pm_input').onkeypress=e=>{if(e.key==='Enter')$('pm_send').click();}
+function addPM(name,text,type){ const d=document.createElement('div'); d.className='msg '+type; d.innerHTML=`<div class="name">${name}</div><div>${text}</div>`; $('pm_box').appendChild(d); $('pm_box').scrollTop=99999; }
 
 // اغلاق البوب اب
 document.querySelectorAll('.popup-overlay').forEach(p => p.onclick = e => { if(e.target===p) p.classList.add('hide'); });
