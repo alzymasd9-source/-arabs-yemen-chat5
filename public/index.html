@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>موقع الشات الفوري بالأسماء</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f0f2f5; }
+        #chat-container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        #user-info { font-weight: bold; margin-bottom: 10px; color: #333; background: #e9ecef; padding: 8px; border-radius: 4px; text-align: center; }
+        #messages { list-style-type: none; padding: 0; height: 300px; overflow-y: auto; border: 1px solid #ddd; margin-bottom: 10px; background: #fafafa; padding: 10px; }
+        #messages li { padding: 8px; margin-bottom: 5px; background: #e1ffb1; border-radius: 5px; width: fit-content; max-width: 80%; word-break: break-word; }
+        .username { font-weight: bold; color: #007bff; display: block; font-size: 0.85em; margin-bottom: 2px; }
+        #form { display: flex; }
+        #input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px 0 0 4px; }
+        button { padding: 10px 20px; border: none; background: #007bff; color: white; cursor: pointer; border-radius: 0 4px 4px 0; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="user-info">مرحباً بك في الشات</div>
+        <ul id="messages"></ul>
+        <form id="form">
+            <input id="input" autocomplete="off" placeholder="اكتب رسالتك هنا..." required />
+            <button>إرسال</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        const userInfo = document.getElementById('user-info');
+
+        // طلب اسم المستخدم عند فتح الصفحة وإجباره على الإدخال
+        let username = "";
+        while (!username || username.trim() === "") {
+            username = prompt("الرجاء إدخال اسمك للانضمام إلى الشات:");
+        }
+        
+        // عرض اسم المستخدم في أعلى الشات
+        userInfo.textContent = `أنت متصل الآن باسم: ${username}`;
+
+        // عند إرسال النموذج
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value.trim()) {
+                // إرسال كائن يحتوي على الاسم ونص الرسالة
+                socket.emit('chatMessage', {
+                    user: username,
+                    text: input.value
+                });
+                input.value = '';
+            }
+        });
+
+        // استقبال البيانات من السيرفر وعرضها
+        socket.on('chatMessage', (data) => {
+            const item = document.createElement('li');
+            
+            // إنشاء عنصر لاسم المرسل وعنصر لنص الرسالة
+            item.innerHTML = `<span class="username">${data.user}</span> ${data.text}`;
+            
+            // تمييز رسائل المستخدم الحالي بلون مختلف إذا أردت (اختياري)
+            if(data.user === username) {
+                item.style.background = "#d1e7dd"; // لون أخضر مائل للزرقة لرسائلك
+                item.style.marginRight = "auto";  // محاذاة لجهة اليسار/اليمين حسب الرغبة
+            } else {
+                item.style.background = "#fff";    // لون أبيض لرسائل الآخرين
+                item.style.border = "1px solid #eee";
+            }
+
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight; // التمرير لأسفل تلقائياً
+        });
+    </script>
+</body>
+</html>
